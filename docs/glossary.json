@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 357,
-      "confirmed": 274,
+      "total": 367,
+      "confirmed": 278,
       "guess": 3,
-      "unmatched": 80,
-      "unmatched_ja_only": 75,
+      "unmatched": 86,
+      "unmatched_ja_only": 81,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl"],
-      "remaining": 10,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell"],
+      "remaining": 9,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2775,6 +2775,86 @@
       "character": "Beryl",
       "source": "https://gamerch.com/chaoszeronightmare/942029",
       "note": "ベリルのエゴスキル（EP5で全体攻撃するエゴスキル。追加効果なく全体攻撃のみ）。Prydwenで一致する効果説明（「Ego skill costs 5 EP and does a large amount of AoE damage」）は見つかったが、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "Shelter Defense",
+      "ja": "シェルターディフェンス",
+      "confidence": "confirmed",
+      "character": "Maribell",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/maribell",
+      "note": "マリベルの開始時基本シールドカード。Prydwen: 「Counterattack is added to her basic shield cards: Shelter Defense and Shelter Hold」。gamerch(942034): 「シェルターディフェンス：コスト1シールドカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shelter Hold",
+      "ja": "シェルターホールド",
+      "confidence": "confirmed",
+      "character": "Maribell",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/maribell",
+      "note": "マリベルの開始時基本シールドカード。Prydwen: 「Shelter Defense and Shelter Hold」。gamerch(942034): 「シェルターホールド：コスト2シールドカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shelter Kick",
+      "ja": "シェルターキック",
+      "confidence": "confirmed",
+      "character": "Maribell",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/maribell",
+      "note": "マリベルの開始時基本攻撃カード。Prydwen: 「Maribell gains 5% to her Defense-based Attack Damage for cards such as Shelter Kick」。gamerch(942034): 「シェルターキック：攻撃カード。防御依存ダメージを与える」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Counterattack",
+      "ja": "反撃",
+      "confidence": "confirmed",
+      "character": "Maribell",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/maribell",
+      "note": "マリベルの固有バフ。Prydwen: 「Counterattack is added to her basic shield cards」。gamerch(942034)の各カードの「反撃1付与」等の記述と一致。同じ en=Counterattack をマグナが character=Magna で既に登録済みだが、character が異なるため重複を許可（2026-08-06のルール追加）。"
+    },
+    {
+      "en": "",
+      "ja": "猪突猛進",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルの固有カード（防御依存攻撃+ダメージ依存シールド、反撃1付与。粉砕効果あり）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "マリベルシェルターMK.Ⅱ",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルの固有カード（防御依存攻撃とダメージ分の固定シールド獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "ウルブスドーム",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルの固有カード（反撃2、クリスタライズ2と毎ターン反撃1獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "あーそうなんだ",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルの固有カード（シールドと反撃獲得、敵全体に弱体化を付与）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "シェルターストライク",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルの固有カード（シールドに依存した固定ダメージを与える）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "アンブレイカブル",
+      "confidence": "unmatched",
+      "character": "Maribell",
+      "source": "https://gamerch.com/chaoszeronightmare/942034",
+      "note": "マリベルのエゴスキル（シールドを付与するエゴスキル。350%と高倍率）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった（「Unbreakable」推定だが引用は得られず）。"
     }
   ]
 }

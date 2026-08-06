@@ -239,6 +239,22 @@
   スキル名自体の引用が得られなかった。
   (source: https://gamerch.com/chaoszeronightmare/942029)
 
+## Maribell（マリベル）
+
+- [ ] **猪突猛進** — 固有カード。防御依存攻撃+ダメージ依存シールド、反撃1付与。粉砕効果あり。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+- [ ] **マリベルシェルターMK.Ⅱ** — 固有カード。防御依存攻撃とダメージ分の固定シールド獲得。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+- [ ] **ウルブスドーム** — 固有カード。反撃2、クリスタライズ2と毎ターン反撃1獲得。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+- [ ] **あーそうなんだ** — 固有カード。シールドと反撃獲得、敵全体に弱体化を付与。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+- [ ] **シェルターストライク** — 固有カード。シールドに依存した固定ダメージを与える。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+- [ ] **アンブレイカブル** — エゴスキル。シールドを付与するエゴスキル。350%と高倍率。
+  `Unbreakable` である可能性が高いが引用は得られず。
+  (source: https://gamerch.com/chaoszeronightmare/942034)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
