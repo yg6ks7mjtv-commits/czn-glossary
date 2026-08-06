@@ -22,11 +22,14 @@
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
-//      「カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件」の内訳を表示する。
-//      カード枠は種別表示から検出を試みた件数、名前取得はそのうちカード名まで
-//      特定できた件数、ユニークはベース名（ローマ数字を除いた名前、レベル違いは
-//      1件にまとめる）の種類数。同名でもカード枠ごとに別カードとして処理し、
-//      名前による集約・重複排除は一切行わない
+//      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件」の
+//      内訳を表示する。カード枠は種別表示から検出を試みた件数、名前取得はその
+//      うちカード名まで特定できた件数、ユニークはベース名（ローマ数字を除いた
+//      名前、レベル違いは1件にまとめる）の種類数。同名でもカード枠ごとに別
+//      カードとして処理し、名前による集約・重複排除は一切行わない。効果文が
+//      0件のときの内訳表示（最大10件）は、効果文が見つかったもの・glossary
+//      で日本語化できたもの・ヒラメキ段階が付いているものを優先して並べる
+//      （DOM順のキャップで手がかりの多いカードが漏れないようにするため）
 //
 // 実装上の注意:
 //   - www.prydwen.gg への自動アクセスが403で拒否されるため、細部のセレクタは
@@ -474,6 +477,19 @@
   // 最大10件まで持つ。candidates は box ごとに独立しているため、同名カード
   // （Sword Rain I〜V 等）も集約せずそれぞれ別行として積む。
 
+  // diagnostics の並び順: 効果文が見つかったもの > glossaryで日本語化できた
+  // もの > ヒラメキ段階（level）が付いているもの、の優先度で並べ替えてから
+  // 先頭10件を残す。全滅（効果文0件）のときでも、glossary照合済み・非0
+  // レベルのカード（＝手がかりの多いカード。例: Sword Rain III）が単純な
+  // DOM順のキャップで埋もれて表示から漏れないようにするための優先度。
+  function diagnosticScore(d) {
+    var s = 0;
+    if (d.effectFound) { s += 4; }
+    if (d.entry) { s += 2; }
+    if (d.level !== 0) { s += 1; }
+    return s;
+  }
+
   function insertEffects(candidates, effectsIdx, charName) {
     var inserted = 0;
     var diagnostics = [];
@@ -485,15 +501,13 @@
         ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName, c.level)
         : null;
 
-      if (diagnostics.length < 10) {
-        diagnostics.push({
-          rawNameText: c.rawNameText || c.nameText,
-          nameText: c.nameText,
-          entry: c.entry,
-          level: c.level,
-          effectFound: !!effect
-        });
-      }
+      diagnostics.push({
+        rawNameText: c.rawNameText || c.nameText,
+        nameText: c.nameText,
+        entry: c.entry,
+        level: c.level,
+        effectFound: !!effect
+      });
 
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
       if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
@@ -523,6 +537,9 @@
       inserted++;
       log('inserted effect for', c.nameText, 'level', c.level);
     });
+
+    diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
+    diagnostics = diagnostics.slice(0, 10);
 
     return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
   }
@@ -651,8 +668,9 @@
       return 'CZN: 対象が見つかりません';
     }
 
-    var lines = ['CZN: カード枠' + result.attemptedCount + '件 / 名前取得' +
-      result.resolvedCount + '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
+    var lines = ['CZN: ' + result.replacedCount + '件を置換 / カード枠' +
+      result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
+      '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件'];
 
     if (result.insertedCount === 0) {
