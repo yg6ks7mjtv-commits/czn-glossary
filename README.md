@@ -17,6 +17,10 @@ Chaos Zero Nightmare の用語の英日対応表。状態異常・バフデバ�
 - `extension/` — prydwen.gg 用 Chrome 拡張（開発用・非公開）。詳細は下記
   「Chrome拡張（開発用）」参照
 - `scripts/sync_effects.py` — 非公開の `effects-ja.json` を `extension/` へコピー
+- `scripts/fetch_gamerch_effects.py` — gamerchのキャラクターページを直接HTTP
+  取得し、カードごとの「おすすめヒラメキ」表をHTML構造から解析して効果文
+  候補を標準出力に表示する補助ツール（`effects-ja.json` は自動更新しない。
+  抽出結果は人が確認してから手で反映する）
 - `effects-ja.json`（リポジトリには含まれない） — 非公開データ。詳細は下記参照
 
 `glossary.json` か `docs/bookmarklet.js` を編集したら必ず実行する:
