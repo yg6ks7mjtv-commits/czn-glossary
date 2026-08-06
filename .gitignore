@@ -1,0 +1,4 @@
+# 非公開データ。ゲーム内の効果文を含むため絶対にコミットしない。
+# リポジトリ直下と extension/ 配下の両方に置きうるので両方を明示する。
+/effects-ja.json
+/extension/effects-ja.json

@@ -14,6 +14,10 @@ Chaos Zero Nightmare の用語の英日対応表。状態異常・バフデバ�
 - `docs/bookmarklet.html` — ブックマークレットの配布ページ（コピーボタン + iPhone 登録手順）
 - `docs/glossary.json` — 対応表の**自動生成コピー**。直接編集しないこと
 - `scripts/sync.py` — 検証 + `docs/` へのコピー + ブックマークレットの組み立て
+- `extension/` — prydwen.gg 用 Chrome 拡張（開発用・非公開）。詳細は下記
+  「Chrome拡張（開発用）」参照
+- `scripts/sync_effects.py` — 非公開の `effects-ja.json` を `extension/` へコピー
+- `effects-ja.json`（リポジトリには含まれない） — 非公開データ。詳細は下記参照
 
 `glossary.json` か `docs/bookmarklet.js` を編集したら必ず実行する:
 
@@ -61,6 +65,71 @@ python3 scripts/sync.py
 `https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json` になる。
 他サイト上で実行するので、この絶対URLを埋め込んである。ユーザー名やリポジトリ名を
 変えたら `docs/bookmarklet.js` の `SRC` を直すこと。
+
+## Chrome拡張（開発用・非公開）
+
+`extension/` に prydwen.gg（Chaos Zero Nightmare セクションのみ）向けの
+Chrome拡張がある。ブックマークレットと同じ用語置換に加えて、カードの説明欄
+（画像の下の空白領域）に効果文を挿入する機能を持つ。**Chrome ウェブストアには
+公開しない。** デベロッパーモードでフォルダを読み込んで使うローカル専用の拡張。
+
+### 導入手順
+
+1. `chrome://extensions` を開く
+2. 右上の「デベロッパーモード」をONにする
+3. 「パッケージ化されていない拡張機能を読み込む」を押し、`extension/` フォルダを選ぶ
+4. `www.prydwen.gg/chaos-zero-nightmare/` 配下のページを開くと自動で動作する
+5. 拡張アイコンのポップアップに ON/OFF トグルがある。OFF にしても、その時点で
+   既に置換済みの表示は元に戻らない（反映にはページの再読み込みが必要）
+
+`extension/effects-ja.json`（効果文データ）を更新した場合は再読み込みが必要:
+
+- リポジトリ直下の `effects-ja.json` を編集する
+- `python3 scripts/sync_effects.py` を実行して `extension/effects-ja.json` に反映する
+- `chrome://extensions` で対象拡張の再読み込みボタン（circular arrow）を押す
+
+`effects-ja.json` は `.gitignore` 済みで、リポジトリ直下・`extension/` 配下の
+どちらもコミットされない。**このファイルの中身（スキーマや収録データ）は
+このREADMEには記載しない。**
+
+### 仕組み
+
+起動時に2つのデータを読む:
+
+- `glossary.json` — 公開URL（`docs/` 配信）から取得。カード名の英日対応に使う
+- `extension/effects-ja.json` — 拡張に同梱される非公開データ。カード名から
+  効果文を引くのに使う
+
+処理の流れ: ページ上のカード要素を検出 → カード名(英語)を取得 →
+`glossary.json` で日本語名に変換 → `effects-ja.json` からその日本語名で
+効果文を検索 → 見つかればカードの説明欄に挿入する。効果文が無いカードは
+何もしない（枠は空のまま）。カード名以外のテキストの用語置換は、
+ブックマークレットと同じアルゴリズム・同じ辞書（`glossary.json`）で行う。
+
+### 実装上の注意（重要）
+
+**`www.prydwen.gg` への自動アクセスが403で拒否される環境で書いたため、
+実際のカード要素のHTML構造を確認できていない。** そのため:
+
+- カード要素・カード名・効果文の挿入先を指すCSSセレクタは
+  `extension/selectors.js` に切り出してある。実際のページで
+  devtools を見ながらここを調整すること（`content.js` 側の変更は不要な設計）
+- セレクタがヒットしない場合のフォールバック（テキスト一致でカード名を探す、
+  空要素を探して効果文を挿入する）も入っているが、精度はセレクタの調整に劣る
+- `content.js` 冒頭の `CZN_DEBUG` を `true` にすると、マッチ状況を
+  console に出力する
+
+一発では動かない前提で作ってあるので、動作確認しながら `selectors.js` を
+育てていくこと。
+
+### キャラ名の対応
+
+URLの `/characters/<slug>` からキャラ名を判定し、`glossary.json` の
+`character` フィールドと突き合わせている（対応表は `content.js` の
+`SLUG_TO_CHARACTER`）。同じ英語カード名が複数キャラに存在する場合
+（例: `Rapid Fire`）、キャラページ上ではURLから分かるキャラ名を優先する。
+キャラページ以外（デッキビルダー等）ではキャラを特定できないため、
+ブックマークレットと同じ「英語併記」の扱いになる。
 
 ## スキーマ
 

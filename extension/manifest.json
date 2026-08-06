@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "CZN 用語対応表 (開発用・未公開)",
+  "version": "0.1.0",
+  "description": "prydwen.gg の Chaos Zero Nightmare ページでカード名を日本語表示に置き換え、手元の効果文データがあればカード説明欄に挿入する。ストアには公開しない開発用拡張。",
+  "content_scripts": [
+    {
+      "matches": ["https://www.prydwen.gg/chaos-zero-nightmare/*"],
+      "js": ["selectors.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://www.prydwen.gg/*",
+    "https://yg6ks7mjtv-commits.github.io/*"
+  ],
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CZN 用語対応表"
+  }
+}
