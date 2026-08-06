@@ -132,24 +132,23 @@ python3 scripts/sync.py
 
 | confidence | 件数 |
 |---|---|
-| `confirmed` | 246 |
+| `confirmed` | 340 |
 | `guess` | 3 |
-| `unmatched` | 60 （日本語のみ 55 / 英語のみ 5） |
-| **合計** | **309** |
+| `unmatched` | 109 （日本語のみ 104 / 英語のみ 5） |
+| **合計** | **452** |
 
 ### キャラ固有カード追加の進捗
 
-全35キャラのカード名・固有バフを1キャラずつ追加中（2026-08-06開始）。
+全35キャラのカード名・固有バフの追加が完了（2026-08-06）。
 Prydwen の該当キャラページと gamerch の該当キャラページを突き合わせ、
 効果説明が一致する語のみ `confirmed` として `glossary.json` の
-`meta.character_progress` に進捗を記録している。10キャラごとに件数と
-confidence 内訳を報告する運用。ゲーム内確認が必要な語は
-`docs/todo-ingame.md` にチェックリストとして集約している。
+`meta.character_progress` に進捗を記録している。ゲーム内確認が必要な語は
+`docs/todo-ingame.md` にチェックリストとして集約している（104件）。
 
-- 完了（20/35）: Tenebria, Luke, Hilde, Fei, Adelheid, Heidemarie,
-  Diana, Rita, Tiphera, Nine, Sereniel, Chizuru, Yuki, Haru, Veronica,
-  Khalipe, Magna, Rin, Orlea, Mei Lin
-- 残り: 15キャラ
+- 完了（35/35）: Tenebria, Luke, Hilde, Fei, Adelheid, Heidemarie,
+  Diana, Rita, Tiphera, Nine, Narja, Sereniel, Chizuru, Yuki, Haru, Veronica,
+  Khalipe, Magna, Rin, Orlea, Mei Lin, Renoa, Hugo, Kayron, Beryl, Maribell,
+  Owen, Rei, Selena, Lucas, Cassius, Nia, Mika, Amir, Tressa
 
 日本語一覧 48 件のうち 41 件は Prydwen の用語辞典と突き合わせ済み。
 残り 7 件は辞典に未収載のため未解決。これに一覧外の用語（戦闘システム用語、
@@ -256,13 +255,16 @@ python3 -m http.server 8000
 
 ## 残作業
 
-1. 英語表記が未特定の 8 件を、用語辞典以外のページ（敵情報ページ、
+1. 英語表記が未特定の 7 件を、用語辞典以外のページ（敵情報ページ、
    カード関連ガイド等）で特定する
 2. 日本語表記が未特定の 4 件を日本語側ソースで特定し、あわせて
    `source` を実際の出典ページに絞り込む
 3. `点火` の効果説明を突き合わせ、`guess` から `confirmed` に上げる
-4. シーズン4以降の用語を日本語ページから追加する
-5. Hilde 以外のキャラページを順に当たって、未収録のキャラ固有バフを拾う
+4. `高速斬り`（ユキ）を `Flash Slash` か `Rapid Slash` か確定させる
+5. シーズン4以降の用語を日本語ページから追加する
+6. `docs/todo-ingame.md` の104件（全キャラのカード名・固有バフのうち
+   片側のみ確認できたもの）をゲーム内で確認し、確定できたものから
+   `glossary.json` へ反映する
 
 いずれも、Prydwen のページで実際に使われていることを確認していないものを
 `confirmed` にしないこと。

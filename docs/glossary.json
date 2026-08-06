@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 442,
-      "confirmed": 331,
+      "total": 452,
+      "confirmed": 340,
       "guess": 3,
-      "unmatched": 108,
-      "unmatched_ja_only": 103,
+      "unmatched": 109,
+      "unmatched_ja_only": 104,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,9 +48,9 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia", "Mika", "Amir"],
-      "remaining": 1,
-      "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia", "Mika", "Amir", "Tressa"],
+      "remaining": 0,
+      "note": "全キャラ35体のカード名・固有バフ追加作業が2026-08-06に完了。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、バッチ3で気づいて処理した。残る未確認語（en/jaどちらか片方のみ）は docs/todo-ingame.md にまとめてある。"
     }
   },
   "entries": [
@@ -3455,6 +3455,86 @@
       "character": "Amir",
       "source": "https://gamerch.com/chaoszeronightmare/942036",
       "note": "アミールのエゴスキル（金属化数に応じてシールド付与。金属化は全て排除され次ターンに3スタック付与）。効果の一致するPrydwen記述は見つかったが（「increasing the amount of shield gained for each stack of Metallization by 30%...increasing the amount of Metallization granted at the start of the next turn by 2」）、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "Shadow Dagger",
+      "ja": "影の短剣",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの生成カード。Prydwen: 「high-frequency attacks achieved through Shadow Dagger generation and spam」「0-cost Exhaust attacks that apply Agony」。gamerch(942035): 「影の短剣：コスト0、消滅、ダメージ80%、苦痛2」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Curse",
+      "ja": "呪い付与",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの固有カード。Prydwen: 「aligning Shadow Dagger use with Curse if possible」。gamerch(942035): 「呪い付与：攻撃カードに連動して苦痛を追加付与」とダガー/攻撃連動という点が一致。"
+    },
+    {
+      "en": "Vital Attack",
+      "ja": "急所攻撃",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの固有カード。Prydwen: 「'Vital Attack,' which is Tressa's core payoff card after stacking Agony via daggers and Curse」。gamerch(942035): 「急所攻撃：コスト2の単体攻撃。苦痛が付与されていればバフ効果でさらにダメージが伸びる」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Unsheath Dagger",
+      "ja": "短剣抜刀",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの開始時基本攻撃カード。Prydwen: 「'Unsheath Dagger' builds used to drive units like Hugo」。gamerch(942035)の開始カード「短剣抜刀×1」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Cursed Gouge",
+      "ja": "呪い切り落とし",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの固有カード。Prydwen: 「'Cursed Gouge,' which applies both Agony-related effects and Weaken」。gamerch(942035): 「呪い切り落とし：対象が所持している苦痛を強制的に発動させるカード」と苦痛関連の強制発動という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shadow Reload",
+      "ja": "影装填",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの固有カード。Prydwen: 「Shadow Reload sustains your team...It heals 100% and creates 1 Advanced Shadow Dagger」。gamerch(942035): 「影装填：回復と上級短剣1枚生成」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Advanced Shadow Dagger",
+      "ja": "上級影の短剣",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "影装填などが生成する上位生成カード。Prydwen: 「creates 1 Advanced Shadow Dagger」。gamerch(942035): 「上級影の短剣：コスト0、保存/消滅、苦痛4、ダメージ50%」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dagger Throw",
+      "ja": "短剣投てき",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサの開始時基本攻撃カード。Prydwen: 「Dagger Throw applies 2 Agony to the target on use, which is a huge upgrade to Tressa's Basic Attack」。gamerch(942035)の開始カード「短剣投てき×2」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Wave of Darkness",
+      "ja": "暗闇の波",
+      "confidence": "confirmed",
+      "character": "Tressa",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tressa",
+      "note": "トレサのエゴスキル。Prydwen: 「Wave of Darkness costs 5 Ego Points, creates 2 Shadow Daggers and applies 2 stacks of Agony twice, for a total of 4」。gamerch(942035): 「暗闇の波：EP5で影の短剣2枚生成と苦痛2×2を付与」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "闇の手招き",
+      "confidence": "unmatched",
+      "character": "Tressa",
+      "source": "https://gamerch.com/chaoszeronightmare/942035",
+      "note": "トレサの開始時基本治癒カード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }

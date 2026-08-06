@@ -339,6 +339,11 @@
   スキル名自体の引用が得られなかった。
   (source: https://gamerch.com/chaoszeronightmare/942036)
 
+## Tressa（トレサ）
+
+- [ ] **闇の手招き** — 開始時基本治癒カード（1枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942035)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

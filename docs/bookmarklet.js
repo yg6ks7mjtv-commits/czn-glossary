@@ -41,7 +41,16 @@ var KEEP_EN = ['Mark', 'Lead', 'Remove', 'Wave', 'Partner',
                'Absolute Protection', 'Upward Slash',
                'Counterattack', 'Absolute Zero', 'Frost Shield', 'Ice Wall',
                'Ice Fragment', 'Frozen Fist', 'Frost Charge',
-               'Enhanced Counterattack', 'Crystallization'];
+               'Enhanced Counterattack', 'Crystallization',
+               // 2026-08-06 バッチ3（Narja〜Tressa）分。同じ基準で判定。
+               // Card / Curse / Joker / Rapier など単体でも高リスクな一般語を含む。
+               'Mealtime', 'Defense System', 'Futility', 'Black Hole',
+               'Launcher', 'Barrier', 'Guilty Pleasure', 'Wind Slash',
+               'Dark Blade', 'Material Regeneration', 'Tactical Maneuver',
+               'Machine Gun', 'Extended Magazine', 'Flamethrower', 'Flashbang',
+               'Joker', 'Shuffle', 'Wild Card', 'Card', 'Mana Field',
+               'Elasticity', 'Adagio', 'Rock & Roll', 'Tactical Analysis',
+               'Whirlpool', 'Deluge', 'Rapier', 'Curse'];
 var keepEn = Object.create(null);
 KEEP_EN.forEach(function (w) { keepEn[w] = true; });
 // 色は rgb() で書く。# はURLのフラグメント区切りなので javascript: URL 内で切れる。
