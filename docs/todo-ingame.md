@@ -73,6 +73,18 @@
   shield」とだけ言及され、固有の英語カード名を特定できなかった。
   (source: https://gamerch.com/chaoszeronightmare/952183)
 
+## Yuki（ユキ）
+
+- [ ] **高速斬り** — 開始時基本攻撃カード。Prydwenの検索スニペットで『Flash
+  Slash』と『Rapid Slash』の両方がユキの基本攻撃カードとして言及されており、
+  どちらが高速斬りに対応するか一意に確定できなかった（`guess` として
+  `en: "Flash Slash"` で暫定登録済み）。ゲーム内で実際のカード名を確認すること。
+  (source: https://gamerch.com/chaoszeronightmare/949615)
+- [ ] **盗み斬り** — 固有カード。コスト2全体攻撃。インスピレーション時にコスト減少。
+  (source: https://gamerch.com/chaoszeronightmare/987128)
+- [ ] **制圧準備** — 開始カード。ドロー効果とバフを提供。
+  (source: https://gamerch.com/chaoszeronightmare/949615)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
