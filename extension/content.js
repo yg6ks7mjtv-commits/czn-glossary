@@ -16,22 +16,31 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、カード枠内の「英語の
-//      効果文要素」そのものを書き換える。候補（コスト数字・カード名・種別
-//      表示・ローマ数字バッジを除いた葉要素）は、[Linked]/[Unique]のような
-//      角括弧タグを含むもの／「Show Effects」と同じ親要素を共有するもの／
-//      カード名要素より下（DOM順で後）にあるものを優先するスコアリングで
-//      選ぶ（単純な最長文字列だけを基準にすると、カード名の重複要素を
-//      誤って選ぶことがあったため）。カード名と同一テキストの重複要素も
-//      候補から除外する。新しい要素を挿入する方式は幅・高さが0に潰れて
-//      表示に失敗したため、既に確実に表示されているその要素の中身を日本語
-//      効果文に差し替え、背景白・文字黒・角丸を付け、白い折り返し表示
-//      （white-space:normal 等でカード名側の省略表示CSSの影響を打ち消す）
-//      にする。元の英語は title 属性に退避する（消さずに保持するが表示は
-//      しない）。対象要素が見つからないカードには何もしない（英語のまま残る）
+//      する。カード名は glossary が分かっていれば効果文の有無と無関係に
+//      常に日本語のみに書き換える（用語置換の正規表現に頼らず、既に解決
+//      済みの英日対応を直接書き込む。一部のカード名はglossary側が未確認の
+//      英語表記のままのことがあり、通常の用語置換では置き換わらないため）。
+//      元の英語は data-czn-orig-name 属性に退避し、次回のカード名解析
+//      （stripRomanLevel）ではこちらを読む。該当levelの効果文が手元
+//      データにあれば、カード枠内の「英語の効果文要素」そのものも書き換える。
+//      候補（コスト数字・カード名・種別表示・ローマ数字バッジを除いた
+//      葉要素）は、[Linked]/[Unique]のような角括弧タグを含むもの／
+//      「Show Effects」と同じ親要素を共有するもの／カード名要素より下
+//      （DOM順で後）にあるものを優先するスコアリングで選ぶ（単純な最長
+//      文字列だけを基準にすると、カード名の重複要素を誤って選ぶことが
+//      あったため）。カード名と同一テキストの重複要素も候補から除外する。
+//      新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
+//      既に確実に表示されているその要素の中身を日本語効果文に差し替え、
+//      背景白・文字黒・角丸を付け、white-space:normal等でカード名側の
+//      省略表示CSSの影響を打ち消す。元の英語は title 属性に退避する
+//      （消さずに保持するが表示はしない）。同じ効果文ブロック内に残る
+//      他の英語テキスト（複数行に分かれている場合）は display:none で
+//      隠す（「Show Effects」の展開トグルは除く）。対象要素が見つからない
+//      カードや日本語の効果文が無いカードには何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
-//      まとめて1つの用語として扱う
+//      まとめて1つの用語として扱う。書き換え済み（data-czn-done="1"）の
+//      要素は対象から除外する。置換した箇所への背景ハイライトは付けない
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
 //      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
 //      効果文データ◯件」の内訳を表示する。カード枠は種別表示から検出を試みた
@@ -136,6 +145,7 @@
   // ヒラメキ段階を表すカード名末尾のローマ数字。I〜Vの5段階のみ（それ以外の
   // 大文字語を誤って数字扱いしないよう、この5つの完全一致だけを対象にする）。
   var ROMAN_LEVELS = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+  var ROMAN_BY_LEVEL = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' };
 
   // "Sword Rain III" -> { base: "Sword Rain", level: 3 }
   // "Sword Rain"     -> { base: "Sword Rain", level: 0 }
@@ -147,6 +157,17 @@
       return { base: text.slice(0, idx), level: ROMAN_LEVELS[last] };
     }
     return { base: text, level: 0 };
+  }
+
+  // カード名要素の原文を読む。日本語に書き換え済み（data-czn-orig-name
+  // 属性を保持している）なら、書き換え前に退避しておいた原文（英語）を
+  // 返す。書き換え後の textContent（日本語）をそのまま読むと、次の
+  // MutationObserver再実行時に stripRomanLevel / glossary照合が壊れる
+  // ため。
+  function readNameText(nameEl) {
+    var orig = nameEl.getAttribute('data-czn-orig-name');
+    if (orig !== null) { return orig; }
+    return (nameEl.textContent || '').trim();
   }
 
   // ---- データ読み込み ----
@@ -426,7 +447,7 @@
     var index = 0;
     var nameIndex = -1;
     var showEffectsParent = null;
-    var nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+    var nameText = nameEl ? readNameText(nameEl) : '';
     var candidates = [];
 
     while ((node = walker.nextNode())) {
@@ -462,6 +483,28 @@
     return candidates[0].node;
   }
 
+  // effectEl の直近の親要素の中に残っている、他の英語テキスト（effectEl
+  // 自身とその子孫は除く）を display:none で隠す。日本語の効果文を実際に
+  // 適用できたカードに限って呼ぶ（適用できなかったカードは英語のまま
+  // 残すため、この関数自体を呼ばない）。excludeEls（カード名・種別表示・
+  // レベルバッジ）は誤って隠さないよう対象から外す。「Show Effects」は
+  // 展開トグルの機能を持つことがあるため、テキストとして隠さない。
+  function hideSiblingEffectText(effectEl, excludeEls) {
+    var parent = effectEl.parentElement;
+    if (!parent) { return; }
+    var walker = document.createTreeWalker(parent, NodeFilter.SHOW_ELEMENT);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (node === effectEl || effectEl.contains(node)) { continue; }
+      if (excludeEls.indexOf(node) !== -1) { continue; }
+      if (node.children.length > 0) { continue; } // 葉要素のみ
+      var text = (node.textContent || '').trim();
+      if (!text) { continue; }
+      if (text.indexOf('Show Effects') !== -1) { continue; }
+      node.style.display = 'none';
+    }
+  }
+
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
   //
   // 用語置換より前にこのフェーズを完全に終わらせることで、見出しが
@@ -480,7 +523,7 @@
       var found = findCardBox(label, knownEnNames);
       if (!found) { log('card box (name + type label) not found for a label'); return; }
 
-      var nameText = (found.nameEl.textContent || '').trim();
+      var nameText = readNameText(found.nameEl);
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -528,7 +571,7 @@
       var slot = queryAny(container, CZN_SELECTORS.effectSlot);
       if (!slot) { return; }
 
-      var nameText = (nameEl.textContent || '').trim();
+      var nameText = readNameText(nameEl);
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -604,12 +647,34 @@
       });
 
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      var effectEl = findEffectTextEl(c.block, excludeEls, c.nameEl);
+      // findEffectTextEl はカード名要素の「原文（英語）」を重複除外の基準に
+      // 使うため、カード名を日本語に書き換えるより先に呼ぶ。
+      var effectEl = effect ? findEffectTextEl(c.block, excludeEls, c.nameEl) : null;
+
+      // カード名は glossary が分かっていれば効果文の有無とは無関係に常に
+      // 日本語のみにする。用語置換の正規表現マッチに依存せず、既に解決済みの
+      // c.entry.ja を直接書き込むことで確実に反映する（一部のカード名は
+      // glossary側が未確認の英語表記のままのことがあり、通常の用語置換
+      // フェーズでは置き換わらないため）。
+      if (c.nameEl.getAttribute('data-czn-done') !== '1') {
+        if (!c.nameEl.hasAttribute('data-czn-orig-name')) {
+          c.nameEl.setAttribute('data-czn-orig-name', (c.nameEl.textContent || '').trim());
+        }
+        var jaName = c.entry.ja;
+        // ローマ数字がカード名要素自身に含まれていた場合（levelBadgeElを
+        // 使っていない場合）のみ、日本語名にも同じローマ数字を付け直す。
+        if (!c.levelBadgeEl && c.level > 0 && ROMAN_BY_LEVEL[c.level]) {
+          jaName += ' ' + ROMAN_BY_LEVEL[c.level];
+        }
+        c.nameEl.textContent = jaName;
+        c.nameEl.setAttribute('data-czn-done', '1');
+      }
+
+      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
       // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
       // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
@@ -649,6 +714,12 @@
       effectEl.style.overflow = 'visible';
       effectEl.style.maxWidth = 'none';
       effectEl.setAttribute('data-czn-done', '1');
+
+      // 効果文ブロック内に、書き換えた要素以外の英語テキストが残っている
+      // ことがある（複数行・複数要素に分かれている場合）。日本語の効果文を
+      // 適用できたカードに限り、それらも隠す。カード名・種別表示・レベル
+      // バッジは巻き込まないよう除外する。
+      hideSiblingEffectText(effectEl, excludeEls);
 
       PROCESSED.add(c.block);
       inserted++;
@@ -737,7 +808,6 @@
         span.className = REPLACED_CLS;
         span.textContent = keepEn[en] ? en + levelSuffix + '(' + ja + ')' : ja;
         span.title = en + levelSuffix;
-        span.style.cssText = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;';
         frag.appendChild(span);
         last = e;
         count++;
