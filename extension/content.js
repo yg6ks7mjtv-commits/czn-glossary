@@ -16,16 +16,12 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、box の外に出す方式
-//      （親要素やboxの兄弟として挿入）はgrid/flexのレイアウトに巻き込まれて
-//      幅・高さ0になったため使わず、box の「中」、英語の効果文がもともと
-//      表示されている場所の直後（「Show Effects」があればその直後、無ければ
-//      効果文の最後のテキスト要素の直後、それも見つからなければ最終手段として
-//      カード名要素の直後）に日本語効果文を追加する。カード名要素は候補収集
-//      の時点で必ず見つかっているため、この最終手段だけは絶対に失敗しない。
-//      挿入するdivはインラインスタイルを一切持たない素の要素にしてある
-//      （box内に置いても幅・高さが0のまま画面に出ない問題を切り分け中の
-//      ため。原因判明後にスタイルを戻す）。英語の効果文は消さずそのまま残す）
+//      する。該当levelの効果文が手元データにあれば、box内でコスト数字・
+//      カード名・種別表示・Show Effects・ローマ数字バッジを除いた最長の
+//      テキスト要素（＝英語の効果文）の直後に、日本語効果文を追記する
+//      （見つからなければ box 自体の末尾に追加する）。box の外に出す方式
+//      （親要素やboxの兄弟として挿入）は実際に幅・高さ0で非表示になり
+//      表示に失敗したため採用していない。英語の効果文は消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -456,22 +452,6 @@
     return best;
   }
 
-  // box 内で「Show Effects」を含む葉要素を探し、リンク/ボタン全体（あれば）
-  // を返す。日本語効果文はこの直後に追加する。div をリンクの内側に紛れ込ま
-  // せないよう、closest('a, button') で実際のクリック領域まで遡る。
-  function findShowEffectsAnchor(box) {
-    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
-    var node;
-    while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; }
-      var text = (node.textContent || '').trim();
-      if (text === 'Show Effects' || text.indexOf('Show Effects') !== -1) {
-        return (node.closest && node.closest('a, button')) || node;
-      }
-    }
-    return null;
-  }
-
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
   //
   // 用語置換より前にこのフェーズを完全に終わらせることで、見出しが
@@ -595,7 +575,6 @@
     var inserted = 0;
     var diagnostics = [];
     var insertedDetails = []; // 実際に挿入できたカードの内訳（診断用）
-    var insertFailures = []; // 効果文は見つかったのに挿入できなかったカード（診断用）
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -617,58 +596,37 @@
       if (!c.entry) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
       if (!effect) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
+      // 挿入位置は、実際に表示に成功していた元の方式に戻す: box内で
+      // コスト数字・カード名・種別表示・Show Effects・ローマ数字バッジを
+      // 除いた最長のテキスト要素（＝英語の効果文）の直後。見つからなければ
+      // box自体の末尾にフォールバックする。
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      // 英語の効果文とみなす要素（フォントサイズの参照、「Show Effects」が
-      // 無いカードでの挿入位置フォールバックの両方に使う）。
-      var effectTextEl = findEffectTextEl(c.block, excludeEls);
-      var showEffectsAnchor = findShowEffectsAnchor(c.block);
+      var effectEl = findEffectTextEl(c.block, excludeEls);
 
-      // 挿入位置の優先順位: 1)「Show Effects」の直後 2) 効果文の最後の
-      // テキスト要素の直後 3)（最終手段）カード名要素の直後。カード名は
-      // 候補収集の時点で必ず見つかっている（60/60）ため、この最終手段だけは
-      // 絶対にnullにならず、挿入先が見つからず0件になることを防ぐ。
-      var insertAnchor = showEffectsAnchor || effectTextEl || c.nameEl;
-
+      // box内の既存の挿入ブロックを querySelectorAll で全て探して削除して
+      // から作り直す。SPA側の再描画で同じboxが複数回処理されても、
+      // 積み上がらないようにするため。
       removeExistingEffectBlocks(c.block);
 
-      // 0×0で表示されない原因切り分けのため、インラインスタイルを一切
-      // 持たない素の div にする（width/height/position/background/
-      // font-size/border/paddingなど何も指定しない）。
       var div = document.createElement('div');
       div.className = EFFECT_BLOCK_CLS;
       div.textContent = effect;
+      div.style.cssText =
+        'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
+        'white-space:pre-wrap;font-size:0.9em;color:inherit;';
 
-      var insertError = null;
-      try {
-        insertAnchor.insertAdjacentElement('afterend', div);
-      } catch (err) {
-        insertError = err && err.message ? err.message : String(err);
-      }
-
-      if (insertError || !div.parentNode) {
-        // 挿入に失敗した場合は診断用に記録して次回に持ち越す（PROCESSEDには
-        // 入れない＝再描画のたびに再挑戦する）。
-        insertFailures.push({
-          rawNameText: c.rawNameText || c.nameText,
-          level: c.level,
-          showEffectsFound: !!showEffectsAnchor,
-          anchorTag: insertAnchor.tagName,
-          anchorClass: (insertAnchor.className || '').toString().slice(0, 40),
-          insertError: insertError || '(親要素が無く挿入できなかった)'
-        });
-        return;
+      if (effectEl) {
+        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
+      } else {
+        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
       }
 
       c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
       inserted++;
 
-      // getBoundingClientRectでの幅測定はやめ、中身が本当に入っているか
-      // （textContentの文字数）と実際のDOM構造（outerHTMLの先頭100文字）を
-      // 見る。文字数が0なら中身が入っていない、文字数があるのに画面に
-      // 出ないならCSS側の問題、と切り分けるための診断情報。
       insertedDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
@@ -685,7 +643,6 @@
       insertedCount: inserted,
       diagnostics: diagnostics,
       insertedDetails: insertedDetails.slice(0, 10),
-      insertFailures: insertFailures.slice(0, 10),
       candidateCount: candidates.length
     };
   }
@@ -820,7 +777,6 @@
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
       insertedDetails: insertResult.insertedDetails,
-      insertFailures: insertResult.insertFailures,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
@@ -866,18 +822,6 @@
       result.insertedDetails.forEach(function (d) {
         lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
           ' / 文字数' + d.textLength + ' / ' + d.outerHtmlHead);
-      });
-    }
-
-    if (result.insertFailures && result.insertFailures.length > 0) {
-      // 効果文は見つかったのに挿入できなかったカード。全体の挿入件数が
-      // 0件でなくても（一部のカードだけ失敗していても）必ず表示する。
-      // Show Effectsの有無・実際に選んだ挿入先要素・例外の有無を見せる。
-      result.insertFailures.forEach(function (f) {
-        lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
-          ' / ShowEffects:' + (f.showEffectsFound ? 'あり' : 'なし') +
-          ' / 挿入先:' + f.anchorTag + (f.anchorClass ? '.' + f.anchorClass : '') +
-          ' / ' + f.insertError);
       });
     }
 
