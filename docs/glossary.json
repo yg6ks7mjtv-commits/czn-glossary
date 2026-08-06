@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 179,
-      "confirmed": 152,
+      "total": 193,
+      "confirmed": 164,
       "guess": 2,
-      "unmatched": 25,
-      "unmatched_ja_only": 20,
+      "unmatched": 27,
+      "unmatched_ja_only": 22,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita"],
-      "remaining": 27,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera"],
+      "remaining": 26,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1350,6 +1350,118 @@
       "character": "Rita",
       "source": "https://gamerch.com/chaoszeronightmare/972157",
       "note": "リタのエゴスキル（EP5で時間超越6と次に使用する自分の攻撃に乗算バフを付与）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Archetype",
+      "ja": "創造カード",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの生成カード群の総称。Prydwen: 「Tiphera's core mechanic is based around her various Archetype cards - Circle, Triangle, and Square」。gamerch(966320)の「創造カード」カテゴリ名と一致。既存の『Creation』(創造物, テネブレア以前の効果辞典由来)とは別語。"
+    },
+    {
+      "en": "Quantum Seed",
+      "ja": "クアンタムシード",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの固有カード。Prydwen: 「Quantum Seed IV costs 1 AP...creates 3 Archetypes...activating the effect of one of Tiphera's [Retain] cards」。gamerch(966320): 「クアンタムシード：治癒100%+山札に創造カード2枚生成。さらに生成したカードを1枚ドロー」と創造カード生成+追加効果という点で一致。語形も直訳一致。"
+    },
+    {
+      "en": "Creation and Destruction",
+      "ja": "創造と破壊",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの固有カード。Prydwen: 「Creation and Destruction is a card with many epiphanies which can be useful for dealing damage, shielding, or healing」。gamerch(966320): 「創造と破壊：防御依存ダメ120%、治癒+シールド80%」とダメージ/シールド/治癒の複合効果が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Archetype: Circle",
+      "ja": "創造：〇",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "創造カードの図形バリエーション。Prydwen: 「Circle: has the signature mechanic of generating 1 AP on use...and also heals for 50% on use」。gamerch(966320): 「創造：〇：『消滅』治癒50%、AP+1」と完全一致。"
+    },
+    {
+      "en": "Archetype: Triangle",
+      "ja": "創造：△",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "創造カードの図形バリエーション。Prydwen: 「Triangle: buffing the next allied attacks first Hit by +30%...per Triangle, and also Shields for 50% on use」。gamerch(966320): 「創造：△：『消滅』シールド50%、次攻撃カード最初ヒット30%増加（最大300%）」と完全一致。"
+    },
+    {
+      "en": "Archetype: Square",
+      "ja": "創造：□",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "創造カードの図形バリエーション。Prydwen: 「Square: has the signature mechanic to draw 1 Archetype card(s) from the deck」。gamerch(966320): 「創造：□：『消滅』治癒50%、創造カード1枚ドロー」とドロー効果の部分が一致。"
+    },
+    {
+      "en": "Dual Creation",
+      "ja": "対生成",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの固有カード。Prydwen: 「'Dual Creation' that creates an identical Archetype card in the Discard Pile whenever 2 Archetype cards are created」。gamerch(966320): 「対生成：強化状態。創造カード2枚生成ごとに、同じカードを捨て札に1枚生成」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Form Convergence",
+      "ja": "形状結集",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの固有カード。Prydwen: 「draws 2 Archetype cards on use, then doubles a random effect of one of them until the end of the turn」(関連文脈で'Form Convergence'に言及)。gamerch(966320): 「形状結集：保存効果。創造カード限定で2枚ドロー。カード効果のいずれかが2倍になる」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Event Horizon",
+      "ja": "事象の地平線",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの固有カード。Prydwen: 「'Event Horizon' card...an RNG card that won't consistently function without RNG manipulation」。gamerch(966320): 「事象の地平線：コスト2でAP+1、ドロー+1、次攻撃カード最初ヒット40%増加」と一致（複合ランダム性のあるカード）。語形も直訳一致。"
+    },
+    {
+      "en": "Archetype Resonance",
+      "ja": "創造共鳴",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラのエゴスキル。Prydwen: 「Archetype Resonance allows you to select and create 1 Archetype card, and the next 3 times an Ego Skill is used, create an additional card...decreases the Cost of the next Ego Skill used by 2」。gamerch(966320): 「創造共鳴：EP5で創造カード1枚選択生成。エゴスキル使用時2回までさらに生成。次エゴスキルコスト2減少」とコスト減少値まで一致。語形も直訳一致。"
+    },
+    {
+      "en": "Barrier Deployment",
+      "ja": "障壁展開",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの開始時基本治癒カード。Prydwen: 「'Barrier Deployment'...3-1 Potential alters from a 100% heal to a 70% shield 70% heal」。gamerch(966320): 「障壁展開：治癒2枚。潜在力により治癒+シールド効果に変更可能」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Matter Disintegration",
+      "ja": "物質分解",
+      "confidence": "confirmed",
+      "character": "Tiphera",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tiphera",
+      "note": "ティペラの開始時基本攻撃カード。Prydwen: 「Matter Disintegration is Tiphera's basic attack card that costs 1 and deals 100% Defense-Based Damage」。gamerch(966320): 「物質分解：攻撃カード。敵にダメージを与える基本攻撃」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "調律",
+      "confidence": "unmatched",
+      "character": "Tiphera",
+      "source": "https://gamerch.com/chaoszeronightmare/966320",
+      "note": "ティペラの固有バフ（創造と破壊などの効果を2倍にする）候補。Prydwenの英語版で『Attunement』はテネブレア/ハイデマリの文脈でのみ言及が見つかり、ティペラの調律に対応するか確認できなかったため、ここでは対応付けしない。"
+    },
+    {
+      "en": "",
+      "ja": "図形：〇△□",
+      "confidence": "unmatched",
+      "character": "Tiphera",
+      "source": "https://gamerch.com/chaoszeronightmare/966320",
+      "note": "ティペラの2凸以降専用カード（3種図形効果が重複時に生成。治癒150%、ダメ30%増加、ドロー1の複合効果）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
