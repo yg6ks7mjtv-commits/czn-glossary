@@ -14,28 +14,37 @@
 //      （ローマ数字除去後）を主な判定基準にしている
 //   3. カード名末尾のローマ数字（I/II/III/IV/V）をヒラメキ段階(level 1-5)、
 //      無ければ level 0 として扱い、effects-ja.json を
-//      (character, ja_card, level) で引く。該当levelの効果文が手元データに
-//      あれば、カード枠内の効果文要素（画像下部、コスト数字・カード名・種別
-//      表示・Show Effectsを除いた最長のテキスト要素）の直後に、英語を消さず
-//      日本語効果文を追記する
+//      (character, ja_card, level) で引く。character は大文字小文字・前後
+//      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
+//      する。該当levelの効果文が手元データにあれば、カード枠内の効果文要素
+//      （画像下部、コスト数字・カード名・種別表示・Show Effectsを除いた
+//      最長のテキスト要素）の直後に、英語を消さず日本語効果文を追記する
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
-//      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件」の
-//      内訳を表示する。カード枠は種別表示から検出を試みた件数、名前取得はその
-//      うちカード名まで特定できた件数、ユニークはベース名（ローマ数字を除いた
-//      名前、レベル違いは1件にまとめる）の種類数。同名でもカード枠ごとに別
-//      カードとして処理し、名前による集約・重複排除は一切行わない。効果文が
-//      0件のときの内訳表示（最大10件）は、効果文が見つかったもの・glossary
-//      で日本語化できたもの・ヒラメキ段階が付いているものを優先して並べる
-//      （DOM順のキャップで手がかりの多いカードが漏れないようにするため）
+//      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
+//      効果文データ◯件」の内訳を表示する。カード枠は種別表示から検出を試みた
+//      件数、名前取得はそのうちカード名まで特定できた件数、ユニークはベース名
+//      （ローマ数字を除いた名前、レベル違いは1件にまとめる）の種類数、
+//      効果文データは effects-ja.json から読めた件数（0ならファイル未配置か
+//      読み込み失敗）。同名でもカード枠ごとに別カードとして処理し、名前による
+//      集約・重複排除は一切行わない。効果文が0件のときの内訳表示（最大10件）
+//      は、効果文が見つかったもの・glossaryで日本語化できたもの・ヒラメキ
+//      段階が付いているものを優先して並べ、実際に探索したキーと保有キー一覧
+//      も表示する（DOM順のキャップで手がかりの多いカードが漏れないように
+//      するため、また照合ミスの原因を切り分けやすくするため）
+//   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
+//      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
 // 実装上の注意:
 //   - www.prydwen.gg への自動アクセスが403で拒否されるため、細部のセレクタは
 //     見ないまま書いている。調整は selectors.js を編集すること。
 //   - CZN_SELECTORS は selectors.js で定義され、このファイルより先に読み込まれる
 //     （manifest.json の content_scripts.js の順序に依存）。
+//   - effects-ja.json は content script から chrome.runtime.getURL() 経由で
+//     fetch するため、manifest.json の web_accessible_resources に登録が
+//     必要（無いとブロックされ、効果文データ0件として扱われる）。
 
 (function () {
   'use strict';
@@ -218,15 +227,34 @@
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
   // 同じ ja_card + character で level（ヒラメキ段階、0=無印）違いを複数持てる。
+  //
+  // 照合は緩めに行う（URLスラッグ由来の character は小文字、JSON側は
+  // "Heidemarie" のように大文字始まりなど、表記ゆれがあり得るため）:
+  //   - character: 前後空白除去 + 小文字化してから比較
+  //   - ja_card: 前後空白除去してから比較
+  //   - level: 数値・文字列どちらでも同じキーになるよう数値に正規化
+  function normText(s) {
+    return (s === null || s === undefined ? '' : String(s)).trim();
+  }
+
+  function normChar(s) {
+    return normText(s).toLowerCase();
+  }
+
+  function normLevel(l) {
+    var n = typeof l === 'string' ? parseInt(l, 10) : l;
+    return typeof n === 'number' && !isNaN(n) ? n : 0;
+  }
+
   function effectsKey(character, jaName, level) {
-    return (character || '') + '|' + jaName + '|' + level;
+    return normChar(character) + '|' + normText(jaName) + '|' + normLevel(level);
   }
 
   function buildEffectsIndex(effects) {
     var idx = Object.create(null);
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
-      var level = typeof e.level === 'number' ? e.level : 0;
+      var level = normLevel(e.level);
       if (e.character) {
         idx[effectsKey(e.character, e.ja_card, level)] = e.effect;
       }
@@ -250,6 +278,12 @@
     var withoutChar = effectsKey(null, jaName, level);
     if (effectsIdx[withoutChar] !== undefined) { return effectsIdx[withoutChar]; }
     return null;
+  }
+
+  // 診断表示用。実際の照合は正規化したキー（effectsKey）で行うが、トースト上
+  // では元の表記のまま「ja_card | character | level」の形で見せる。
+  function displayKey(jaName, character, level) {
+    return jaName + ' | ' + (character || '(無)') + ' | ' + level;
   }
 
   function queryAny(root, selectors) {
@@ -497,8 +531,9 @@
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
 
+      var lookupChar = c.entry ? (c.entry.character || charName) : null;
       var effect = c.entry
-        ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName, c.level)
+        ? lookupEffect(effectsIdx, c.entry.ja, lookupChar, c.level)
         : null;
 
       diagnostics.push({
@@ -506,7 +541,8 @@
         nameText: c.nameText,
         entry: c.entry,
         level: c.level,
-        effectFound: !!effect
+        effectFound: !!effect,
+        triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
@@ -635,13 +671,15 @@
   // 3) そのあとで用語置換（テキストを書き換える）を実行する。
   // 用語置換を先にやると見出しが「Sword Rain(剣の雨)」のように化けて
   // glossary 照合に失敗するため、この順序を崩さないこと。
+  //
+  // 初回表示後もSPA側の再描画でDOMが丸ごと差し替えられ、挿入済みの効果文や
+  // 用語置換のspanが消えることがある（PROCESSEDはWeakSetなのでboxごと
+  // 差し替えられれば自然に「未処理」扱いに戻り、replaceTermsOnPage側も
+  // czn-replaced クラスの有無で判定しているため、差し替え後のテキストは
+  // 単に「まだ置換されていない新しいテキスト」として再度拾われる）。そのため
+  // MutationObserver からもこの3段階をまとめて再実行する。
 
-  function run(entries, effects) {
-    var charName = currentCharacter();
-    log('character context:', charName);
-    var ctx = buildContext(entries, charName);
-    var effectsIdx = buildEffectsIndex(effects);
-
+  function processPage(ctx, effectsIdx, charName) {
     var collected = collectCardCandidates(ctx);             // 1. カード名（原文）
     var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName); // 2. 効果文挿入
@@ -653,7 +691,6 @@
     var uniqueNames = new Set(candidates.map(function (c) { return c.baseName; }));
 
     return {
-      ctx: ctx,
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
@@ -661,6 +698,24 @@
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
       replacedCount: replacedCount
     };
+  }
+
+  function run(entries, effects) {
+    var charName = currentCharacter();
+    log('character context:', charName);
+    var ctx = buildContext(entries, charName);
+    var effectsIdx = buildEffectsIndex(effects);
+
+    var result = processPage(ctx, effectsIdx, charName);
+    result.ctx = ctx;
+    // effects-ja.json が読めているかの診断用。0件なら未配置か読み込み失敗
+    // （拡張の web_accessible_resources 未設定などでブロックされている場合も
+    // ここに現れる）。保有キーは元の表記のまま最大20件だけトーストに出す。
+    result.effectsCount = effects.length;
+    result.effectsSummary = effects.slice(0, 20).map(function (e) {
+      return displayKey(e && e.ja_card, e && e.character, e ? normLevel(e.level) : 0);
+    });
+    return result;
   }
 
   function formatToastMessage(result) {
@@ -671,17 +726,23 @@
     var lines = ['CZN: ' + result.replacedCount + '件を置換 / カード枠' +
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
-      result.insertedCount + '件'];
+      result.insertedCount + '件 / 効果文データ' + result.effectsCount + '件'];
 
     if (result.insertedCount === 0) {
       if (result.resolvedCount === 0) {
         lines.push('→ カード枠（カード名+種別表示の最小共通祖先）を検出できません');
       } else {
+        if (result.effectsCount === 0) {
+          lines.push('→ 効果文データが0件です（effects-ja.jsonの読み込みに失敗している可能性）');
+        } else {
+          lines.push('保有キー(' + result.effectsCount + '件): ' + result.effectsSummary.join('、'));
+        }
         result.diagnostics.forEach(function (d) {
           var jaPart = d.entry ? d.entry.ja : '日本語化NG';
           var effectPart = d.effectFound ? '効果文あり' : '効果文なし';
+          var keyPart = d.triedKeyDisplay ? ' → 探索キー「' + d.triedKeyDisplay + '」' : '';
           lines.push('原文「' + d.rawNameText + '」→ ' + jaPart + ' / level ' + d.level +
-            ' → ' + effectPart);
+            keyPart + ' → ' + effectPart);
         });
       }
     }
@@ -700,10 +761,9 @@
 
       showStatusToast(formatToastMessage(result));
 
-      // SPA的な後読みに対応する簡易 MutationObserver。連続発火を間引く。
-      // ここでも「収集してから挿入」の順を守る（用語置換はここでは行わない。
-      // 初回の replaceTermsOnPage 以降に増えたカードの原文はまだ置換されて
-      // いないので、そのまま名前を読める）。
+      // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
+      // 収集→挿入→置換の3段階をまとめて再実行する（用語置換だけ除外すると、
+      // 再描画で消えた置換結果が復活しないため）。
       var pending = false;
       var observer = new MutationObserver(function () {
         if (pending) { return; }
@@ -711,8 +771,7 @@
         setTimeout(function () {
           pending = false;
           var freshEffectsIdx = buildEffectsIndex(effects);
-          var freshCandidates = collectCardCandidates(ctx).candidates;
-          insertEffects(freshCandidates, freshEffectsIdx, currentCharacter());
+          processPage(ctx, freshEffectsIdx, currentCharacter());
         }, 500);
       });
       observer.observe(document.body, { childList: true, subtree: true });

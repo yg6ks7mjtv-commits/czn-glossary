@@ -15,6 +15,12 @@
     "https://yg6ks7mjtv-commits.github.io/*"
   ],
   "permissions": ["storage"],
+  "web_accessible_resources": [
+    {
+      "resources": ["effects-ja.json"],
+      "matches": ["https://www.prydwen.gg/*"]
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "CZN 用語対応表"
