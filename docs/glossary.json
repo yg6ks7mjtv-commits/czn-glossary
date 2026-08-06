@@ -27,8 +27,8 @@
     },
     "coverage": {
       "total": 94,
-      "confirmed": 81,
-      "guess": 1,
+      "confirmed": 80,
+      "guess": 2,
       "unmatched": 12,
       "unmatched_ja_only": 8,
       "unmatched_en_only": 4
@@ -666,10 +666,10 @@
     {
       "en": "All Eyes On You",
       "ja": "ロックオン",
-      "confidence": "confirmed",
+      "confidence": "guess",
       "character": "Tenebria",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
-      "note": "テネブレアがリズムカード発動時に敵へ付与する固有デバフ。Prydwen: 「When a Rhythm Card is activated, it inflicts 1 'All Eyes On You' on the target」。gamerch: 「リズムカードから受けるダメージ量40%増加」と効果の方向性が一致（対象が受けるダメージ増加）。"
+      "note": "テネブレアがリズムカード発動時に敵へ付与する固有デバフ候補。Prydwen: 「When a Rhythm Card is activated, it inflicts 1 'All Eyes On You' on the target」。gamerch: 「リズムカードから受けるダメージ量40%増加」と効果の方向性は一致するが、英日で語形が大きく異なるため（直訳・音写の対応関係が無い）、効果説明の完全一致確認が特に重要。40%という数値の一致もゲーム内で未確認。ゲーム内での確認が必要。"
     }
   ]
 }
