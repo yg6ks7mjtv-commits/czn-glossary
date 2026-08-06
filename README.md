@@ -63,8 +63,8 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 |---|---|
 | `confirmed` | 45 |
 | `guess` | 1 |
-| `unmatched` | 13 （日本語のみ 8 / 英語のみ 5） |
-| **合計** | **59** |
+| `unmatched` | 14 （日本語のみ 8 / 英語のみ 6） |
+| **合計** | **60** |
 
 日本語一覧 48 件のうち 41 件は Prydwen の用語辞典と突き合わせ済み。
 残り 7 件は辞典に未収載のため未解決。これに一覧外の用語（戦闘システム用語、
@@ -82,8 +82,9 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 - **キャラ固有用語 3 件**（`出撃` / `大亀裂` / `ダブルタップ`）—
   [Hilde のキャラページ](https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde)
   で確認。
-- **英語のみ 5 件**（`Streak` / `Find the Gap` / `Piercing Damage` /
-  `Manifest Ego` / `Potential`）— Prydwen 側の表記のみ判明。対応する日本語が未特定。
+- **英語のみ 6 件**（`Streak` / `Find the Gap` / `Piercing Damage` /
+  `Manifest Ego` / `Potential` / `Attunement`）— Prydwen 側の表記のみ判明。
+  対応する日本語が未特定。
 
 この作業を行ったセッションでは egress ポリシーにより `gamerch.com` および
 `www.prydwen.gg` への接続が拒否され（CONNECT に 403）、出典ページを直接読んだ
@@ -100,9 +101,11 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
   - `欲望カード` — Prydwen での使用を確認できず。Game8 では `Desire Cards`
     と表記されているが、**他サイトの訳語は採用しない**（上記「判定基準」）
     ため空欄のまま。Prydwen 側の表記が判明したら復帰させる。
-- **日本語表記が未特定の 5 件** — `Streak` / `Find the Gap` /
-  `Piercing Damage` / `Manifest Ego` / `Potential`。出典ページを個別に
-  特定できていないため `source` はサイトルートを指している。
+- **日本語表記が未特定の 6 件** — `Streak` / `Find the Gap` /
+  `Piercing Damage` / `Manifest Ego` / `Potential` / `Attunement`。出典ページを
+  個別に特定できていないため `source` はサイトルートを指している。
+- **キャラ固有バフは網羅していない。** 上記 6 件のほかにも未収録のキャラ固有バフが
+  存在する。キャラページを順に当たって拾う必要がある。
 - **`点火` は `guess`** — カードタグ `[Ignition]` としての存在は確認済みだが、
   効果説明の突き合わせが未了。ゲーム内で要確認。
 - 収録語は日本語一覧 48 件と一致しない。一覧外の用語（`ストレス`、
@@ -120,10 +123,11 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 
 1. 英語表記が未特定の 8 件を、用語辞典以外のページ（敵情報ページ、
    カード関連ガイド等）で特定する
-2. 日本語表記が未特定の 5 件を日本語側ソースで特定し、あわせて
+2. 日本語表記が未特定の 6 件を日本語側ソースで特定し、あわせて
    `source` を実際の出典ページに絞り込む
 3. `点火` の効果説明を突き合わせ、`guess` から `confirmed` に上げる
 4. シーズン4以降の用語を日本語ページから追加する
+5. キャラページを順に当たって、未収録のキャラ固有バフを拾う
 
 いずれも、Prydwen のページで実際に使われていることを確認していないものを
 `confirmed` にしないこと。

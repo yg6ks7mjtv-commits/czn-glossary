@@ -15,7 +15,7 @@
       "unmatched": "片側のみ確認。対応語が特定できていない。en が空欄なら日本語側のみ確認、ja が空欄なら英語側のみ確認。両方が空になることはない。"
     },
     "status": "incomplete",
-    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。加えてキャラ固有用語・戦闘システム用語を個別に追加。日本語側8件は英語表記が未特定、英語側5件は日本語表記が未特定。",
+    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。加えてキャラ固有用語・戦闘システム用語を個別に追加。日本語側8件は英語表記が未特定、英語側6件は日本語表記が未特定。キャラ固有バフは網羅していない。",
     "ja_list_as_of": "2026-04-14",
     "provenance": {
       "ja_terms": "日本語用語48件はユーザーが gamerch の状態異常・バフデバフ一覧 (2026/04/14時点) から転記して提供したもの。",
@@ -23,18 +23,19 @@
       "session_access": "この作業を行ったセッションでは egress ポリシーにより gamerch.com / www.prydwen.gg のいずれにも接続できず、出典ページを直接読んだ検証は行っていない。confirmed の根拠はすべてユーザーによる確認。"
     },
     "coverage": {
-      "total": 59,
+      "total": 60,
       "confirmed": 45,
       "guess": 1,
-      "unmatched": 13,
+      "unmatched": 14,
       "unmatched_ja_only": 8,
-      "unmatched_en_only": 5
+      "unmatched_en_only": 6
     },
     "known_gaps": [
       "日本語一覧は2026/04/14時点のもので、シーズン4以降の用語は網羅していない（点火のみ guess で暫定登録）。",
       "日本語側で英語表記が未特定の8件: 気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード。前7件は敵が付与する状態異常系で用語辞典に未収載。",
-      "英語側で日本語表記が未特定の5件: Streak / Find the Gap / Piercing Damage / Manifest Ego / Potential。出典ページを個別に特定できていないため source はサイトルートを指している。",
-      "『点火』は guess。カードタグとしての存在は確認済みだが効果説明の突き合わせが未了。"
+      "日本語表記が未特定の6件: Streak / Find the Gap / Piercing Damage / Manifest Ego / Potential / Attunement。出典ページを個別に特定できていないため source はサイトルートを指している。",
+      "『点火』は guess。カードタグとしての存在は確認済みだが効果説明の突き合わせが未了。",
+      "キャラ固有バフは網羅していない。上記6件のほかにも未収録のキャラ固有バフが存在する。"
     ],
     "criteria": {
       "rule": "confirmed の条件は「Prydwen のページで実際に使われている語であること」。他サイトの訳語は根拠として採用しない。",
@@ -407,6 +408,13 @@
     },
     {
       "en": "Potential",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+    },
+    {
+      "en": "Attunement",
       "ja": "",
       "confidence": "unmatched",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
