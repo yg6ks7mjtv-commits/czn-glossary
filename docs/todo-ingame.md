@@ -62,6 +62,17 @@
   ダメ30%増加、ドロー1の複合効果。
   (source: https://gamerch.com/chaoszeronightmare/966320)
 
+## Chizuru（チズル）
+
+- [ ] **拘束** — 黄昏の結束がターン開始時に付与する効果候補。Prydwenの説明では
+  単純な「コスト減少」としてのみ言及されており、拘束という独立した英語
+  キーワードが存在するか確認できなかった。既存の『結束』(Bind)とは別の
+  日本語表記のため、混同しないよう別エントリとした。
+  (source: https://gamerch.com/chaoszeronightmare/952183)
+- [ ] **霊魂の保護** — 開始時基本シールドカード。Prydwenでは「Chizuru's basic
+  shield」とだけ言及され、固有の英語カード名を特定できなかった。
+  (source: https://gamerch.com/chaoszeronightmare/952183)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

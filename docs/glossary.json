@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 214,
-      "confirmed": 180,
+      "total": 226,
+      "confirmed": 190,
       "guess": 2,
-      "unmatched": 32,
-      "unmatched_ja_only": 27,
+      "unmatched": 34,
+      "unmatched_ja_only": 29,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel"],
-      "remaining": 24,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru"],
+      "remaining": 23,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1630,6 +1630,102 @@
       "character": "Sereniel",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
       "note": "セレニエルの開始時基本シールドカード。Prydwen: 「Magnetic Field is removed in basically any Sereniel deck. This is Sereniel's basic shield starting card」。gamerch(955573): 「マグネティックフィールド：シールド獲得カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Will-O'-Wisp",
+      "ja": "鬼火",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有リソース。Prydwen: 「Chizuru's unique mechanic and resource is Will-O'-Wisp...stackable up to 5 times」。gamerch(952183)の「鬼火2を獲得」等の記述と一致。語形も直訳一致（鬼火=Will-O'-Wisp）。"
+    },
+    {
+      "en": "Shadow of the Moon",
+      "ja": "月影",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルのSignature Card。Prydwen: 「Chizuru reaches 5 Will-O'-Wisp, they are consumed to generate a Shadow of the Moon card」。gamerch(952183): 「月影：結束の数に応じて火力が伸びる単体攻撃」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Cursed Shackles",
+      "ja": "呪縛術",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有デバフ。Prydwen: 「Cursed Shackles is a special debuff applied by Chizuru's Karmic Flames card and is one of her primary ways of generating Will-O'-Wisp」。gamerch(952183): 「業火：単体攻撃と呪縛術を付与」と一致。"
+    },
+    {
+      "en": "Karmic Flames",
+      "ja": "業火",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有カード（起点カード）。Prydwen: 「Cursed Shackles is a special debuff applied by Chizuru's Karmic Flames card」。gamerch(952183): 「業火：単体攻撃と呪縛術を付与。チズルの起点となるカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Oni Hunt",
+      "ja": "鬼狩り",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有カード。Prydwen: 「Oni Hunt is Chizuru's highest hit count card without Bind」。gamerch(952183): 「鬼狩り：単体ダメージ×3と結束カードバフ付与」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Bind",
+      "ja": "結束",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有リソース。Prydwen: 「if one [Shadow of the Moon] is already in hand, increase its Bind (power) level by 1」。gamerch(952183)の月影の「結束の数に応じて火力が伸びる」と一致。"
+    },
+    {
+      "en": "Twilight",
+      "ja": "黄昏の結束",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有カード。Prydwen: 「a 'Twilight' card that provides cost reduction of random cards in hand at the start of every turn」。gamerch(952183): 「黄昏の結束：ターン開始時、拘束を獲得と他戦闘員のカードをランダム1枚コスト1減少」とターン開始時のランダムカードコスト減少という点で一致。"
+    },
+    {
+      "en": "Moonslash",
+      "ja": "真月",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの開始時基本攻撃カード。Prydwen: 「Chizuru starts with 2 Moonslash in her starting deck」。gamerch(952183): 「真月×2：攻撃カード」と枚数まで一致。直訳ではないが同一カードと判断（開始時2枚所持の基本攻撃カードという一致点）。"
+    },
+    {
+      "en": "Tsukuyomi",
+      "ja": "月読",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルの固有カード。Prydwen: 「Tsukuyomi is another one of Chizuru's cards that can receive buffs」。gamerch(952183): 「月読：次に使用する攻撃カードのヒット数に応じて鬼火2を獲得」。語形は月読の日本語読み(つくよみ)そのままのローマ字表記。"
+    },
+    {
+      "en": "Moonlight of High Tide",
+      "ja": "満潮の月光",
+      "confidence": "confirmed",
+      "character": "Chizuru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/chizuru",
+      "note": "チズルのエゴスキル。Prydwen: 「Ego skill called 'Moonlight of High Tide' which receives a 150% base damage boost」。gamerch(952183): 「満潮の月光：月影生成数でダメージが増える単体攻撃」と一致。語形も直訳一致（語順のみ入れ替え）。"
+    },
+    {
+      "en": "",
+      "ja": "拘束",
+      "confidence": "unmatched",
+      "character": "Chizuru",
+      "source": "https://gamerch.com/chaoszeronightmare/952183",
+      "note": "黄昏の結束がターン開始時に付与する効果候補。Prydwenの説明では単純な「コスト減少」としてのみ言及されており、拘束という独立した英語キーワードが存在するか確認できなかった。既存の『結束』(Bind)とは別の日本語表記のため、混同しないよう別エントリとした。"
+    },
+    {
+      "en": "",
+      "ja": "霊魂の保護",
+      "confidence": "unmatched",
+      "character": "Chizuru",
+      "source": "https://gamerch.com/chaoszeronightmare/952183",
+      "note": "チズルの開始時基本シールドカード。Prydwenでは「Chizuru's basic shield」とだけ言及され、固有の英語カード名を特定できなかった。site:prydwen.gg での複数クエリでも未特定。"
     }
   ]
 }
