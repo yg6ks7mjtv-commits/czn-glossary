@@ -277,6 +277,16 @@
   WebSearchの利用上限到達によりPrydwen側の確認ができなかった。
   (source: https://gamerch.com/chaoszeronightmare/942031)
 
+## Selena（セレーナ）
+
+- [ ] **緊急遮蔽** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/942032)
+- [ ] **目標捕捉** — 固有カード。単体ダメージと感応で標識を付与。ヒラメキで標識付与効果が強化される。
+  (source: https://gamerch.com/chaoszeronightmare/942032)
+- [ ] **ラストショット** — エゴスキル。単体ダメージと標識を付与。追加で標識を付与でき、
+  アタッカー行動前に使用推奨。
+  (source: https://gamerch.com/chaoszeronightmare/942032)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

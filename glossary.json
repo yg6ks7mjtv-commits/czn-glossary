@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 385,
-      "confirmed": 289,
+      "total": 393,
+      "confirmed": 294,
       "guess": 3,
-      "unmatched": 93,
-      "unmatched_ja_only": 88,
+      "unmatched": 96,
+      "unmatched_ja_only": 91,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei"],
-      "remaining": 7,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena"],
+      "remaining": 6,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2999,6 +2999,70 @@
       "character": "Rei",
       "source": "https://gamerch.com/chaoszeronightmare/942031",
       "note": "レイのエゴスキル（単体攻撃+AP1獲得できるスキル。EP4と低コスト）。WebSearchの利用上限到達によりPrydwen側の確認ができなかった。"
+    },
+    {
+      "en": "Engagement Fire",
+      "ja": "交戦射撃",
+      "confidence": "confirmed",
+      "character": "Selena",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/selena",
+      "note": "セレーナの開始時基本攻撃カード。Prydwenの検索結果に「'Engagement Fire' card for Selena」の言及あり。gamerch(942032): 「交戦射撃：攻撃カード。潜在力で貫通ダメージに変更可能」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "High-Power Scope",
+      "ja": "高倍率照準器",
+      "confidence": "confirmed",
+      "character": "Selena",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/selena",
+      "note": "セレーナの開始カード。Prydwen: 「High-Power Scope V is an Upgrade that applies 1 Mark to enemies at start of turn」。gamerch(942032): 「高倍率照準器：敵に標識2を付与する」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Drone Bombing",
+      "ja": "ドローン爆撃",
+      "confidence": "confirmed",
+      "character": "Selena",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/selena",
+      "note": "セレーナの固有カード。Prydwen: 「Drone Bombing V is an Upgrade that allows Selena to do an Extra Attack for every Passion card played」。gamerch(942032): 「ドローン爆撃：全体攻撃後に情熱弱点付与。情熱属性のアタッカーと組み合わせ可能」と情熱(Passion)属性連携という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Tactical Maneuver",
+      "ja": "戦術機動",
+      "confidence": "confirmed",
+      "character": "Selena",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/selena",
+      "note": "セレーナの固有カード。Prydwen: 「Tactical Maneuver is Selena's main niche as a Tenacity support...refunds an enemy's tenacity in order to ravage them multiple times」。gamerch(942032): 「戦術機動：シールド付与と強靭度2ダメージ。大破サポート効果」と強靭度・大破サポートという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Sniper's Domain",
+      "ja": "狙撃手の領域",
+      "confidence": "confirmed",
+      "character": "Selena",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/selena",
+      "note": "セレーナの固有カード。Prydwen: 「Selena's 'Sniper's Domain' card...she'll always start with this card in her opening hand...useful when pursuing Selena's Mark playstyle」。gamerch(942032): 「狙撃手の領域：標識ダメージが80%増加。1凸で開戦が追加」と標識(Mark)関連という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "緊急遮蔽",
+      "confidence": "unmatched",
+      "character": "Selena",
+      "source": "https://gamerch.com/chaoszeronightmare/942032",
+      "note": "セレーナの開始時基本シールドカード。Prydwenでは「Selena's basic shield is completely standard」とだけ言及され、固有の英語カード名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "目標捕捉",
+      "confidence": "unmatched",
+      "character": "Selena",
+      "source": "https://gamerch.com/chaoszeronightmare/942032",
+      "note": "セレーナの固有カード（単体ダメージと感応で標識を付与。ヒラメキで標識付与効果が強化される）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "ラストショット",
+      "confidence": "unmatched",
+      "character": "Selena",
+      "source": "https://gamerch.com/chaoszeronightmare/942032",
+      "note": "セレーナのエゴスキル（単体ダメージと標識を付与。追加で標識を付与でき、アタッカー行動前に使用推奨）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
