@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 120,
-      "confirmed": 102,
+      "total": 133,
+      "confirmed": 114,
       "guess": 2,
-      "unmatched": 16,
-      "unmatched_ja_only": 11,
+      "unmatched": 17,
+      "unmatched_ja_only": 12,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde"],
-      "remaining": 32,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei"],
+      "remaining": 31,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -878,6 +878,110 @@
       "character": "Hilde",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
       "note": "ヒルデの固有スタック式デバフ候補。Prydwen: 「if they have 30 stacks of Fracture」と言及があり Zero In と並ぶ蓄積系デバフとみられるが、gamerch側で対応する日本語名を特定できていない。"
+    },
+    {
+      "en": "Descent",
+      "ja": "降臨",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有スタック式バフ。Prydwen: 「grants 8 stacks of 'Descent'...increase Damage Amount of the next Heavensfall by 100%」。gamerch(995382)の各カード説明の「降臨」付与記述と一致。"
+    },
+    {
+      "en": "Flame Arts",
+      "ja": "炎舞",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有リソース。Prydwen: 「grants 1 stack of 'Flame Arts'」。gamerch(995382)の「炎舞1」等の記述と一致。"
+    },
+    {
+      "en": "Exorcism Formation",
+      "ja": "退魔の形勢",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有カード（開戦効果）。Prydwen: 「'Inferno Rhapsody' cards, which are created from 'Exorcism Formation'」。gamerch(995382): 「退魔の形勢：開戦効果でコスト1、山札に炎舞曲8枚生成」と一致。"
+    },
+    {
+      "en": "Inferno Rhapsody",
+      "ja": "炎舞曲",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "退魔の形勢が生成する生成カード。Prydwen: 「'Inferno Rhapsody' cards」。gamerch(995382): 「炎舞曲：コスト0で炎舞が3溜まると追加ダメージ発生」と一致。"
+    },
+    {
+      "en": "Azure Flame",
+      "ja": "蒼炎",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの開始時基本攻撃カード。Prydwen: 「Fei's starting Basic Attack-Card is 'Azure Flame'...conditionally kept for [Flame Arts] breakpoints」。gamerch(995382): 「蒼炎：攻撃カード。潜在力で炎舞1効果が追加される」と一致。"
+    },
+    {
+      "en": "Melancholy",
+      "ja": "憂愁",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの開始時基本シールドカード。Prydwen: 「'Melancholy' which is removed in most Fei set-ups」。gamerch(995382): 「憂愁：シールドカード」と一致（基本構成では外れやすい定番シールド）。"
+    },
+    {
+      "en": "Heavenscleaver",
+      "ja": "碧天",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイのエゴスキル。Prydwen: 「Heavenscleaver costs 5-Ego Points to cast and when used immediately grants 8 stacks of 'Descent', additionally at the start of the next two turns will also grant 8 'Descent' stacks」。gamerch(995382): 「碧天：EP5で降臨8、2ターン間ターン開始時に降臨8付与。次の落九天のダメージを乗算100%バフ」と数値まで一致。"
+    },
+    {
+      "en": "Heavensfall",
+      "ja": "落九天",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "碧天が強化する固有カード。Prydwen: 「increase Damage Amount of the next Heavensfall by 100%」。gamerch(995382): 「落九天：降臨8で生成される強力なカード。複数回発動可能」と一致（碧天による強化対象）。"
+    },
+    {
+      "en": "Night Rain",
+      "ja": "常夜の雨",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有カード。Prydwen: 「Night Rain is a 0-Cost Skill card that grants 1 stack of 'Flame Arts' and will draw 1 'Inferno Rhapsody' card」。gamerch(995382): 「常夜の雨：コスト0で炎舞1。連続で炎舞曲をドロー可能」と一致。"
+    },
+    {
+      "en": "Solo Dance",
+      "ja": "独舞",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有カード。Prydwen: 「Solo Dance cards are Fei's most universal search tool for...Inferno Rhapsody」。gamerch(995382): 「独舞：コスト0でドロー2。ドロー時のコスト1以上カードを破棄」と一致（サーチ・ドロー用途）。語形も直訳で一致（独舞=Solo Dance）。"
+    },
+    {
+      "en": "Inferno Rhapsody: Heaven",
+      "ja": "炎舞曲：天",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "炎舞曲の上位派生。Prydwen: 「The Heaven variant (Inferno Rhapsody: Heaven) deals 110% Damage, grants 1 Flame Arts, and when it triggers Flame Arts, grants 3 Descent instead of drawing」。gamerch(995382): 「炎舞曲：天：退魔の形勢5凸時に生成。炎舞発動時の効果が降臨3に変化」と一致。"
+    },
+    {
+      "en": "Soulfire Dance",
+      "ja": "魂焔舞",
+      "confidence": "confirmed",
+      "character": "Fei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/fei",
+      "note": "フェイの固有カード。Prydwen: 「solid card draw through her...'Soulfire Dance' cards」。gamerch(995382): 「魂焔舞：コストXでダメージ×(X+1)とドローX」と一致（ドロー提供カード）。語形も直訳で一致（魂焔舞=Soulfire Dance）。"
+    },
+    {
+      "en": "",
+      "ja": "炎舞舞曲",
+      "confidence": "unmatched",
+      "character": "Fei",
+      "source": "https://gamerch.com/chaoszeronightmare/995382",
+      "note": "フェイの固有カード（消滅/唯一。コスト0で降臨数に応じて炎舞曲を手札に移動）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
