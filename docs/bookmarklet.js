@@ -10,7 +10,25 @@ var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|INPUT|SELECT|OPTION)$/;
 // 完全一致だけが対象。Critical Damage のような複合語は用語であることが明らかなので
 // 通常どおり日本語だけに置き換える。
 var KEEP_EN = ['Mark', 'Lead', 'Remove', 'Wave', 'Partner',
-               'Break', 'Save', 'Damage', 'Shield', 'Heal'];
+               'Break', 'Save', 'Damage', 'Shield', 'Heal',
+               // キャラ固有カード名のうち、一般的な英語表現としても成立する語。
+               // 2026-08-06 のキャラカード追加作業で判定。迷ったものは残す側に倒した。
+               'Sound Check', 'Fan Service', 'Spotlight', 'Call & Response',
+               'Encore', 'Photo Time', 'Photo Card', 'Rhythm', 'Performance Buzz',
+               'Rapid Fire', 'Handgun Bullet', 'Single Shot',
+               'Ionization', 'Draw & Release', 'Big Game Ranger', 'Zero In',
+               'Matrix Overlay', 'Multishot', 'Bowguard', 'Homing Arrow',
+               'Descent', 'Melancholy', 'Night Rain', 'Solo Dance',
+               'Once Upon a Time', 'Blessing', 'Protect Us', 'Garden of Secrets',
+               'Gather Round', 'Happy Ending',
+               'Sword Rain', 'Linked', 'Hero to All', 'Sword Flash', 'Sword Barrier',
+               'Resonance', 'Repose', 'Heart Shaker', 'With All My Heart!',
+               'Liberated Feelings', 'Radiant Smile', 'Heart Bullet',
+               'Blooming Love', 'Disruption Fire', 'Protect Me',
+               'Chronicle', 'Time Paradox', 'Time Acceleration', 'Rewind',
+               'Archetype', 'Creation and Destruction', 'Event Horizon',
+               'Barrier Deployment', 'Matter Disintegration',
+               'Hew', 'Honed Edge', 'Fighting Spirit', 'Slash'];
 var keepEn = Object.create(null);
 KEEP_EN.forEach(function (w) { keepEn[w] = true; });
 // 色は rgb() で書く。# はURLのフラグメント区切りなので javascript: URL 内で切れる。

@@ -1,0 +1,76 @@
+# ゲーム内確認が必要な語 (todo-ingame)
+
+`glossary.json` でキャラ固有カード・固有バフとして登録したが、`site:prydwen.gg`
+検索では英語名を特定できず `unmatched`（日本語のみ）のまま残っている語の一覧。
+
+検索エンジンのインデックス漏れの可能性が高く、Prydwen に用語自体が存在しない
+とは限らない。実際にゲーム内（または Prydwen ページの直接閲覧）で該当カード・
+バフを確認できたら、`glossary.json` の対応エントリに `en` を追記し、
+`confidence` を `confirmed` に変更した上で `python scripts/sync.py` を実行すること。
+
+使い方: 上から順にチェックする必要はない。手元で確認できたものから
+`glossary.json` を直接編集してよい。確認後はこのファイルから該当行を削除する。
+
+## Luke（ルーク）
+
+- [ ] **機会捕捉** — 固有カード。主導、シールドと弾丸に加算バフ付与。
+  (source: https://gamerch.com/chaoszeronightmare/942020)
+- [ ] **魔眼の乱舞** — 固有カード。使用済み弾丸カード数に応じてヒット数追加。
+  (source: https://gamerch.com/chaoszeronightmare/942020)
+- [ ] **必殺弾** — 固有カード。ハンドガン弾丸5枚使用で使用可能になる500%ダメージの必殺技。
+  Prydwenでは「Unique」「Bullet」タグの組み合わせとしてのみ言及されており、
+  固有の英語カード名が見当たらなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942020)
+
+## Fei（フェイ）
+
+- [ ] **炎舞舞曲** — 固有カード。消滅/唯一。コスト0で降臨数に応じて炎舞曲を手札に移動。
+  (source: https://gamerch.com/chaoszeronightmare/995382)
+
+## Adelheid（アーデルハイト）
+
+- [ ] **童話の中のお友だち** — 固有カード。ワンちゃんまたはクマさんを選択して1枚生成。
+  (source: https://gamerch.com/chaoszeronightmare/986739)
+- [ ] **物語の真実** — 固有カード。防御依存ダメージ+被ダメ量アップ、対象敵へのダメージ加算100%バフ。
+  (source: https://gamerch.com/chaoszeronightmare/986739)
+- [ ] **夢の幸せ** — 固有バフ。祝福を付与または生成した数に応じて獲得。味方のダメージ量3%増加、最大10重複。
+  (source: https://gamerch.com/chaoszeronightmare/986739)
+
+## Heidemarie（ハイデマリ）
+
+- [ ] **一筋の光** — 固有カード。1コストの単体攻撃。手札の連結数に応じて倍率が上がる。
+  (source: https://gamerch.com/chaoszeronightmare/983591)
+- [ ] **極光展開** — 固有カード。2コストで極光剣2枚生成。1ターンの間、極光剣に加算バフも入る。
+  (source: https://gamerch.com/chaoszeronightmare/983591)
+- [ ] **極光凝縮** — 固有カード。3回墓地へ移動させると極光解放に変化するカード。
+  (source: https://gamerch.com/chaoszeronightmare/983591)
+
+## Rita（リタ）
+
+- [ ] **記録者** — 固有カード。使用したコストに応じて時間記録を獲得。ターン開始時に時間超越に変化。
+  (source: https://gamerch.com/chaoszeronightmare/972157)
+- [ ] **栄光の時間** — エゴスキル。EP5で時間超越6と次に使用する自分の攻撃に乗算バフを付与。
+  (source: https://gamerch.com/chaoszeronightmare/972157)
+
+## Tiphera（ティペラ）
+
+- [ ] **調律** — 固有バフ候補。創造と破壊などの効果を2倍にする。Prydwenの英語版で
+  「Attunement」はテネブレア/ハイデマリの文脈でのみ言及が見つかり、ティペラの
+  調律に対応するか確認できなかったため、未対応のまま。
+  (source: https://gamerch.com/chaoszeronightmare/966320)
+- [ ] **図形：〇△□** — 2凸以降専用カード。3種図形効果が重複時に生成。治癒150%、
+  ダメ30%増加、ドロー1の複合効果。
+  (source: https://gamerch.com/chaoszeronightmare/966320)
+
+## Nine（ナイン）
+
+- [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
+  (source: https://gamerch.com/chaoszeronightmare/958782)
+- [ ] **逆転の刃** — 固有カード。シールド獲得時に刃研ぎを付与できる強化カード。
+  (source: https://gamerch.com/chaoszeronightmare/958782)
+- [ ] **隙突き** — エゴ発現限定カード。2凸以降に開幕から手札に入る。消滅2だが脆弱1と強靭度ダメージ1を付与。
+  (source: https://gamerch.com/chaoszeronightmare/958782)
+- [ ] **臨機応変** — 固有バフ。攻撃カード防御依存ダメージ量+50%、最大3重複。
+  (source: https://gamerch.com/chaoszeronightmare/958782)
+- [ ] **刀背受け** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/958782)
