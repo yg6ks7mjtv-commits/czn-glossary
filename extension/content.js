@@ -17,10 +17,11 @@
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
 //      する。該当levelの効果文が手元データにあれば、カード枠（box）の
-//      「中」でも box の兄弟要素でもなく、box の親要素（グリッドのセルに
-//      相当）自体の末尾に、独立したブロックで日本語効果文を追加する
-//      （box自身がposition:absoluteでレイアウトされている可能性を考慮し、
-//      より外側に置く。幅はwidth:100%+box-sizing:border-boxで親に追従させ、
+//      「中」ではなく box の直後の兄弟要素として、独立したブロックで日本語
+//      効果文を追加する（box の中は画像などが position:absolute で配置
+//      されていることがあり、中に入れると重なってしまうため）。box の親
+//      要素には overflow:visible を明示的に付与してはみ出しを防ぎ、幅は
+//      box の実測幅（getBoundingClientRect）をpxで直接指定する。
 //      white-space/word-breakはnormalにする。英語の効果文がどこにあっても
 //      消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
@@ -571,45 +572,53 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      var container = c.block.parentElement; // カード枠(box)の親要素＝グリッドのセルに相当
+      var parent = c.block.parentElement; // box の直後に挿入するための親要素
 
-      if (!c.entry) { if (container) { removeExistingEffectBlock(container); } PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { if (container) { removeExistingEffectBlock(container); } PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
-      if (!container) { PROCESSED.add(c.block); return; } // 挿入先の親が無い（DOMから外れた等）
+      if (!c.entry) { if (parent) { removeExistingEffectBlock(parent); } PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { if (parent) { removeExistingEffectBlock(parent); } PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!parent) { PROCESSED.add(c.block); return; } // 挿入先の親が無い（DOMから外れた等）
 
-      // 挿入先は box の「中」でも box の直後（同じ親内の兄弟）でもなく、
-      // box の親要素（グリッドのセル）自体の末尾。box自身がposition:absolute
-      // でレイアウトされている可能性を考慮し、より外側の container に置く。
-      // 挿入のたびに removeExistingEffectBlock で container 内の既存ブロックを
-      // querySelector で探して削除してから作り直すため、boxのdata属性が
-      // 再描画で失われても同じカードに複数の効果文ブロックが並ぶことはない。
-      removeExistingEffectBlock(container);
+      // 挿入先は box の直後（同じ親要素内の兄弟要素）。box の親要素が
+      // overflow:hidden 等で切り取っている可能性があるため、はみ出し対策と
+      // して親要素に overflow:visible を明示的に付与しておく。
+      removeExistingEffectBlock(parent);
+      var parentOverflow = getComputedStyle(parent).overflow;
+      parent.style.overflow = 'visible';
+
+      var boxRect = c.block.getBoundingClientRect();
 
       var div = document.createElement('div');
       div.className = EFFECT_BLOCK_CLS;
       div.textContent = effect;
       div.style.cssText =
-        'position:static;display:block;margin-top:6px;' +
+        'position:static;display:block;visibility:visible;margin-top:6px;' +
         'padding:8px 10px;border-radius:0 0 8px 8px;box-sizing:border-box;' +
-        'width:100%;white-space:normal;word-break:normal;' +
+        'white-space:normal;word-break:normal;' +
         'background:rgba(0,0,0,0.85);color:#fff;line-height:1.6;';
-      // カード名見出しと同程度の文字サイズに揃える（実測値をそのまま使う）。
-      // 幅は親要素からの継承に頼らず明示的に100%（box-sizing:border-box併用）。
+      // カード名見出しと同程度の文字サイズに揃える。幅は親の値に依存せず、
+      // box の実測幅（getBoundingClientRect）をpxで直接指定する。
       div.style.fontSize = getComputedStyle(c.nameEl).fontSize;
+      div.style.width = Math.round(boxRect.width) + 'px';
 
-      container.appendChild(div);
+      c.block.insertAdjacentElement('afterend', div); // box の直後の兄弟要素として挿入
       c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
       inserted++;
-      // top/visible は「本当に別々のカード要素が5件あるのか」を確認するための
-      // 診断情報。ページ上の縦位置（top）が同じ/近い値ばかりなら重なっている
-      // 疑いがあり、visible が false ならその box は非表示要素だったことになる。
-      var rect = c.block.getBoundingClientRect();
+
+      // 挿入したブロック自身の実測値。非表示のときに原因を切り分けるための
+      // 診断情報（挿入先の幅・高さがゼロになっていないか、親のoverflowで
+      // 切られていないか、display/visibilityが想定どおりか）。
+      var divRect = div.getBoundingClientRect();
+      var divStyle = getComputedStyle(div);
       insertedDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
-        top: Math.round(rect.top),
-        visible: c.block.offsetParent !== null
+        width: Math.round(divRect.width),
+        height: Math.round(divRect.height),
+        visible: div.offsetParent !== null,
+        parentOverflow: parentOverflow,
+        display: divStyle.display,
+        visibility: divStyle.visibility
       });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
@@ -794,12 +803,17 @@
       // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
       // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
       // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
-      // top/表示状態も出す。同じ名前が複数行に見えても、ページ上で本当に
-      // 別々の位置にある別要素なのか（＝正しい挙動）、それとも非表示要素
-      // まで拾ってしまっているのかをその場で切り分けられるようにするため。
+      // 挿入したブロック自身の幅・高さ・表示状態・親のoverflow・
+      // display/visibility も出す。非表示になっているときに、幅/高さが
+      // ゼロになっていないか、親のoverflowで切られていないか、CSSで
+      // display/visibilityを上書きされていないかをその場で切り分けられる
+      // ようにするため。
       result.insertedDetails.forEach(function (d) {
         lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          ' / top' + d.top + ' / ' + (d.visible ? '表示中' : '非表示'));
+          ' / ' + d.width + '×' + d.height +
+          ' / ' + (d.visible ? '表示中' : '非表示') +
+          ' / 親overflow:' + d.parentOverflow +
+          ' / display:' + d.display + ' visibility:' + d.visibility);
       });
     }
 
