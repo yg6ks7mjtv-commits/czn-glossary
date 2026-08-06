@@ -268,6 +268,15 @@
 - [ ] **論理の喪失** — 固有バフ。クレジット減少時にストレス1増加。
   (source: https://gamerch.com/chaoszeronightmare/942030)
 
+## Rei（レイ）
+
+- [ ] **おやつの時間** — 固有カード。高い治癒量とドロー効果。使用時は消滅する使い切りカード。
+  WebSearchの利用上限到達によりPrydwen側の確認ができなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942031)
+- [ ] **最後の暗影** — エゴスキル。単体攻撃+AP1獲得できるスキル。EP4と低コスト。
+  WebSearchの利用上限到達によりPrydwen側の確認ができなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942031)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

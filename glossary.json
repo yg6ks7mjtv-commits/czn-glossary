@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 377,
-      "confirmed": 283,
+      "total": 385,
+      "confirmed": 289,
       "guess": 3,
-      "unmatched": 91,
-      "unmatched_ja_only": 86,
+      "unmatched": 93,
+      "unmatched_ja_only": 88,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen"],
-      "remaining": 8,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei"],
+      "remaining": 7,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2935,6 +2935,70 @@
       "character": "Owen",
       "source": "https://gamerch.com/chaoszeronightmare/942030",
       "note": "オーウェンの固有バフ（クレジット減少時にストレス1増加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Dark Blade",
+      "ja": "闇黒の刃",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの開始時基本攻撃カード。Prydwen: 「Dark Blade is removed in basically any Rei deck for Save Data」。gamerch(942031): 「闇黒の刃：単体攻撃カード。基本的な攻撃手段として機能」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Material Regeneration",
+      "ja": "物質再生",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの開始時基本治癒カード。Prydwen: 「Material Regeneration is removed in basically any Rei deck」。gamerch(942031): 「物質再生：治癒カード。HPを回復する効果を持つ」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Resonating Darkness",
+      "ja": "共鳴する暗闇",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの固有カード。Prydwen: 「'Resonating Darkness' III is great for buffing units with multi-use 1-cost cards」。gamerch(942031): 「共鳴する暗闇：コスト1カードにダメージ加算バフを付与しつつ、ターン終了時の継続回復を獲得」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Condensation",
+      "ja": "暗黒凝集",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの固有カード。Prydwen: 「'Dark Condensation' cards that provide direct card buffs to allies' damage output」。gamerch(942031): 「暗黒凝集：手札の攻撃カードから1枚選び、瞬間的に大幅なダメージ加算バフで火力をサポート」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Strike of Darkness",
+      "ja": "闇の斬撃",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの固有カード。Prydwenの検索結果に「Strike of Darkness」の言及あり。gamerch(942031): 「闇の斬撃：1ターンの間、基本攻撃カードのダメージに100%の乗算バフを付与」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Predator's Blade",
+      "ja": "捕食者の刃",
+      "confidence": "confirmed",
+      "character": "Rei",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "レイの固有カード。Prydwenの検索結果に「Predator's Blade」の言及あり。gamerch(942031): 「捕食者の刃：1コストの高倍率攻撃カード。1ターン士気4を獲得」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "おやつの時間",
+      "confidence": "unmatched",
+      "character": "Rei",
+      "source": "https://gamerch.com/chaoszeronightmare/942031",
+      "note": "レイの固有カード（高い治癒量とドロー効果。使用時は消滅する使い切りカード）。WebSearchの利用上限到達によりPrydwen側の確認ができなかった。"
+    },
+    {
+      "en": "",
+      "ja": "最後の暗影",
+      "confidence": "unmatched",
+      "character": "Rei",
+      "source": "https://gamerch.com/chaoszeronightmare/942031",
+      "note": "レイのエゴスキル（単体攻撃+AP1獲得できるスキル。EP4と低コスト）。WebSearchの利用上限到達によりPrydwen側の確認ができなかった。"
     }
   ]
 }
