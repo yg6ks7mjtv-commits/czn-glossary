@@ -177,6 +177,24 @@
 - [ ] **NA：保護反応** — 開始時基本防御・治癒カード（2枚）。
   (source: https://gamerch.com/chaoszeronightmare/957728)
 
+## Renoa（レノア）
+
+- [ ] **決死の一撃** — 固有カード。手札の鎮魂の弾丸を全て破棄してダメージ。保存効果付き。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+- [ ] **鎮魂の弾丸：終焉** — 2凸効果で生成される強化版弾丸。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+- [ ] **黒いトゲ** — カード（山札と墓地の鎮魂の弾丸を手札に移動させる単体攻撃）。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+- [ ] **殲滅射撃** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+- [ ] **黒い帳** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+- [ ] **エゴスキル（無名）** — レノアのエゴスキル本体（手札と墓地にある鎮魂の弾丸を
+  全て手札に持ってくる）。Prydwenでは『Requiem』という候補が見つかったが、
+  gamerch側にスキル名の記載がなく ja が特定できないため未登録。ゲーム内で
+  日本語名を確認したら、en=Requiem, character=Renoa で新規登録すること。
+  (source: https://gamerch.com/chaoszeronightmare/942026)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
