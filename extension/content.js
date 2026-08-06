@@ -21,10 +21,11 @@
 //      幅・高さ0になったため使わず、box の「中」、英語の効果文がもともと
 //      表示されている場所の直後（「Show Effects」があればその直後、無ければ
 //      効果文の最後のテキスト要素の直後、それも見つからなければ最終手段として
-//      カード名要素の直後）に、position/widthを指定しないプレーンなブロック
-//      として日本語効果文を追加する（周囲の要素のレイアウトにそのまま
-//      従わせる）。カード名要素は候補収集の時点で必ず見つかっているため、
-//      この最終手段だけは絶対に失敗しない。英語の効果文は消さずそのまま残す）
+//      カード名要素の直後）に日本語効果文を追加する。カード名要素は候補収集
+//      の時点で必ず見つかっているため、この最終手段だけは絶対に失敗しない。
+//      挿入するdivはインラインスタイルを一切持たない素の要素にしてある
+//      （box内に置いても幅・高さが0のまま画面に出ない問題を切り分け中の
+//      ため。原因判明後にスタイルを戻す）。英語の効果文は消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -632,16 +633,12 @@
 
       removeExistingEffectBlocks(c.block);
 
+      // 0×0で表示されない原因切り分けのため、インラインスタイルを一切
+      // 持たない素の div にする（width/height/position/background/
+      // font-size/border/paddingなど何も指定しない）。
       var div = document.createElement('div');
       div.className = EFFECT_BLOCK_CLS;
       div.textContent = effect;
-      // position・widthは指定しない（周囲の要素にそのまま従わせる）。
-      // 背景は付けず、文字色だけ白にして上に細い区切り線を1本入れる。
-      div.style.cssText =
-        'margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.4);' +
-        'color:#fff;white-space:pre-wrap;';
-      // 英語の効果文と同じ文字サイズに揃える（見つからなければカード名基準）。
-      div.style.fontSize = getComputedStyle(effectTextEl || c.nameEl).fontSize;
 
       var insertError = null;
       try {
@@ -668,14 +665,15 @@
       PROCESSED.add(c.block);
       inserted++;
 
-      // 挿入したブロック自身の実測値（非表示になっていないかの確認用）。
-      var divRect = div.getBoundingClientRect();
+      // getBoundingClientRectでの幅測定はやめ、中身が本当に入っているか
+      // （textContentの文字数）と実際のDOM構造（outerHTMLの先頭100文字）を
+      // 見る。文字数が0なら中身が入っていない、文字数があるのに画面に
+      // 出ないならCSS側の問題、と切り分けるための診断情報。
       insertedDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
-        width: Math.round(divRect.width),
-        height: Math.round(divRect.height),
-        visible: div.offsetParent !== null
+        textLength: (div.textContent || '').length,
+        outerHtmlHead: (div.outerHTML || '').slice(0, 100)
       });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
@@ -862,12 +860,12 @@
       // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
       // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
       // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
-      // 挿入したブロック自身の幅・高さ・表示状態も出し、非表示になって
-      // いないかその場で確認できるようにする。
+      // textContentの文字数とouterHTMLの先頭100文字も出す。文字数が0なら
+      // 中身が入っていない、文字数があるのに画面に出ないならCSS側の問題、
+      // と切り分けられるようにするため。
       result.insertedDetails.forEach(function (d) {
         lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          ' / ' + d.width + '×' + d.height +
-          ' / ' + (d.visible ? '表示中' : '非表示'));
+          ' / 文字数' + d.textLength + ' / ' + d.outerHtmlHead);
       });
     }
 
