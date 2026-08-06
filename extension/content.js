@@ -3,11 +3,13 @@
 //
 // やること:
 //   1. glossary.json（公開URL）と effects-ja.json（拡張に同梱・非公開）を読む
-//   2. ページ上の「Show Effects」を含む説明ブロックを検出し、近くの見出し要素
-//      からカード名(英語)を取得、glossary.json で日本語に変換
+//   2. ページ上の「Show Effects」を含む要素から親を1階層ずつたどり、
+//      「glossary.json の英語カード名と完全一致する（末尾コロンでない）葉要素」が
+//      現れた時点でそこを「カード枠」として確定する（＝カード名とShow Effects
+//      両方を含む最小の共通祖先）。それより外は探索しない。単純な固定階層数や
+//      見出しタグの総当たりだと、カードのグループ見出し（「Starting Cards:」等）
+//      まで拾ってしまうため、glossary名との完全一致を主な判定基準にしている
 //   3. 効果文が手元データにあれば、英語の説明文を残したまま、その下に追記する
-//      （説明欄はもともと空ではなく、Prydwenの英語説明とShow Effectsリンクが
-//      入っている。空要素を探す旧方式は使っていない）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も行う
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする
 //
@@ -228,37 +230,6 @@
     return Array.from(found);
   }
 
-  var HEADING_SELECTOR = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-    .concat((typeof CZN_SELECTORS !== 'undefined' && CZN_SELECTORS.cardNameExtraSelectors) || [])
-    .join(',');
-
-  // block より前（DOM順で手前）にある見出し要素のうち、最も近いものを探す。
-  // 親をたどりながら探索範囲を広げていく（見出しはカード名として block の
-  // 近くにあるはずなので、狭い範囲から確認する）。
-  function findNearestHeading(block) {
-    var scope = block;
-    for (var depth = 0; depth < 6 && scope; depth++) {
-      var candidates;
-      try {
-        candidates = scope.querySelectorAll(HEADING_SELECTOR);
-      } catch (err) {
-        candidates = [];
-      }
-      var best = null;
-      candidates.forEach(function (h) {
-        if (h === block || block.contains(h)) { return; } // block自身やその子は除外
-        var pos = h.compareDocumentPosition(block);
-        // eslint-disable-next-line no-bitwise
-        if (pos & Node.DOCUMENT_POSITION_FOLLOWING) {
-          best = h; // querySelectorAll は文書順なので、最後に見つかったものが最も近い
-        }
-      });
-      if (best) { return best; }
-      scope = scope.parentElement;
-    }
-    return null;
-  }
-
   // "Show Effects" 等のマーカー文字列を含む要素（葉要素優先）を全ページから探す。
   function findMarkerElements(markerTexts) {
     var exact = [];
@@ -277,15 +248,45 @@
     return exact.length > 0 ? exact : partial;
   }
 
-  // マーカー要素から指定階層だけ親をたどり、説明ブロック（英語効果文 + マーカーを
-  // 両方含む要素）を返す。
-  function ancestorLevels(el, levels) {
-    var cur = el;
-    for (var i = 0; i < levels; i++) {
-      if (!cur.parentElement) { break; }
-      cur = cur.parentElement;
+  function hasExcludedSuffix(text) {
+    var suffixes = CZN_SELECTORS.nameExcludeSuffixes || [':'];
+    for (var i = 0; i < suffixes.length; i++) {
+      if (text.charAt(text.length - 1) === suffixes[i]) { return true; }
     }
-    return cur;
+    return false;
+  }
+
+  // scope 内の葉要素で、末尾がコロン等でなく、かつ knownEnNames
+  // （glossary.json の英語カード名一覧）と完全一致するものを探す。
+  // 「Starting Cards:」のようなグループ見出しは、コロン除外・glossary不一致の
+  // 両方で弾かれる。excludeRoot（マーカー自身）の内側は見ない。
+  function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (node.children.length > 0) { continue; } // 葉要素のみ
+      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { continue; }
+      var text = (node.textContent || '').trim();
+      if (!text || hasExcludedSuffix(text)) { continue; }
+      if (knownEnNames.has(text)) { return node; }
+    }
+    return null;
+  }
+
+  // マーカーから親を1階層ずつたどり、「カード名候補（glossaryと完全一致、かつ
+  // コロン終わりでない）を含む最小の祖先」をカード枠として返す。それより外は
+  // 探索しない。見つからなければ null。
+  function findCardBox(marker, knownEnNames) {
+    var maxClimb = CZN_SELECTORS.maxAncestorClimb || 10;
+    var el = marker;
+    for (var depth = 0; depth < maxClimb && el.parentElement; depth++) {
+      el = el.parentElement;
+      var nameEl = findGlossaryNameLeaf(el, marker, knownEnNames);
+      if (nameEl) {
+        return { box: el, nameEl: nameEl };
+      }
+    }
+    return null;
   }
 
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
@@ -299,17 +300,20 @@
   function collectCardCandidatesByMarker(ctx) {
     var markers = findMarkerElements(CZN_SELECTORS.effectMarkerText || ['Show Effects']);
     log('marker elements found:', markers.length);
+    var knownEnNames = new Set(Object.keys(ctx.resolved));
     var candidates = [];
 
     markers.forEach(function (marker) {
-      var block = ancestorLevels(marker, CZN_SELECTORS.effectMarkerAncestorLevels || 2);
-      if (!block) { return; }
+      var found = findCardBox(marker, knownEnNames);
+      if (!found) { log('card box (name + marker) not found for a marker'); return; }
 
-      var nameEl = findNearestHeading(block);
-      if (!nameEl) { log('heading not found near marker'); return; }
-
-      var nameText = (nameEl.textContent || '').trim();
-      candidates.push({ block: block, nameEl: nameEl, nameText: nameText, entry: ctx.resolved[nameText] || null });
+      var nameText = (found.nameEl.textContent || '').trim();
+      candidates.push({
+        block: found.box,
+        nameEl: found.nameEl,
+        nameText: nameText,
+        entry: ctx.resolved[nameText] || null
+      });
     });
 
     return candidates;
@@ -487,14 +491,12 @@
       return 'CZN: 対象が見つかりません';
     }
 
-    var lines = ['CZN: ' + result.replacedCount + '件を置換 / ' +
-      result.insertedCount + '件の効果文を挿入'];
+    var lines = ['CZN: ' + result.replacedCount + '件を置換 / カード枠' +
+      result.candidateCount + '件を検出 / 効果文' + result.insertedCount + '件を挿入'];
 
     if (result.insertedCount === 0) {
       if (result.candidateCount === 0) {
-        lines.push('→ カード（Show Effectsを含む説明ブロック）を検出できません');
-      } else if (result.diagnostics.length === 0) {
-        lines.push('→ ブロックは見つかったが近くの見出しを特定できません');
+        lines.push('→ カード枠（カード名+Show Effectsの最小共通祖先）を検出できません');
       } else {
         result.diagnostics.forEach(function (d) {
           var jaPart = d.entry ? '日本語化OK「' + d.entry.ja + '」' : '日本語化NG';

@@ -1,7 +1,12 @@
 // prydwen.gg の実際のDOM構造の一部が判明したので、それに合わせた設定。
-// カードの説明欄は空ではなく、Prydwenの英語の効果説明と「Show Effects」リンクが
-// 入っている。そのため「空要素を探す」旧方式ではなく、"Show Effects" という
-// テキストを手がかりに説明ブロックを特定する方式を既定にしている。
+//
+// カード枠の特定方法（既定・useMarkerStrategy: true）:
+//   「カード名」と「Show Effects」の両方を含む、最も小さい共通の祖先要素を
+//   カード枠とみなす。カード名候補は glossary.json の英語名と完全一致する
+//   ことを条件にする（グループ見出し「Starting Cards:」等の誤検出を防ぐため。
+//   末尾がコロンの文字列は候補から除外する二重の対策も入れてある）。
+//   マーカーから親を1階層ずつたどり、その階層の中に条件を満たすカード名候補が
+//   現れた時点で探索を打ち切る＝それが最小の共通祖先＝カード枠。それより外は見ない。
 //
 // 使い方:
 //   - useMarkerStrategy: true の間は effectMarkerText を使った検出が主経路になる。
@@ -14,7 +19,7 @@
 // console に出す。
 
 var CZN_SELECTORS = {
-  // true: "Show Effects" マーカーを手がかりに説明ブロックとカード名を探す
+  // true: "Show Effects" マーカー + glossary名一致でカード枠とカード名を探す
   //       （現状の既定・推奨）。
   // false: 下の cardContainer / cardName / effectSlot セレクタだけで探す
   //        （正確なセレクタが判明してから切り替える用）。
@@ -24,19 +29,14 @@ var CZN_SELECTORS = {
   // 表記ゆれ（大文字小文字・空白）があれば候補を増やすこと。
   effectMarkerText: ['Show Effects'],
 
-  // マーカー要素から何階層親をたどると「説明ブロック」（英語の効果文と
-  // Show Effects を両方含む要素）に届くか。1階層で狭すぎる／広すぎる場合は
-  // ここを増減する。日本語効果文はこの要素の最後の子として追加される。
-  effectMarkerAncestorLevels: 2,
+  // マーカーから最大何階層まで親をたどって「カード名候補を含む最小の祖先」を
+  // 探すか。カードグリッド全体まで無駄に登らないための上限。
+  maxAncestorClimb: 10,
 
-  // カード名を探すときに、見出しタグに加えて試す候補（class名の部分一致）。
-  // 例のカード名（Sword Rain 等）が入っている要素の class が分かれば追加する。
-  cardNameExtraSelectors: [
-    '[class*="CardName"]',
-    '[class*="card-name"]',
-    '[class*="Title"]',
-    '[class*="title"]'
-  ],
+  // カード名候補として扱わない文字列の条件。既定は「末尾がコロン」
+  // （"Starting Cards:" 等のグループ見出し除け）。念のための保険で、
+  // 実際は glossary.json の英語名と完全一致するかどうかが主な判定基準。
+  nameExcludeSuffixes: [':'],
 
   // ---- 以下は useMarkerStrategy: false のときだけ使う任意の速い経路 ----
   // 正確なセレクタが判明したらここに書く。空配列のままなら単にスキップされる。
