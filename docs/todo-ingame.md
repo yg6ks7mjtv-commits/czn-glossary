@@ -327,6 +327,18 @@
   引用が得られなかった。
   (source: https://gamerch.com/chaoszeronightmare/942037)
 
+## Amir（アミール）
+
+- [ ] **ホバリングメタル** — 固有カード。ダメージ減少と金属化を付与。
+  (source: https://gamerch.com/chaoszeronightmare/942036)
+- [ ] **鋼鉄の嵐** — 固有カード。敵全体に防御依存ダメージと1ターン金属化の対象が
+  全体に変化。複数敵対応。
+  (source: https://gamerch.com/chaoszeronightmare/942036)
+- [ ] **鋼の信念で** — エゴスキル。金属化数に応じてシールド付与。金属化は全て
+  排除され次ターンに3スタック付与。効果の一致するPrydwen記述は見つかったが、
+  スキル名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942036)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

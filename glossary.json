@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 434,
-      "confirmed": 326,
+      "total": 442,
+      "confirmed": 331,
       "guess": 3,
-      "unmatched": 105,
-      "unmatched_ja_only": 100,
+      "unmatched": 108,
+      "unmatched_ja_only": 103,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia", "Mika"],
-      "remaining": 2,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia", "Mika", "Amir"],
+      "remaining": 1,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -3391,6 +3391,70 @@
       "character": "Mika",
       "source": "https://gamerch.com/chaoszeronightmare/942037",
       "note": "ミカのエゴスキル（消滅のついた水の根源を2枚生成、HP回復とAP2獲得を実行）。効果の一致するPrydwen記述は見つかったが（「equivalent to gaining 2 AP immediately while also delivering some nice heals」）、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "Steel Barrier",
+      "ja": "鋼のバリア",
+      "confidence": "confirmed",
+      "character": "Amir",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/amir",
+      "note": "アミールの開始時基本シールドカード。Prydwen: 「Steel Barrier grants Amir the ability to generate a stack of Metallization on use」「Steel Barrier is removed in basically any Amir deck」。gamerch(942036): 「鋼のバリア：シールド獲得カード。防御用」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Rapier",
+      "ja": "レイピア",
+      "confidence": "confirmed",
+      "character": "Amir",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/amir",
+      "note": "アミールの開始時基本攻撃カード。Prydwen: 「Rapier's damage multiplier is improved by +5% with an additional +5% bonus available after Amir's defense is higher than 250」。gamerch(942036): 「レイピア：攻撃カード。基本ダメージを与える」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Metal Pierce",
+      "ja": "メタルピアス",
+      "confidence": "confirmed",
+      "character": "Amir",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/amir",
+      "note": "アミールの固有カード。Prydwen: 「Metal Pierce III gives +2 Metallization and applies 1 Vulnerability for free」。gamerch(942036): 「メタルピアス：防御依存攻撃×2、金属化があれば脆弱付与」と金属化+脆弱付与という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Metal Extraction",
+      "ja": "金属抽出",
+      "confidence": "confirmed",
+      "character": "Amir",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/amir",
+      "note": "アミールの固有カード。Prydwen: 「Metal Extraction I increases shield skill gain by 30%」。gamerch(942036): 「金属抽出：金属化2と1ターンの決意2付与でシールド活用を促進」とシールド活用促進という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Iron Skin",
+      "ja": "アイアンスキン",
+      "confidence": "confirmed",
+      "character": "Amir",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/amir",
+      "note": "アミールの固有カード。Prydwen: 「Iron Skin is generally removed in most Amir decks, as it consumes your Metallicization for defensive utility」。gamerch(942036): 「アイアンスキン：1ターンの間被ダメを抑える防御スキル」と防御スキルという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "ホバリングメタル",
+      "confidence": "unmatched",
+      "character": "Amir",
+      "source": "https://gamerch.com/chaoszeronightmare/942036",
+      "note": "アミールの固有カード（ダメージ減少と金属化を付与）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "鋼鉄の嵐",
+      "confidence": "unmatched",
+      "character": "Amir",
+      "source": "https://gamerch.com/chaoszeronightmare/942036",
+      "note": "アミールの固有カード（敵全体に防御依存ダメージと1ターン金属化の対象が全体に変化。複数敵対応）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "鋼の信念で",
+      "confidence": "unmatched",
+      "character": "Amir",
+      "source": "https://gamerch.com/chaoszeronightmare/942036",
+      "note": "アミールのエゴスキル（金属化数に応じてシールド付与。金属化は全て排除され次ターンに3スタック付与）。効果の一致するPrydwen記述は見つかったが（「increasing the amount of shield gained for each stack of Metallization by 30%...increasing the amount of Metallization granted at the start of the next turn by 2」）、スキル名自体の引用が得られなかった。"
     }
   ]
 }
