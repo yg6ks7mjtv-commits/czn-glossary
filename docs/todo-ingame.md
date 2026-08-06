@@ -151,6 +151,27 @@
 - [ ] **光の治癒** — 開始時基本治癒カード（1枚）。
   (source: https://gamerch.com/chaoszeronightmare/942024)
 
+## Mei Lin（メイリン）
+
+- [ ] **昇龍脚** — メイン主力攻撃カード。効果説明の一致は見つかったが
+  （「1-Cost Attack Card...applies 2 Ember stacks, Combo effect hits twice」）、
+  カード名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942025)
+- [ ] **火龍驚天** — 固有カード（属性を無視できる弱点攻撃持ち+倍率300%）。
+  Prydwenに『Flame Dragon's Sovereignty』という似た語があったが、そちらは
+  「Ravaged対象へのクリティカル確定」という別の効果として言及されており、
+  gamerchの説明（属性無視+300%）と一致しないため対応付けを見送った。
+  同一カードの可能性はあるが要ゲーム内確認。
+  (source: https://gamerch.com/chaoszeronightmare/942025)
+- [ ] **火龍昇天** — エゴスキル（基本攻撃カードのヒット数1回追加を4回まで付与）。
+  効果説明の一致は見つかったが（「costing 6 EP...doubles the hit count of
+  her next 4 Basic Attacks」）、スキル名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942025)
+- [ ] **一撃** — 開始時基本攻撃カード（2枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942025)
+- [ ] **火龍護身** — 開始時基本シールドカード（1枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942025)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

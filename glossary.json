@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 301,
-      "confirmed": 243,
+      "total": 309,
+      "confirmed": 246,
       "guess": 3,
-      "unmatched": 55,
-      "unmatched_ja_only": 50,
+      "unmatched": 60,
+      "unmatched_ja_only": 55,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea"],
-      "remaining": 16,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin"],
+      "remaining": 15,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -2326,6 +2326,70 @@
       "character": "Orlea",
       "source": "https://gamerch.com/chaoszeronightmare/942024",
       "note": "オルレアの開始時基本治癒カード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Aromata",
+      "ja": "芳香族の精神",
+      "confidence": "confirmed",
+      "character": "Mei Lin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mei-lin",
+      "note": "メイリンの固有カード。Prydwen: 「buff herself via Aromata...while playing passion cards」。gamerch(942025): 「芳香族の精神：1ターン、自分のカード使用毎に加算バフする（初期効果）」と一致。"
+    },
+    {
+      "en": "Flame Dragon's Jewel",
+      "ja": "火竜の宝石",
+      "confidence": "confirmed",
+      "character": "Mei Lin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mei-lin",
+      "note": "メイリンの開始カード。Prydwen: 「buff herself via Aromata and Flame Dragon's Jewel via playing passion cards」。gamerch(942025)の開始カード「火竜の宝石×1」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Unity of Attack and Defense",
+      "ja": "攻防一体",
+      "confidence": "confirmed",
+      "character": "Mei Lin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mei-lin",
+      "note": "メイリンの固有カード。Prydwen: 「a tremendous amount of burst potential when combined with Unity of Attack and Defense」。gamerch(942025): 「攻防一体：基本カード2枚ドローしてコスト-1するカード」と一致。語形も直訳一致（攻防一体=Unity of Attack and Defense）。"
+    },
+    {
+      "en": "",
+      "ja": "昇龍脚",
+      "confidence": "unmatched",
+      "character": "Mei Lin",
+      "source": "https://gamerch.com/chaoszeronightmare/942025",
+      "note": "メイリンのメイン主力攻撃カード（単体ダメージ+残り火付与、連続ヒット）。Prydwenで一致する効果説明（「1-Cost Attack Card...applies 2 Ember stacks and has a Combo effect that causes it to hit twice」）は見つかったが、カード名自体の引用が得られなかった。"
+    },
+    {
+      "en": "",
+      "ja": "火龍驚天",
+      "confidence": "unmatched",
+      "character": "Mei Lin",
+      "source": "https://gamerch.com/chaoszeronightmare/942025",
+      "note": "メイリンの固有カード（属性を無視できる弱点攻撃持ち+倍率300%）。Prydwenに『Flame Dragon's Sovereignty』という似た語があったが、そちらは「Ravaged対象へのクリティカル確定」という別の効果として言及されており、gamerchの説明（属性無視+300%）と一致しないため対応付けを見送った。"
+    },
+    {
+      "en": "",
+      "ja": "火龍昇天",
+      "confidence": "unmatched",
+      "character": "Mei Lin",
+      "source": "https://gamerch.com/chaoszeronightmare/942025",
+      "note": "メイリンのエゴスキル（基本攻撃カードのヒット数1回追加を4回まで付与）。Prydwenで一致する効果説明（「costing 6 EP...doubles the hit count of her next 4 Basic Attacks」）は見つかったが、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "",
+      "ja": "一撃",
+      "confidence": "unmatched",
+      "character": "Mei Lin",
+      "source": "https://gamerch.com/chaoszeronightmare/942025",
+      "note": "メイリンの開始時基本攻撃カード（2枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "火龍護身",
+      "confidence": "unmatched",
+      "character": "Mei Lin",
+      "source": "https://gamerch.com/chaoszeronightmare/942025",
+      "note": "メイリンの開始時基本シールドカード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
