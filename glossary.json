@@ -12,7 +12,22 @@
       "unmatched": "日本語側のみ確認。対応する英語用語が特定できていない (en は空欄)"
     },
     "status": "incomplete",
-    "status_note": "本セッションではネットワーク制限により prydwen.gg / gamerch.com のいずれにもアクセスできず、用語の抽出および突き合わせ作業を実行できなかった。収録済みの12件はユーザーから事前確認済みとして提供されたもの。"
+    "status_note": "日本語側48件の抽出は完了（ユーザー提供）。英語用語との突き合わせは未実施。本セッションではネットワーク制限により prydwen.gg / gamerch.com のいずれにもアクセスできなかった。",
+    "ja_list_as_of": "2026-04-14",
+    "provenance": {
+      "ja_terms": "48件の日本語用語一覧はユーザーが gamerch の状態異常・バフデバフ一覧 (2026/04/14時点) から転記して提供したもの。本セッションでは当該ページに未アクセス。",
+      "pre_verified_12": "source が 'user-verified' の12件はユーザー提供の事前確認済みペア。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    "coverage": {
+      "total": 50,
+      "confirmed": 12,
+      "guess": 0,
+      "unmatched": 38
+    },
+    "known_gaps": [
+      "この一覧は2026/04/14時点のもので、シーズン4以降に追加された用語（点火など）は含まれていない。",
+      "既登録の『ストレス』『欲望カード』は今回の48件の一覧に含まれていないが、ユーザー確認済みのため据え置いている。"
+    ]
   },
   "entries": [
     {
@@ -98,6 +113,234 @@
       "confidence": "confirmed",
       "source": "user-verified",
       "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "",
+      "ja": "気絶",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "挑発",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "隠蔽",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "大破",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "回収",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "開戦",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "弱点攻撃",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "終極",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "使用不可",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "蒸発",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "主導",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "迅速",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "創造物",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "弾丸",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "天上",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "排除",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "粉砕",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "保存",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "唯一",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "ダメージ減少",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "シールド保存",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "鼓動",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "損傷",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "報復",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "苦痛",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "毒",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "氷結",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "妄想",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "封鎖",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "装填",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "波",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "金属化",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "銀色の帳",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "デシベル",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "黒雲態勢",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "黒雲態勢保存",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "苦痛刻印",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    {
+      "en": "",
+      "ja": "残り火",
+      "confidence": "unmatched",
+      "source": "https://gamerch.com/chaoszeronightmare/947128"
     }
   ]
 }
