@@ -250,26 +250,37 @@
     return normChar(character) + '|' + normText(jaName) + '|' + normLevel(level);
   }
 
+  // source は "ingame"（実機で確認した文言）か "gamerch"（gamerchから自動
+  // 収集した文言、公式の言い回しそのままとは限らない）。同じキーに複数の
+  // エントリがあっても ingame は gamerch に上書きされない（逆は可）。
+  function effectSource(e) {
+    return e.source === 'ingame' ? 'ingame' : 'gamerch';
+  }
+
+  function setEffectIfAllowed(idx, key, value) {
+    var existing = idx[key];
+    if (existing && existing.source === 'ingame' && value.source !== 'ingame') { return; }
+    idx[key] = value;
+  }
+
   function buildEffectsIndex(effects) {
     var idx = Object.create(null);
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
       var level = normLevel(e.level);
+      var value = { effect: e.effect, source: effectSource(e) };
       if (e.character) {
-        idx[effectsKey(e.character, e.ja_card, level)] = e.effect;
+        setEffectIfAllowed(idx, effectsKey(e.character, e.ja_card, level), value);
       }
       // character なし・またはフォールバック用に character 抜きキーも登録
       // （character が分かっている場面では上の複合キーが優先されるので実害は小さい）
-      var fallbackKey = effectsKey(null, e.ja_card, level);
-      if (!(fallbackKey in idx)) {
-        idx[fallbackKey] = e.effect;
-      }
+      setEffectIfAllowed(idx, effectsKey(null, e.ja_card, level), value);
     });
     return idx;
   }
 
   // level は完全一致のみ。該当レベルの効果文が無ければ null（他レベルへの
-  // フォールバックはしない）。
+  // フォールバックはしない）。戻り値は { effect, source } または null。
   function lookupEffect(effectsIdx, jaName, character, level) {
     if (character) {
       var withChar = effectsKey(character, jaName, level);
@@ -558,7 +569,9 @@
 
       var div = document.createElement('div');
       div.className = 'czn-effect-text-ja';
-      div.textContent = effect;
+      // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
+      // 実機確認済み（ingame）の文言と一目で区別できるようにする。
+      div.textContent = effect.effect + (effect.source === 'gamerch' ? '※' : '');
       div.style.cssText =
         'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
         'white-space:pre-wrap;font-size:0.9em;color:inherit;';
