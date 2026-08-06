@@ -26,18 +26,18 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 108,
-      "confirmed": 91,
+      "total": 120,
+      "confirmed": 102,
       "guess": 2,
-      "unmatched": 15,
+      "unmatched": 16,
       "unmatched_ja_only": 11,
-      "unmatched_en_only": 4
+      "unmatched_en_only": 5
     },
     "known_gaps": [
       "日本語一覧は2026/04/14時点のもので、シーズン4以降の用語は網羅していない（点火のみ guess で暫定登録）。",
       "日本語側で英語表記が未特定の8件: 気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード。前7件は敵が付与する状態異常系で用語辞典に未収載。",
       "日本語表記が未特定の4件: Find the Gap / Piercing Damage / Potential / Streak。出典ページを個別に特定できていないため source はサイトルートを指している。",
-      "『点火』は guess。ヒルデのページの Plasma Rain IV に [Ignition] タグとして存在することは確認済みだが、効果説明の突き合わせが未了。",
+      "『点火』は guess。ヒルデのページの Plasma Rain IV に [Ignition] タグとして存在することは確認済みだが、効果説明の突き合わせが未了。2026-08-06のキャラカード調査では Plasma Rain が実際に付与するのは 'Ionization'（→イオン化として新規confirmed登録）であることが確認でき、'Ignition' タグの所在は再確認できなかった。点火=Ignition の対応関係自体を再検証する必要がある。",
       "キャラ固有バフは網羅していない。収録済みのものは Hilde のページ由来で、他のキャラページは未確認。"
     ],
     "criteria": {
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke"],
-      "remaining": 33,
+      "done": ["Tenebria", "Luke", "Hilde"],
+      "remaining": 32,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -782,6 +782,102 @@
       "character": "Luke",
       "source": "https://gamerch.com/chaoszeronightmare/942020",
       "note": "ルークの固有カード（ハンドガン弾丸5枚使用で使用可能になる500%ダメージの必殺技）。Prydwenでは「Unique」「Bullet」タグの組み合わせとしてのみ言及されており、固有の英語カード名が見当たらない。"
+    },
+    {
+      "en": "Quiver Reload",
+      "ja": "クイバーロード",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの固有カード（主導）。Prydwen: 「Quiver Reload creates Draw Power and Damage in one」。gamerch(1000492): 「クイバーロード：主導カード。山札に『ホーミングアロー』を3枚生成」と一致。"
+    },
+    {
+      "en": "Plasma Rain",
+      "ja": "プラズマレイン",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの固有カード。Prydwen: 「1-Cost Attack-Card that deals 60% Damage and inflicts 2 stacks of 'Ionization' to all enemies」。gamerch(1000492): 「プラズマレイン：コスト1。敵全体にダメージ+イオン化2付与」とコスト・付与数まで一致。"
+    },
+    {
+      "en": "Ionization",
+      "ja": "イオン化",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "プラズマレインが付与するスタック式デバフ。Prydwen: 「'Ionization' is a strong lingering debuff that increases the amount of damage taken per stack」。gamerch(1000492)のプラズマレイン説明「イオン化2付与」と一致。既存の guess 登録『点火(Ignition)』とは別の用語（下記メモ参照）。"
+    },
+    {
+      "en": "Vortex Arrow",
+      "ja": "ボルテックスアロー",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデのMythicカード。Prydwen: 「1-Cost Attack-Card...draws 3 cards and deals 120% Damage to all enemies, increasing by an additional +60% for each Attack Card drawn...up to 8 times」。gamerch(1000492): 「ボルテックスアロー：コスト1。ドロー3枚+敵全体ダメージ。ドローした攻撃カード数に応じて最大60%ダメージ加算バフ」と一致。"
+    },
+    {
+      "en": "Draw & Release",
+      "ja": "ドロー&リリース",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの固有カード。Prydwen: 「Draw & Release V is now a 2-cost which increases next Attack Card a large multiplicative amount」。gamerch(1000492): 「ドロー&リリース：コスト1。自分の攻撃カード2枚ドロー+加算50%バフ」と、次の攻撃カードへの加算バフという性質が一致。"
+    },
+    {
+      "en": "Big Game Ranger",
+      "ja": "ビッグゲームレンジャー",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの強化([Upgrade])カード。Prydwen: 「'Zero In' is granted whenever Hilde hits an enemy when under the effects of her [Upgrade] Card 'Big Game Ranger'」。gamerch(1000492): 「ビッグゲームレンジャー：強化カード。ヒット時に敵に一点照準2を付与」と一致。"
+    },
+    {
+      "en": "Zero In",
+      "ja": "一点照準",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ビッグゲームレンジャーのヒットで付与されるスタック式デバフ。Prydwen: 「stacks up to a maximum of 60 times and activates at the end of the turn to deal 35% Extra-Attack Damage to the enemy with the highest HP per stack」。gamerch(1000492)の「一点照準2を付与」と一致。"
+    },
+    {
+      "en": "Matrix Overlay",
+      "ja": "マトリクスオーバーレイ",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデのエゴスキル。Prydwen: 「increase damage dealt by Weakness Attacks by an additional +15% for 1 turn, and it draws 3 of Hilde's own Attack Cards and granting them Weakness Attack」。gamerch(1000492): 「マトリクスオーバーレイ(EP4)：敵全体に1ターン弱点ダメージ量+15%、自分の攻撃カード3枚ドロー、ドローしたカードに1ターン弱点攻撃を適用」と数値・内容とも一致。"
+    },
+    {
+      "en": "Multishot",
+      "ja": "マルチショット",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの開始時基本攻撃カード。Prydwen: 「Hilde's starting Basic Attack-card, dealing 60% damage to all enemies for 1 AP」。gamerch(1000492): 「マルチショット(2枚)：攻撃カード」と一致（全体攻撃の基本カード）。"
+    },
+    {
+      "en": "Bowguard",
+      "ja": "ボウガード",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの開始時基本シールドカード。Prydwen: 「Bowguard is Hilde's starting Basic Skill-Card, shielding her team for 100% for 1 AP」。gamerch(1000492): 「ボウガード(1枚)：シールドカード」と一致。"
+    },
+    {
+      "en": "Homing Arrow",
+      "ja": "ホーミングアロー",
+      "confidence": "confirmed",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "クイバーロードが山札に生成する生成カード。Prydwen: 「Hilde can create 4 Homing Arrow cards in her Draw Pile」。gamerch(1000492): 「ホーミングアロー：感応効果で自動発動。敵にダメージを与え、1枚ドローできる生成カード」と一致。"
+    },
+    {
+      "en": "Fracture",
+      "ja": "",
+      "confidence": "unmatched",
+      "character": "Hilde",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "ヒルデの固有スタック式デバフ候補。Prydwen: 「if they have 30 stacks of Fracture」と言及があり Zero In と並ぶ蓄積系デバフとみられるが、gamerch側で対応する日本語名を特定できていない。"
     }
   ]
 }
