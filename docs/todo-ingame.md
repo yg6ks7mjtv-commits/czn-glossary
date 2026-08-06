@@ -215,6 +215,22 @@
 - [ ] **狩猟の証** — 固有バフ。狩猟の開始効果でヒット時、士気2を獲得。
   (source: https://gamerch.com/chaoszeronightmare/942027)
 
+## Kayron（カイロン）
+
+- [ ] **虚無の残像** — 固有カード。コスト1の単体攻撃+虚無2枚生成が基本効果。
+  (source: https://gamerch.com/chaoszeronightmare/942028)
+- [ ] **無憾の鼓動** — 固有カード。虚無3枚生成して高倍率の単体攻撃を実行。
+  (source: https://gamerch.com/chaoszeronightmare/942028)
+- [ ] **無の亀裂** — エゴスキル。手札の虚無を消滅させてその枚数に応じてダメージ増加。
+  3凸で墓地も消滅対象に。効果の一致するPrydwen記述は見つかったが
+  （「exhausts all Futility cards in hand to increase damage by 80% per card
+  exhausted」「E3...extends to graveyard」）、スキル名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942028)
+- [ ] **滅** — 開始時基本攻撃カード（2枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942028)
+- [ ] **救** — 開始時基本回復カード。
+  (source: https://gamerch.com/chaoszeronightmare/942028)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

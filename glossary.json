@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 339,
-      "confirmed": 262,
+      "total": 348,
+      "confirmed": 266,
       "guess": 3,
-      "unmatched": 74,
-      "unmatched_ja_only": 69,
+      "unmatched": 79,
+      "unmatched_ja_only": 74,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo"],
-      "remaining": 12,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron"],
+      "remaining": 11,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2631,6 +2631,78 @@
       "character": "Hugo",
       "source": "https://gamerch.com/chaoszeronightmare/942027",
       "note": "ヒューゴの固有バフ（狩猟の開始効果でヒット時、士気2を獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Futility",
+      "ja": "虚無",
+      "confidence": "confirmed",
+      "character": "Kayron",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/kayron",
+      "note": "カイロンの固有生成カード。Prydwen: 「Futility is a status ailment card created by many of Kayron's cards that costs 1AP, does nothing on use, but is exhausted after」。gamerch(942028): 「虚無：効果がない1コストカード。他カードの効果で強化・変化される」と完全一致。"
+    },
+    {
+      "en": "Black Hole",
+      "ja": "ブラックホール",
+      "confidence": "confirmed",
+      "character": "Kayron",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/kayron",
+      "note": "カイロンの固有カード。Prydwen: 「his 'Black Hole' card deals heavy base damage and does extra damage for each exhausted 'Futility' card」。gamerch(942028): 「ブラックホール：コスト2の単体攻撃。消滅した虚無数に応じてダメージが増加」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Brand of Annihilation",
+      "ja": "消滅の烙印",
+      "confidence": "confirmed",
+      "character": "Kayron",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/kayron",
+      "note": "カイロンの固有カード。Prydwen: 「his 'Brand of Annihilation', which is a 3 Cost Attack Card that reduces its cost by 1 for each card exhausted this turn」。gamerch(942028): 「消滅の烙印：コスト3の全体攻撃。カード消滅時にコスト1減少」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Oath of Vanity",
+      "ja": "虚妄の誓約",
+      "confidence": "confirmed",
+      "character": "Kayron",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/kayron",
+      "note": "カイロンの固有カード（強化）。Prydwen: 「Futility...can be changed into Attack Cards through Kayron's 'Oath of Vanity' Upgrade card」。gamerch(942028): 「虚妄の誓約：手札の虚無をダメージ・治癒100%の攻撃カードに変更」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "虚無の残像",
+      "confidence": "unmatched",
+      "character": "Kayron",
+      "source": "https://gamerch.com/chaoszeronightmare/942028",
+      "note": "カイロンの固有カード（コスト1の単体攻撃+虚無2枚生成が基本効果）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "無憾の鼓動",
+      "confidence": "unmatched",
+      "character": "Kayron",
+      "source": "https://gamerch.com/chaoszeronightmare/942028",
+      "note": "カイロンの固有カード（虚無3枚生成して高倍率の単体攻撃を実行）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "無の亀裂",
+      "confidence": "unmatched",
+      "character": "Kayron",
+      "source": "https://gamerch.com/chaoszeronightmare/942028",
+      "note": "カイロンのエゴスキル（手札の虚無を消滅させてその枚数に応じてダメージ増加。3凸で墓地も消滅対象に）。効果の一致するPrydwen記述は見つかったが（「exhausts all Futility cards in hand to increase damage by 80% per card exhausted」「E3...extends to graveyard」）、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "",
+      "ja": "滅",
+      "confidence": "unmatched",
+      "character": "Kayron",
+      "source": "https://gamerch.com/chaoszeronightmare/942028",
+      "note": "カイロンの開始時基本攻撃カード（2枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "救",
+      "confidence": "unmatched",
+      "character": "Kayron",
+      "source": "https://gamerch.com/chaoszeronightmare/942028",
+      "note": "カイロンの開始時基本回復カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
