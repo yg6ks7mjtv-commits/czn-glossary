@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 309,
-      "confirmed": 247,
+      "total": 319,
+      "confirmed": 254,
       "guess": 3,
-      "unmatched": 59,
-      "unmatched_ja_only": 54,
+      "unmatched": 62,
+      "unmatched_ja_only": 57,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,9 +48,9 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin"],
-      "remaining": 15,
-      "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja"],
+      "remaining": 14,
+      "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
   "entries": [
@@ -2391,6 +2391,86 @@
       "character": "Mei Lin",
       "source": "https://gamerch.com/chaoszeronightmare/942025",
       "note": "メイリンの開始時基本シールドカード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Voracity",
+      "ja": "貪食",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有バフ。Prydwen: 「the team's Attack Cards heal the team for 40% (fixed) per hit and if the team's health is 50% or higher, they'll also all gain a 30% (additive) damage boost」。gamerch(957728): 「貪食：攻撃ヒット時に固定治癒40%の回復とHP50%以上なら攻撃30%の加算バフ」と完全一致。"
+    },
+    {
+      "en": "Predation",
+      "ja": "捕食",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有バフ。Prydwen: 「Predation is a stackable buff...the team's Attack Cards each gain a +80% (additive) damage boost」。gamerch(957728): 「捕食：貪食バフ所持時、攻撃80%の加算バフ効果」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shackles of Hunger",
+      "ja": "飢餓の枷",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有カード。Prydwenの検索結果に「Shackles of Hunger」の言及あり。gamerch(957728): 「飢餓の枷：コスト1の防御依存ダメージ×3。感応で貪食が付きダメージバフやHP回復効果が付く」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Forbidden: Hunger",
+      "ja": "限りなき飢え",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有カード。Prydwen: 「Forbidden: Hunger is a 0-cost card which causes the next 2 Voracity stacks you consume to decrease the cost of a random card in hand by 1」。gamerch(957728): 「限りなき飢え：コスト0で使いやすく、貪食消費時にランダムなカードのコスト1減少」と完全一致。"
+    },
+    {
+      "en": "Active Control",
+      "ja": "アクティブコントロール",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有カード。Prydwen: 「'Active Control' (Voluntary Control)」。gamerch(957728): 「アクティブコントロール：コスト1で貪食数に応じて貪食6か捕食2付与」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Domain of Voracity",
+      "ja": "貪食の領域",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有カード。Prydwen: 「'Domain' (Domain of Voracity)」。gamerch(957728): 「貪食の領域：コスト1で敵全体に防御依存ダメージ+強靭度ダメージ100%増加」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Mealtime",
+      "ja": "完全な食事",
+      "confidence": "confirmed",
+      "character": "Narja",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/narja",
+      "note": "ナージャの固有カード（シグネチャースキル）。Prydwen: 「'Mealtime', with its 'Retain' and 'Unique' attributes...its cost decreases as Voracity stacks are consumed, while upon use it deals considerable AoE damage, provides massive healing」。gamerch(957728): 「完全な食事：コスト6と重いが貪食消費に応じてコスト低下。回復メイン」と一致。"
+    },
+    {
+      "en": "",
+      "ja": "捕食者の狩猟法",
+      "confidence": "unmatched",
+      "character": "Narja",
+      "source": "https://gamerch.com/chaoszeronightmare/957728",
+      "note": "ナージャのエゴスキル（EP5で貪食10と単体に防御依存ダメージ、墓地に完全な食事があると捕食5も獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "NA：攻撃反応",
+      "confidence": "unmatched",
+      "character": "Narja",
+      "source": "https://gamerch.com/chaoszeronightmare/957728",
+      "note": "ナージャの開始時基本攻撃カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "NA：保護反応",
+      "confidence": "unmatched",
+      "character": "Narja",
+      "source": "https://gamerch.com/chaoszeronightmare/957728",
+      "note": "ナージャの開始時基本防御・治癒カード（2枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }

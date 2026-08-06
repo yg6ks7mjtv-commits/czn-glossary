@@ -167,6 +167,16 @@
 - [ ] **火龍護身** — 開始時基本シールドカード（1枚）。
   (source: https://gamerch.com/chaoszeronightmare/942025)
 
+## Narja（ナージャ）
+
+- [ ] **捕食者の狩猟法** — エゴスキル（EP5で貪食10と単体に防御依存ダメージ、
+  墓地に完全な食事があると捕食5も獲得）。
+  (source: https://gamerch.com/chaoszeronightmare/957728)
+- [ ] **NA：攻撃反応** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/957728)
+- [ ] **NA：保護反応** — 開始時基本防御・治癒カード（2枚）。
+  (source: https://gamerch.com/chaoszeronightmare/957728)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
