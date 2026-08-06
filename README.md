@@ -117,20 +117,22 @@ python3 scripts/sync.py
 
 | confidence | 件数 |
 |---|---|
-| `confirmed` | 80 |
+| `confirmed` | 170 |
 | `guess` | 2 |
-| `unmatched` | 12 （日本語のみ 8 / 英語のみ 4） |
-| **合計** | **94** |
+| `unmatched` | 32 （日本語のみ 27 / 英語のみ 5） |
+| **合計** | **204** |
 
 ### キャラ固有カード追加の進捗
 
 全35キャラのカード名・固有バフを1キャラずつ追加中（2026-08-06開始）。
 Prydwen の該当キャラページと gamerch の該当キャラページを突き合わせ、
 効果説明が一致する語のみ `confirmed` として `glossary.json` の
-`meta.character_progress` に進捗を記録している。
+`meta.character_progress` に進捗を記録している。10キャラごとに件数と
+confidence 内訳を報告する運用。
 
-- 完了: テネブレア（Tenebria） — 18件追加
-- 残り: 34キャラ
+- 完了（10/35）: Tenebria, Luke, Hilde, Fei, Adelheid, Heidemarie,
+  Diana, Rita, Tiphera, Nine
+- 残り: 25キャラ
 
 日本語一覧 48 件のうち 41 件は Prydwen の用語辞典と突き合わせ済み。
 残り 7 件は辞典に未収載のため未解決。これに一覧外の用語（戦闘システム用語、
