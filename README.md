@@ -10,19 +10,43 @@ Chaos Zero Nightmare の用語の英日対応表。状態異常・バフデバ�
 
 - `glossary.json` — **用語対応表本体。編集するのはここだけ。**
 - `docs/index.html` — 検索ページ（外部ライブラリなしの単一 HTML）
-- `docs/glossary.json` — 上記の**自動生成コピー**。直接編集しないこと
-- `scripts/sync.py` — 検証 + `docs/` へのコピー
+- `docs/bookmarklet.js` — ブックマークレットの**実体**。編集するならここ
+- `docs/bookmarklet.html` — ブックマークレットの配布ページ（コピーボタン + iPhone 登録手順）
+- `docs/glossary.json` — 対応表の**自動生成コピー**。直接編集しないこと
+- `scripts/sync.py` — 検証 + `docs/` へのコピー + ブックマークレットの組み立て
 
-`glossary.json` を編集したら必ず実行する:
+`glossary.json` か `docs/bookmarklet.js` を編集したら必ず実行する:
 
 ```sh
 python3 scripts/sync.py
 ```
 
-GitHub Pages は `docs/` 配下しか配信しないため、ルートの `glossary.json` を
-検索ページから直接読めない。このスクリプトがコピーを作る。あわせて下記
-「判定基準」をコードで検証するので、`confirmed` に Prydwen 以外の出典が
-紛れ込んだ場合などはここで落ちる。
+このスクリプトは3つのことをする:
+
+1. **検証** — 下記「判定基準」をコードで確認する。`confirmed` に Prydwen 以外の
+   出典が紛れ込んだ場合などはここで落ちる
+2. **コピー** — GitHub Pages は `docs/` 配下しか配信しないため、ルートの
+   `glossary.json` を検索ページから直接読めない。コピーを作る
+3. **組み立て** — `docs/bookmarklet.js` を `javascript:` の1行に畳んで
+   `docs/bookmarklet.html` に埋め込む。改行なしの純 ASCII に変換し、
+   `%` と `#` を URL エスケープする（Safari の URL 欄に貼るため）
+
+## ブックマークレット
+
+英語ページ上で実行すると、ページ内の用語を対応表の日本語に置き換える。
+配布ページ: `docs/bookmarklet.html`（公開後は `/czn-glossary/bookmarklet.html`）。
+
+- `confirmed` のみ使用。`guess` と `unmatched` は置換しない
+- 長い語から先に置換する（`Retain Shield` が `Retain` より先）
+- 単語境界を見るので `Marker` の中の `Mark` は置換しない。大文字小文字も区別する
+- 置換箇所は薄い黄色になり、`title` 属性に元の英語が残る
+- 元に戻す機能はなし（再読み込みで戻る）
+
+**取得先URLに `docs/` は入らない。** Pages を `docs/` から配信すると `docs/`
+がサイトのルートになるため、`docs/glossary.json` の公開URLは
+`https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json` になる。
+他サイト上で実行するので、この絶対URLを埋め込んである。ユーザー名やリポジトリ名を
+変えたら `docs/bookmarklet.js` の `SRC` を直すこと。
 
 ## スキーマ
 

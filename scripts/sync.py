@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""glossary.json を検証して docs/ にコピーする。
+"""glossary.json を検証して docs/ にコピーし、ブックマークレットを組み立てる。
 
 GitHub Pages は docs/ 配下しか配信しないため、ルートの glossary.json を
 そのままでは docs/index.html から読めない。ここでコピーを作る。
 
-glossary.json を編集したら必ず実行すること:
+あわせて docs/bookmarklet.js から javascript: の1行版を生成し、
+docs/bookmarklet.html に埋め込む。ブックマークレットの実体は
+bookmarklet.js だけなので、両者がずれることはない。
+
+glossary.json か bookmarklet.js を編集したら必ず実行すること:
 
     python3 scripts/sync.py
 """
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -16,6 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "glossary.json"
 DST = ROOT / "docs" / "glossary.json"
+BM_SRC = ROOT / "docs" / "bookmarklet.js"
+BM_PAGE = ROOT / "docs" / "bookmarklet.html"
 
 LEVELS = {"confirmed", "guess", "unmatched"}
 
@@ -77,6 +84,31 @@ def validate(data):
     return errors, counted
 
 
+def build_bookmarklet(source):
+    """bookmarklet.js を javascript: の1行に畳む。
+
+    貼り付け先は Safari の URL 欄なので、出力は改行なしの純 ASCII にする。
+    - 行頭コメントは落とす（URL 内の // を壊さないよう行頭のものだけ）
+    - 各行はセミコロン終端で書いてあるので空白1つで連結してよい
+    - 日本語は \\uXXXX に逃がす
+    - % と # は URL 上で意味を持つのでエスケープする
+    """
+    lines = []
+    for line in source.splitlines():
+        line = line.strip()
+        if not line or line.startswith("//"):
+            continue
+        lines.append(line)
+    code = " ".join(lines)
+
+    code = code.encode("ascii", "backslashreplace").decode("ascii")
+
+    escaped = {c: n for c, n in (("%", code.count("%")), ("#", code.count("#")))}
+    code = code.replace("%", "%25").replace("#", "%23")
+
+    return "javascript:" + code, escaped
+
+
 def main():
     data = json.loads(SRC.read_text(encoding="utf-8"))
     errors, counts = validate(data)
@@ -92,6 +124,22 @@ def main():
           f"(confirmed {counts['confirmed']} / guess {counts['guess']} / "
           f"unmatched {counts['unmatched']})")
     print(f"  {SRC.relative_to(ROOT)} -> {DST.relative_to(ROOT)}")
+
+    if BM_SRC.exists() and BM_PAGE.exists():
+        bm, escaped = build_bookmarklet(BM_SRC.read_text(encoding="utf-8"))
+        page = BM_PAGE.read_text(encoding="utf-8")
+        new_line = "var BOOKMARKLET = " + json.dumps(bm) + ";"
+        page, n = re.subn(r"^var BOOKMARKLET = .*;$", lambda _: new_line,
+                          page, count=1, flags=re.M)
+        if n != 1:
+            print("bookmarklet.html に 'var BOOKMARKLET = ...;' の行が見つかりません",
+                  file=sys.stderr)
+            return 1
+        BM_PAGE.write_text(page, encoding="utf-8")
+        note = ", ".join(f"{c} を {v} 箇所エスケープ" for c, v in escaped.items() if v)
+        print(f"  {BM_SRC.relative_to(ROOT)} -> {BM_PAGE.relative_to(ROOT)} "
+              f"({len(bm):,} 文字{'; ' + note if note else ''})")
+
     return 0
 
 

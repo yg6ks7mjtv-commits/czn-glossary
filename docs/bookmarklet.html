@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用語日本語化ブックマークレット — カオスゼロナイトメア</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>%F0%9F%94%96</text></svg>">
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f6f7f9; --fg: #1b1d21; --fg-dim: #5c6169;
+    --border: #dfe2e7; --accent: #2f6fdb; --accent-fg: #ffffff;
+    --warn-bg: #fdf1d9; --warn-bd: #e8ca8a; --warn-fg: #6d4705;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --bg-alt: #1c1f25; --fg: #e6e8ec; --fg-dim: #9aa1ac;
+      --border: #2d323a; --accent: #74a6f5; --accent-fg: #0d1117;
+      --warn-bg: #33270f; --warn-bd: #5d4720; --warn-fg: #e8bd6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 1rem 4rem;
+    background: var(--bg); color: var(--fg);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+          "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.3rem; margin: 1.5rem 0 .5rem; }
+  h2 { font-size: 1.05rem; margin: 2.2rem 0 .6rem; padding-top: .8rem;
+       border-top: 1px solid var(--border); }
+  h3 { font-size: .95rem; margin: 1.4rem 0 .4rem; }
+  p { margin: .6rem 0; }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
+         background: var(--bg-alt); padding: .1em .35em; border-radius: 3px; }
+  ol, ul { padding-left: 1.4rem; }
+  li { margin: .35rem 0; }
+  .lead { color: var(--fg-dim); font-size: .92rem; }
+
+  #code {
+    width: 100%; height: 8.5rem; resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .78rem; line-height: 1.45;
+    padding: .7rem; color: var(--fg); background: var(--bg-alt);
+    border: 1px solid var(--border); border-radius: 8px;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+         margin-top: .6rem; }
+  button {
+    font: inherit; font-size: .9rem; font-weight: 600;
+    padding: .6rem 1.2rem; border-radius: 8px; border: none;
+    background: var(--accent); color: var(--accent-fg); cursor: pointer;
+  }
+  button:active { opacity: .8; }
+  #status { font-size: .85rem; color: var(--fg-dim); }
+  .drag {
+    display: inline-block; padding: .55rem 1rem; border-radius: 8px;
+    border: 1px dashed var(--accent); color: var(--accent);
+    text-decoration: none; font-size: .9rem; font-weight: 600;
+  }
+
+  .note {
+    background: var(--warn-bg); border: 1px solid var(--warn-bd);
+    color: var(--warn-fg); border-radius: 8px;
+    padding: .7rem .9rem; font-size: .88rem; margin: 1rem 0;
+  }
+  .note p:first-child { margin-top: 0; }
+  .note p:last-child { margin-bottom: 0; }
+
+  details { margin: 1rem 0; }
+  summary { cursor: pointer; font-size: .9rem; color: var(--accent); }
+  pre {
+    overflow-x: auto; background: var(--bg-alt); border: 1px solid var(--border);
+    border-radius: 8px; padding: .8rem; font-size: .78rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+
+  .demo { background: var(--bg-alt); border: 1px solid var(--border);
+          border-radius: 8px; padding: .7rem .9rem; font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>用語日本語化ブックマークレット</h1>
+<p class="lead">
+  Prydwen などの英語ページ上で実行すると、ページ内の用語を
+  <a href="./">対応表</a>の日本語に置き換えます。置換した箇所には薄い背景色が付きます。
+  元に戻すにはページを再読み込みしてください。
+</p>
+
+<h2>1. コードをコピー</h2>
+
+<textarea id="code" readonly spellcheck="false" aria-label="ブックマークレットのコード"></textarea>
+<div class="row">
+  <button type="button" id="copy">コピー</button>
+  <a class="drag" id="drag" href="#">用語を日本語化</a>
+  <span id="status" role="status"></span>
+</div>
+<p class="lead">
+  パソコンなら、上の「用語を日本語化」をブックマークバーにドラッグするだけで登録できます。
+  iPhone は次の手順で登録してください。
+</p>
+
+<h2>2. iPhone の Safari に登録する</h2>
+
+<p>iOS の Safari にはブックマークレットを直接追加する機能がないので、
+   <strong>普通のブックマークを作ってから中身を書き換える</strong>という手順になります。</p>
+
+<h3>準備：入れ物のブックマークを作る</h3>
+<ol>
+  <li>上の「コピー」ボタンを押してコードをコピーします。</li>
+  <li>Safari で適当なページ（このページでもかまいません）を開きます。</li>
+  <li>画面下部中央の<strong>共有ボタン</strong>（四角から上向きの矢印が出ているアイコン）をタップします。</li>
+  <li>メニューを下にスクロールして<strong>「ブックマークを追加」</strong>をタップします。</li>
+  <li>右上の<strong>「保存」</strong>をタップします。名前や保存先はこの時点では何でもかまいません。</li>
+</ol>
+
+<h3>書き換え：URL 欄にコードを貼る</h3>
+<ol start="6">
+  <li>画面下部の<strong>ブックマークアイコン</strong>（開いた本のマーク）をタップします。</li>
+  <li>上部のタブが3つ並んでいるので、<strong>いちばん左（本のマーク）</strong>を選びます。</li>
+  <li>右下の<strong>「編集」</strong>をタップします。</li>
+  <li>いま保存したブックマークをタップすると、編集画面が開きます。</li>
+  <li>1行目の<strong>名前</strong>を、呼び出しやすいものに変えます。例：<code>用語を日本語化</code></li>
+  <li>2行目の<strong>URL 欄</strong>の中身をすべて消します。
+      欄を長押しして「すべてを選択」→「カット」が確実です。</li>
+  <li>同じ URL 欄を長押しして<strong>「ペースト」</strong>を選び、手順1でコピーしたコードを貼り付けます。</li>
+  <li>右上の<strong>「完了」</strong>をタップし、もう一度<strong>「完了」</strong>をタップして編集モードを抜けます。</li>
+</ol>
+
+<h3>使う</h3>
+<ol start="14">
+  <li>Prydwen のページを開きます。</li>
+  <li>ブックマークアイコンをタップし、登録したブックマーク（<code>用語を日本語化</code>）をタップします。</li>
+  <li>画面下に「◯件を置換しました」と数秒表示されれば成功です。</li>
+</ol>
+<p class="lead">
+  アドレスバーにブックマーク名の一部（「用語」など）を入力し、
+  候補に出てきたブックマークを選ぶ方法でも実行できます。こちらのほうが速いです。
+</p>
+
+<div class="note">
+  <p><strong>貼り付けたあと <code>javascript:</code> が消えている場合</strong></p>
+  <p>iOS のバージョンによっては、URL 欄への貼り付け時に先頭の <code>javascript:</code>
+     が取り除かれることがあります。貼り付け後に URL 欄の先頭を確認し、消えていたら
+     手入力で <code>javascript:</code> を足してください。ここが欠けていると、
+     タップしても何も起きないか、検索が実行されます。</p>
+</div>
+
+<h2>動作を試す</h2>
+<p class="lead">下のテキストは英語のままです。ブックマークレットを実行すると日本語に変わります。</p>
+<p class="demo">
+  Gain 2 stacks of Morale and apply Vulnerable to the target.
+  Retain Shield at the end of the turn, then Retain one card.
+  Weakness Attack deals bonus Critical Damage. Marker and remarks stay untouched.
+</p>
+
+<h2>仕様と制限</h2>
+<ul>
+  <li><strong><code>confirmed</code> のみ使用</strong> — <code>guess</code> と
+      <code>unmatched</code> は置換しません。裏が取れていない訳語を画面に出さないためです。</li>
+  <li><strong>長い語を優先</strong> — <code>Retain Shield</code> は
+      <code>Retain</code> より先に処理されます。</li>
+  <li><strong>単語境界を見ます</strong> — <code>Marker</code> の中の <code>Mark</code> や
+      <code>remarks</code> は置換されません。</li>
+  <li><strong>大文字小文字を区別します</strong> — 小文字の <code>mark</code> は置換しません。</li>
+  <li><strong>置換箇所は薄い黄色</strong>になります。その部分にカーソルを合わせる
+      （長押しする）と、元の英語が表示されます。</li>
+  <li><strong>元に戻す機能はありません</strong> — ページを再読み込みしてください。</li>
+</ul>
+
+<div class="note">
+  <p><strong>誤爆することがあります</strong></p>
+  <p>用語には <code>Mark</code> <code>Lead</code> <code>Remove</code>
+     <code>Wave</code> <code>Partner</code> のような普通の英単語が含まれます。
+     文頭に来て大文字になった一般名詞は、用語でなくても置換されます。
+     置換箇所は色が付き、元の英語も残っているので、不自然なところは確認してください。</p>
+</div>
+
+<div class="note">
+  <p><strong>サイトによっては動きません</strong></p>
+  <p>ページ側のセキュリティ設定（Content-Security-Policy）によっては、
+     外部からの用語データ取得がブロックされます。その場合は
+     「用語データを取得できませんでした」と表示されます。回避方法はありません。</p>
+</div>
+
+<h2>読みやすい形のソース</h2>
+<p class="lead">
+  貼り付けるのは上の1行版ですが、中身は下と同じものです
+  （<a href="./bookmarklet.js">bookmarklet.js</a> から自動生成しています）。
+</p>
+<details>
+  <summary>ソースを表示</summary>
+  <pre><code id="pretty">読み込み中…</code></pre>
+</details>
+
+<p class="lead" style="margin-top:2rem">
+  <a href="./">← 用語対応表に戻る</a>
+</p>
+
+</div>
+
+<script>
+var BOOKMARKLET = "javascript:(function () { var SRC = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json'; var CLS = 'czn-replaced'; var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|INPUT|SELECT|OPTION)$/; var HL_STYLE = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;'; var TOAST_BASE = 'position:fixed;left:12px;right:12px;bottom:20px;z-index:2147483647;' + 'text-align:center;padding:10px 14px;border-radius:8px;' + 'font:14px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:rgb(255,255,255);' + 'box-shadow:0 2px 12px rgba(0,0,0,0.35);background:'; function toast(msg, bad) { var d = document.createElement('div'); d.textContent = msg; d.style.cssText = TOAST_BASE + (bad ? 'rgb(176,42,34)' : 'rgb(28,106,64)'); document.body.appendChild(d); setTimeout(function () { if (d.parentNode) { d.parentNode.removeChild(d); } }, 4000); } function rxEscape(s) { return s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'); } function isWordChar(c) { return /[A-Za-z0-9]/.test(c); } function replaceIn(node, re, map, state) { var text = node.nodeValue; var frag = null; var last = 0; var m; re.lastIndex = 0; while ((m = re.exec(text)) !== null) { var s = m.index; var e = s + m[0].length; if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; } if (frag === null) { frag = document.createDocumentFragment(); } if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); } var span = document.createElement('span'); span.className = CLS; span.textContent = map[m[0]]; span.title = m[0]; span.style.cssText = HL_STYLE; frag.appendChild(span); last = e; state.count = state.count + 1; } if (frag !== null) { if (last < text.length) { frag.appendChild(document.createTextNode(text.slice(last))); } node.parentNode.replaceChild(frag, node); } } function collectTextNodes() { var nodes = []; var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null); var n; while ((n = walker.nextNode()) !== null) { if (n.nodeValue === '') { continue; } var p = n.parentNode; var ok = true; while (p && p.nodeType === 1) { var cls = p.className ? String(p.className) : ''; if (SKIP.test(p.nodeName) || cls.indexOf(CLS) !== -1) { ok = false; break; } p = p.parentNode; } if (ok) { nodes.push(n); } } return nodes; } function run(data) { var pairs = (data.entries || []).filter(function (e) { return e.confidence === 'confirmed' && e.en && e.ja; }); pairs.sort(function (a, b) { return b.en.length - a.en.length; }); if (pairs.length === 0) { toast('confirmed \\u306e\\u7528\\u8a9e\\u304c\\u898b\\u3064\\u304b\\u308a\\u307e\\u305b\\u3093\\u3067\\u3057\\u305f', true); return; } var map = Object.create(null); var alts = []; pairs.forEach(function (e) { map[e.en] = e.ja; alts.push(rxEscape(e.en)); }); var re = new RegExp(alts.join('|'), 'g'); var state = { count: 0 }; collectTextNodes().forEach(function (node) { if (node.parentNode) { replaceIn(node, re, map, state); } }); toast(state.count + ' \\u4ef6\\u3092\\u7f6e\\u63db\\u3057\\u307e\\u3057\\u305f'); } if (!document.body) { return; } fetch(SRC, { cache: 'no-store' }).then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); }).then(run).catch(function (err) { toast('\\u7528\\u8a9e\\u30c7\\u30fc\\u30bf\\u3092\\u53d6\\u5f97\\u3067\\u304d\\u307e\\u305b\\u3093\\u3067\\u3057\\u305f: ' + err.message, true); }); })();";
+
+(function () {
+  var codeEl = document.getElementById('code');
+  var statusEl = document.getElementById('status');
+  var dragEl = document.getElementById('drag');
+
+  codeEl.value = BOOKMARKLET;
+  dragEl.setAttribute('href', BOOKMARKLET);
+
+  // ドラッグして登録するためのリンクなので、クリックでは実行させない
+  dragEl.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    say('このリンクはブックマークバーにドラッグして使います');
+  });
+
+  var timer;
+  function say(msg) {
+    statusEl.textContent = msg;
+    clearTimeout(timer);
+    timer = setTimeout(function () { statusEl.textContent = ''; }, 4000);
+  }
+
+  function selectAndCopy() {
+    codeEl.focus();
+    codeEl.setSelectionRange(0, codeEl.value.length);
+    try {
+      if (document.execCommand('copy')) { say('コピーしました'); return; }
+    } catch (e) { /* 下のメッセージにフォールバック */ }
+    say('コピーできませんでした。選択されているので手動でコピーしてください');
+  }
+
+  document.getElementById('copy').addEventListener('click', function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(BOOKMARKLET).then(
+        function () { say('コピーしました'); },
+        selectAndCopy
+      );
+    } else {
+      selectAndCopy();
+    }
+  });
+
+  // 読みやすい版は元ファイルをそのまま見せる。1行版とずれることはない
+  fetch('./bookmarklet.js')
+    .then(function (r) {
+      if (!r.ok) { throw new Error('HTTP ' + r.status); }
+      return r.text();
+    })
+    .then(function (src) { document.getElementById('pretty').textContent = src; })
+    .catch(function (err) {
+      document.getElementById('pretty').textContent =
+        'bookmarklet.js を読み込めませんでした (' + err.message + ')';
+    });
+})();
+</script>
+</body>
+</html>
