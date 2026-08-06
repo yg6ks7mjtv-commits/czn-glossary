@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 279,
-      "confirmed": 226,
+      "total": 290,
+      "confirmed": 234,
       "guess": 3,
-      "unmatched": 50,
-      "unmatched_ja_only": 45,
+      "unmatched": 53,
+      "unmatched_ja_only": 48,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna"],
-      "remaining": 18,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin"],
+      "remaining": 17,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -2150,6 +2150,94 @@
       "character": "Magna",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
       "note": "マグナの固有バフ。Prydwen: 「Enhanced Counterattack increases Counterattack Damage Amount by 30% and is removed upon the effect's activation (max 2 stacks)」。gamerch(942022): 「反撃強化：反撃ダメージ量30%増加。効果発動時、反撃強化排除（最大2重複）」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Drawing Slash",
+      "ja": "抜刀",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの起点カード。Prydwen: 「Drawing Slash is often kept as a way to enter Dark Mist Stance」。gamerch(942023): 「抜刀：コスト0で単体攻撃+黒雲態勢獲得。リンの起点となるカード」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Mist Secret Art: Annihilation",
+      "ja": "黒雲奥義：滅",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの固有カード。Prydwen: 「Dark Mist Secret Art: Annihilation...can be moved from Draw Pile or Graveyard to hand」。gamerch(942023): 「黒雲奥義：滅：コスト1で単体攻撃。黒雲態勢時はヒット数1追加」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Mist Secret Art: Black Dance",
+      "ja": "黒雲奥義：黒舞",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの固有カード。Prydwen: 「Dark Mist Secret Art: Black Dance can be moved from Draw Pile or Graveyard to hand」。gamerch(942023): 「黒雲奥義：黒舞：スキルカード枚数に応じてヒット数が増加するカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Mist Secret Art: Slash",
+      "ja": "黒雲奥義：斬",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンのエゴスキル。Prydwen: 「Dark Mist Secret Art: Slash costs 6 EP and does very high single-target damage while applying 2 Vulnerable stacks」。gamerch(942023): 「黒雲奥義：斬：EP6で単体攻撃+脆弱2を付与」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Mist Sword: Third Form",
+      "ja": "黒雲剣・三式",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの開始時基本攻撃カード。Prydwen: 「Dark Mist Sword: Third Form Attack can be kept in Rin's build to enable you to more easily enter Dark Mist Stance」。gamerch(942023): 「黒雲剣・三式：基本攻撃カード。倍率とコスト違いの攻撃カード。潜在力で黒雲態勢獲得」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dark Mist Sword: First Form",
+      "ja": "黒雲剣・一式",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの開始時基本攻撃カード。Prydwenの検索結果で「either basic attack form (I or III)」として『Dark Mist Sword: Third Form』と対で言及。gamerch(942023): 「黒雲剣・一式：基本攻撃カード。潜在力解放で黒雲態勢獲得効果が追加される」と一致。三式(Third Form)との命名パターンから一式=First Formと判断。"
+    },
+    {
+      "en": "Sheathe Sword",
+      "ja": "納刀",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンのエゴ発現限定カード。Prydwenの検索結果に「A Sheathe Sword card」の言及あり。gamerch(942023): 「納刀：2凸以降で黒雲態勢獲得時に生成される」と一致。語形も直訳一致（納刀=Sheathe Sword）。"
+    },
+    {
+      "en": "Dark Mist Secret Art: Remnant",
+      "ja": "黒雲奥義：残",
+      "confidence": "confirmed",
+      "character": "Rin",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rin",
+      "note": "リンの固有カード。Prydwenの検索結果に「draw 1 card and gain Dark Mist Stance」という一致する効果説明があったが、この時点ではカード名自体は明示されなかった。gamerch(942023): 「黒雲奥義：残：0コストで自分のカード1枚ドロー+黒雲態勢獲得」と効果が完全一致。『黒雲奥義：滅/黒舞/斬』が全てDark Mist Secret Art: [英訳]の命名パターンで確認済みのため、残=Remnantもこのパターンから採用。"
+    },
+    {
+      "en": "",
+      "ja": "守護",
+      "confidence": "unmatched",
+      "character": "Rin",
+      "source": "https://gamerch.com/chaoszeronightmare/942023",
+      "note": "リンの開始時基本シールドカード。Prydwenでは「Rin's basic shield is completely standard」とだけ言及され、固有の英語カード名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "黒雲の心法",
+      "confidence": "unmatched",
+      "character": "Rin",
+      "source": "https://gamerch.com/chaoszeronightmare/942023",
+      "note": "リンの固有カード（主導、1ターン黒雲態勢を保存）。Prydwenで一致する効果説明（「retain Dark Mist Stance for 1 turn, which gives +80% Damage Amount to Attack Cards」）は見つかったが、カード名自体の引用が得られなかった。"
+    },
+    {
+      "en": "",
+      "ja": "黒雲剣法",
+      "confidence": "unmatched",
+      "character": "Rin",
+      "source": "https://gamerch.com/chaoszeronightmare/942023",
+      "note": "リンの固有効果系統（黒雲態勢獲得カードから発動する効果系統の総称）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }

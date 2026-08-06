@@ -130,6 +130,18 @@
 - [ ] **ティールの誓い** — 開始時基本シールドカード。
   (source: https://gamerch.com/chaoszeronightmare/942021)
 
+## Rin（リン）
+
+- [ ] **守護** — 開始時基本シールドカード。Prydwenでは「Rin's basic shield is
+  completely standard」とだけ言及され、固有の英語カード名を特定できなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942023)
+- [ ] **黒雲の心法** — 固有カード。主導、1ターン黒雲態勢を保存。効果説明の一致は
+  見つかったが（「retain Dark Mist Stance for 1 turn, +80% Damage Amount」）、
+  カード名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942023)
+- [ ] **黒雲剣法** — 固有効果系統（黒雲態勢獲得カードから発動する効果系統の総称）。
+  (source: https://gamerch.com/chaoszeronightmare/942023)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
