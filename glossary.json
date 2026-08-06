@@ -27,10 +27,10 @@
     },
     "coverage": {
       "total": 309,
-      "confirmed": 246,
+      "confirmed": 247,
       "guess": 3,
-      "unmatched": 60,
-      "unmatched_ja_only": 55,
+      "unmatched": 59,
+      "unmatched_ja_only": 54,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -45,6 +45,7 @@
       "rationale": "サイト間で訳語が異なるため。例: 不屈 = Indomitability (他サイト) / Fortitude (Prydwen)、ヒラメキ = Flash of Insight (他サイト) / Epiphany (Prydwen)。"
     },
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
+    "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
       "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin"],
@@ -1944,12 +1945,12 @@
       "note": "ベロニカの固有カード。Prydwen: 「'Sir Kowalski' - can be a great copy with Divine Epiphany cost-reduction, especially in Ballista-based builds」。gamerch(941895): 「コワルスキー卿：バリスタ強化とドロー1枚の組み合わせ」とバリスタ関連カードという点が一致。語形も直訳一致。"
     },
     {
-      "en": "",
+      "en": "Rapid Fire",
       "ja": "速射弾",
-      "confidence": "unmatched",
+      "confidence": "confirmed",
       "character": "Veronica",
-      "source": "https://gamerch.com/chaoszeronightmare/941895",
-      "note": "ベロニカの開始時基本攻撃カード。Prydwenの検索スニペットに『Rapid Fire』という一致しそうな語が見つかったが、この英語名は既にルークの固有カード『連続撃発』に confirmed として登録済みで、同じ en を重複登録できない（schema制約）。同名カードが複数キャラに存在する可能性があり、ゲーム内で実際の表記を確認してから対応を決めること。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "ベロニカの開始時基本攻撃カード。2026-08-06、character 違いなら en/ja の重複を許可するルール追加に伴い再登録。Prydwen: 「Veronica has a card called 'Rapid Fire', and at her 3-1 Signature Potential, Rapid Fire grants a 20% chance to create a Random Ballista card」。gamerch(941895): 「速射弾：攻撃カード。潜在力で20%の確率でバリスタ生成が追加可能」と数値まで完全一致。ルークの固有カード『連続撃発』も同じ en=Rapid Fire で character=Luke として登録済み（同名カードが複数キャラに存在する例）。ブックマークレット上ではこの en は動的に英語併記（KEEP_EN相当）として扱われる。"
     },
     {
       "en": "",

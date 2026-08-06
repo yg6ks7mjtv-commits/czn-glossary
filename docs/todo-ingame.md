@@ -96,13 +96,8 @@
 
 ## Veronica（ベロニカ）
 
-- [ ] **速射弾** — 開始時基本攻撃カード。**要注意**: Prydwenの検索スニペットに
-  『Rapid Fire』という一致しそうな語が見つかったが、この英語名は既にルークの
-  固有カード『連続撃発』に `confirmed` として登録済みで、同じ `en` を重複
-  登録できない（schema制約）。同名カードが複数キャラに存在する可能性があり、
-  ゲーム内で実際の表記を確認してから対応を決めること（別名の可能性、または
-  本当に同名で `character` フィールドだけで区別すべき可能性の両方を検討）。
-  (source: https://gamerch.com/chaoszeronightmare/941895)
+- [x] ~~速射弾~~ — 2026-08-06、character 違いの en/ja 重複を許可するルール
+  追加に伴い `confirmed`（`Rapid Fire`, character: Veronica）として解決済み。
 - [ ] **金琥花の幻想** — 開始時基本カード（詳細効果はgamerch側に記載なし）。
   (source: https://gamerch.com/chaoszeronightmare/941895)
 - [ ] **息抜き** — 固有カード。シールド付与と他キャラカードのドロー2枚。

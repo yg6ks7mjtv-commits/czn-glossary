@@ -124,7 +124,19 @@ function run(data) {
   if (pairs.length === 0) { toast('confirmed の用語が見つかりませんでした', true); return; }
   var map = Object.create(null);
   var alts = [];
+  // 同じ en が character 違いで複数登録され ja が食い違う場合、どちらの ja かは
+  // ページ上の文脈からは判別できない。誤った日本語だけを表示しないよう、
+  // そのような en は動的に keepEn 扱いにする（表示は最初に出てきた ja を使う）。
+  var jaByEn = Object.create(null);
   pairs.forEach(function (e) {
+    if (!jaByEn[e.en]) { jaByEn[e.en] = Object.create(null); }
+    jaByEn[e.en][e.ja] = true;
+  });
+  Object.keys(jaByEn).forEach(function (en) {
+    if (Object.keys(jaByEn[en]).length > 1) { keepEn[en] = true; }
+  });
+  pairs.forEach(function (e) {
+    if (e.en in map) { return; }
     map[e.en] = e.ja;
     alts.push(rxEscape(e.en));
   });
