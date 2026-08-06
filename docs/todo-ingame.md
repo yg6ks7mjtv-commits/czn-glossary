@@ -317,6 +317,16 @@
 - [ ] **理性攪乱** — パッシブ効果。戦闘終了時のHPが戦闘開始時より高い場合、ストレス1増加。
   (source: https://gamerch.com/chaoszeronightmare/942038)
 
+## Mika（ミカ）
+
+- [ ] **水の矢** — 開始時基本攻撃カード（1枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942037)
+- [ ] **激流** — エゴスキル。消滅のついた水の根源を2枚生成、HP回復とAP2獲得を実行。
+  効果の一致するPrydwen記述は見つかったが（「equivalent to gaining 2 AP
+  immediately while also delivering some nice heals」）、スキル名自体の
+  引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942037)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

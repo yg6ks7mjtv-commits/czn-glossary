@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 426,
-      "confirmed": 320,
+      "total": 434,
+      "confirmed": 326,
       "guess": 3,
-      "unmatched": 103,
-      "unmatched_ja_only": 98,
+      "unmatched": 105,
+      "unmatched_ja_only": 100,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia"],
-      "remaining": 3,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia", "Mika"],
+      "remaining": 2,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -3327,6 +3327,70 @@
       "character": "Nia",
       "source": "https://gamerch.com/chaoszeronightmare/942038",
       "note": "ニアのパッシブ効果（戦闘終了時のHPが戦闘開始時より高い場合、ストレス1増加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Root of Water",
+      "ja": "水の根源",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの開始カード。Prydwen: 「Her starting card 'Root of Water' is an excellent card that costs 0, grants 1 action point, and also recovers HP」。gamerch(942037): 「水の根源：コスト0でHP回復とAP1獲得できる優秀なカード」と完全一致。語形も直訳一致。別スニペットで『Source of Water』という表記も見られたが、より具体的な引用のあるRoot of Waterを採用。"
+    },
+    {
+      "en": "Water Barrier",
+      "ja": "水のバリア",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの開始時基本治癒カード。Prydwenの検索結果に「Water Barrier Cards」の言及あり。gamerch(942037): 「水のバリア：治癒カード（2枚）、回復効果を持つ」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Blessing of Waves",
+      "ja": "波の加護",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの固有カード。Prydwen: 「'Blessing of Waves' I...convert Mika's healing into shield」。gamerch(942037): 「波の加護：AP数に応じて回復量が増加する回復カード」と波(Wave)関連の回復カードという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Tactical Analysis",
+      "ja": "作戦分析",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの固有カード。Prydwen: 「'Tactical Analysis' V...this Epiphany allows you to thin your deck after Turn 1...passive buff to healing」。gamerch(942037): 「作戦分析：波1と1ターンの回復量を上げるカード」と回復量アップという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Whirlpool",
+      "ja": "渦巻き",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの固有カード。Prydwen: 「Whirlpool V is a card that now heals and receives a damage buff based on heal」。gamerch(942037): 「渦巻き：2コストの全体攻撃カード、対象に応じて回復も実施」と攻撃+回復の複合効果という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Deluge",
+      "ja": "氾濫",
+      "confidence": "confirmed",
+      "character": "Mika",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/mika",
+      "note": "ミカの固有カード。Prydwen: 「her 'Deluge' card has an Initiation tag, allowing it to start generating Wave every turn off the bat」。gamerch(942037): 「氾濫：波1と毎ターン波1を付与するカード」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "水の矢",
+      "confidence": "unmatched",
+      "character": "Mika",
+      "source": "https://gamerch.com/chaoszeronightmare/942037",
+      "note": "ミカの開始時基本攻撃カード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "激流",
+      "confidence": "unmatched",
+      "character": "Mika",
+      "source": "https://gamerch.com/chaoszeronightmare/942037",
+      "note": "ミカのエゴスキル（消滅のついた水の根源を2枚生成、HP回復とAP2獲得を実行）。効果の一致するPrydwen記述は見つかったが（「equivalent to gaining 2 AP immediately while also delivering some nice heals」）、スキル名自体の引用が得られなかった。"
     }
   ]
 }
