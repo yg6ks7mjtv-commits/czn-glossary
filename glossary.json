@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "game": "Chaos Zero Nightmare / カオスゼロナイトメア",
+    "updated": "2026-08-06",
+    "sources": {
+      "en": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "ja": "https://gamerch.com/chaoszeronightmare/947128"
+    },
+    "confidence_levels": {
+      "confirmed": "英語ページと日本語ページの効果説明文を突き合わせて一致を確認したもの",
+      "guess": "説明文の一致は未確認。語感・見た目・文脈からの推測。根拠を note に記載",
+      "unmatched": "日本語側のみ確認。対応する英語用語が特定できていない (en は空欄)"
+    },
+    "status": "incomplete",
+    "status_note": "本セッションではネットワーク制限により prydwen.gg / gamerch.com のいずれにもアクセスできず、用語の抽出および突き合わせ作業を実行できなかった。収録済みの12件はユーザーから事前確認済みとして提供されたもの。"
+  },
+  "entries": [
+    {
+      "en": "Morale",
+      "ja": "士気",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Indomitability",
+      "ja": "不屈",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Resolve",
+      "ja": "決意",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Vulnerable",
+      "ja": "脆弱",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Weaken",
+      "ja": "弱体化",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Mark",
+      "ja": "標識",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Crystallize",
+      "ja": "クリスタライズ",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Exhaust",
+      "ja": "消滅",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Stress",
+      "ja": "ストレス",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Mental Breakdown",
+      "ja": "崩壊",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Desire Card",
+      "ja": "欲望カード",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    },
+    {
+      "en": "Commence the Hunt",
+      "ja": "狩猟の開始",
+      "confidence": "confirmed",
+      "source": "user-verified",
+      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+    }
+  ]
+}
