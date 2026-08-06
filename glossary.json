@@ -26,16 +26,16 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 269,
-      "confirmed": 215,
+      "total": 279,
+      "confirmed": 226,
       "guess": 3,
-      "unmatched": 51,
-      "unmatched_ja_only": 46,
+      "unmatched": 50,
+      "unmatched_ja_only": 45,
       "unmatched_en_only": 5
     },
     "known_gaps": [
       "日本語一覧は2026/04/14時点のもので、シーズン4以降の用語は網羅していない（点火のみ guess で暫定登録）。",
-      "日本語側で英語表記が未特定の8件: 気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード。前7件は敵が付与する状態異常系で用語辞典に未収載。",
+      "日本語側で英語表記が未特定の7件: 気絶・挑発・隠蔽・毒・氷結・妄想・欲望カード。前6件は敵が付与する状態異常系で用語辞典に未収載。（クリスタライズは2026-08-06にマグナのキャラページで再確認しconfirmedへ復帰。なお氷結はマグナ自身が敵に付与する『Freeze』の用例をキャラページで発見したが、こちらは元の『敵がプレイヤーに付与する状態異常』とは向きが逆で同一語か未確定のため、既存のunmatchedは据え置いた）",
       "日本語表記が未特定の4件: Find the Gap / Piercing Damage / Potential / Streak。出典ページを個別に特定できていないため source はサイトルートを指している。",
       "『点火』は guess。ヒルデのページの Plasma Rain IV に [Ignition] タグとして存在することは確認済みだが、効果説明の突き合わせが未了。2026-08-06のキャラカード調査では Plasma Rain が実際に付与するのは 'Ionization'（→イオン化として新規confirmed登録）であることが確認でき、'Ignition' タグの所在は再確認できなかった。点火=Ignition の対応関係自体を再検証する必要がある。",
       "キャラ固有バフは網羅していない。収録済みのものは Hilde のページ由来で、他のキャラページは未確認。"
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe"],
-      "remaining": 19,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna"],
+      "remaining": 18,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -90,11 +90,11 @@
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary"
     },
     {
-      "en": "",
+      "en": "Crystallization",
       "ja": "クリスタライズ",
-      "confidence": "unmatched",
-      "source": "https://gamerch.com/chaoszeronightmare/947128",
-      "note": "旧版では Crystallize として confirmed だったが、Prydwen の用語辞典に該当項目が無いことが判明したため降格。敵が付与する状態異常系。Prydwen の用語辞典に未収載のため対応する英語用語を特定できていない。"
+      "confidence": "confirmed",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "2026-08-06、マグナのキャラカード調査で再確認・再確定。Prydwen: 「Crystallization is a stackable and persistent defensive buff that grants 20% Fixed Shield...to the team at the end of the turn per stack」。gamerch(942022)のマグナの固有カード群「クリスタライズ3+ターン開始時に反撃1獲得」等の記述と一致。旧版では Crystallize として confirmed だったが、効果辞典に該当項目が無いことを理由に一度 unmatched へ降格していた。今回、効果辞典ではなくマグナの個別キャラページで実際の使用を確認できたため再度 confirmed に復帰させた（判定基準は「Prydwen のページで実際に使われている語」であり効果辞典限定ではない）。"
     },
     {
       "en": "Exhaust",
@@ -2070,6 +2070,86 @@
       "character": "Khalipe",
       "source": "https://gamerch.com/chaoszeronightmare/942021",
       "note": "カリーペの開始時基本シールドカード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Counterattack",
+      "ja": "反撃",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの中核メカニズム。Prydwen: 「the owner of the buff performs a Counterattack on the assailant equal to 100% Defense-Based damage」。gamerch(942022)の「反撃」に関する各カードの記述と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Absolute Zero",
+      "ja": "絶対零度",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナのエゴスキル。Prydwen: 「Magna's Ego Skill is called Absolute Zero...eats up your Counterattack stacks for...extra damage each」。gamerch(942022): 「絶対零度：EP6で防御依存攻撃のエゴスキル。反撃数に応じてダメージもアップ」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Glacial Iron Fist",
+      "ja": "氷河の鉄拳",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有カード。Prydwen: 「Glacial Iron Fist, is very high cost and hard to play if you don't need its retain shield effect or its damage」。gamerch(942022): 「氷河の鉄拳：コスト2で単体攻撃+ダメージ依存シールドを獲得するカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Frost Shield",
+      "ja": "霜の盾",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの開始時基本シールドカード。Prydwen: 「Frost Shield is removed in most Magna decks」。gamerch(942022): 「霜の盾：シールド獲得カード（2枚）」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Ice Wall",
+      "ja": "氷の壁",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有カード。Prydwen: 「Ice Wall III is the go-to Epiphany that gives the 'Counterattack is AOE' effect for the entire battle passively」。gamerch(942022): 「氷の壁：シールド+反撃獲得、2ターン反撃の対象が全体化されるカード」と反撃の全体化という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Ice Fragment",
+      "ja": "氷の破片",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有カード。Prydwen: 「Ice Fragment I is an upgrade that now grants 6 crystallization instead of 4」。gamerch(942022): 「氷の破片：クリスタライズ3+ターン開始時に反撃1獲得」とクリスタライズ付与カードという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Frozen Fist",
+      "ja": "氷結の拳",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの開始時基本攻撃カード。Prydwen: 「Frozen Fist is removed in basically any Magna deck」（霜の盾と並んで言及）。gamerch(942022): 「氷結の拳：基本攻撃カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Frost Charge",
+      "ja": "アイスチャージ",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有カード。Prydwen: 「Frost Charge applies 2 Vulnerable to all enemies, which boosts team damage」。gamerch(942022): 「アイスチャージ：シールド+敵全体に脆弱付与。1コストで敵全体に脆3を付与できる破格のカード」と敵全体への脆弱付与という点が一致。英語表記は Ice ではなく Frost だが、同一カードと判断。"
+    },
+    {
+      "en": "Storm of Bitter Cold",
+      "ja": "極寒の嵐",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有カード。Prydwen: 「Ice Fragment and Storm of Bitter Cold stack counters passively」。gamerch(942022): 「極寒の嵐：クリスタライズ2とシールド獲得時に反撃を付与できるようになります」と反撃の受動付与という点が一致。語形も直訳一致（語順のみ入れ替え）。"
+    },
+    {
+      "en": "Enhanced Counterattack",
+      "ja": "反撃強化",
+      "confidence": "confirmed",
+      "character": "Magna",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "note": "マグナの固有バフ。Prydwen: 「Enhanced Counterattack increases Counterattack Damage Amount by 30% and is removed upon the effect's activation (max 2 stacks)」。gamerch(942022): 「反撃強化：反撃ダメージ量30%増加。効果発動時、反撃強化排除（最大2重複）」と完全一致。語形も直訳一致。"
     }
   ]
 }

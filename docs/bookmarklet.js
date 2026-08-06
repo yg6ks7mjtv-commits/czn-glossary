@@ -28,7 +28,20 @@ var KEEP_EN = ['Mark', 'Lead', 'Remove', 'Wave', 'Partner',
                'Chronicle', 'Time Paradox', 'Time Acceleration', 'Rewind',
                'Archetype', 'Creation and Destruction', 'Event Horizon',
                'Barrier Deployment', 'Matter Disintegration',
-               'Hew', 'Honed Edge', 'Fighting Spirit', 'Slash'];
+               'Hew', 'Honed Edge', 'Fighting Spirit', 'Slash',
+               // 2026-08-06 バッチ2（Sereniel〜Magna）分。同じ基準で判定。
+               'Homing Laser', 'Afterglow', 'Plasma Missile', 'Shining Core',
+               'Pulse Fire', 'Death Halo', 'Magnetic Field',
+               "Will-O'-Wisp", 'Shadow of the Moon', 'Cursed Shackles', 'Bind',
+               'Twilight',
+               'Inspiration', 'Longsword Slash', 'Trickery Strike',
+               'Freezing Blade', 'Flowing Parry',
+               'Power Charge', 'Charge Energy', 'Quick Lift', 'Power Strike',
+               'Ballista', 'Firing Preparation',
+               'Absolute Protection', 'Upward Slash',
+               'Counterattack', 'Absolute Zero', 'Frost Shield', 'Ice Wall',
+               'Ice Fragment', 'Frozen Fist', 'Frost Charge',
+               'Enhanced Counterattack', 'Crystallization'];
 var keepEn = Object.create(null);
 KEEP_EN.forEach(function (w) { keepEn[w] = true; });
 // 色は rgb() で書く。# はURLのフラグメント区切りなので javascript: URL 内で切れる。
