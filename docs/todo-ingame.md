@@ -114,6 +114,22 @@
 - [ ] **超小型バリスタ** — バリスタの派生カード。スキルカード3枚使用で生成が追加される。
   (source: https://gamerch.com/chaoszeronightmare/941895)
 
+## Khalipe（カリーペ）
+
+- [ ] **威圧** — 固有カード。コスト2で高倍率のシールド付与と敵全体に強靭度ダメージ1。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+- [ ] **再集結** — 固有カード。シールド付与と最高コストカードを1枚ドロー。バルチャー射出をサーチ可能。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+- [ ] **全弾発射** — 固有カード（詳細不明）。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+- [ ] **決意のカリスマ** — エゴスキル。敵全体に防御依存ダメージを与え、バルチャー射出を1枚生成。
+  効果の一致するPrydwen記述は見つかったが、スキル名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+- [ ] **ムチ打ち** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+- [ ] **ティールの誓い** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/942021)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
