@@ -16,14 +16,13 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、カード枠（box）の
-//      「中」ではなく box の直後の兄弟要素として、独立したブロックで日本語
-//      効果文を追加する（box の中は画像などが position:absolute で配置
-//      されていることがあり、中に入れると重なってしまうため）。box の親
-//      要素には overflow:visible を明示的に付与してはみ出しを防ぎ、幅は
-//      box の実測幅（getBoundingClientRect）をpxで直接指定する。
-//      white-space/word-breakはnormalにする。英語の効果文がどこにあっても
-//      消さずそのまま残す）
+//      する。該当levelの効果文が手元データにあれば、box の外に出す方式
+//      （親要素やboxの兄弟として挿入）はgrid/flexのレイアウトに巻き込まれて
+//      幅・高さ0になったため使わず、box の「中」、英語の効果文がもともと
+//      表示されている場所の直後（「Show Effects」があればその直後、無ければ
+//      効果文の最後のテキスト要素の直後）に、position/widthを指定しない
+//      プレーンなブロックとして日本語効果文を追加する（周囲の要素の
+//      レイアウトにそのまま従わせる）。英語の効果文は消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -236,22 +235,22 @@
   // ためだけのもの。box はWeakSetのキーなので、SPA側の再描画でboxのDOM要素
   // 自体が丸ごと差し替わればWeakSetの参照は自然に無効化される（＝古い参照は
   // ガベージコレクトされ、新しいboxは「未処理」として扱われる）。呼び出しを
-  // またいだ永続的な「挿入済み」判定は removeExistingEffectBlock による
+  // またいだ永続的な「挿入済み」判定は removeExistingEffectBlocks による
   // 削除→再挿入の冪等性で担保する（box自体は残るがdata属性だけ再描画で
   // 消えてしまうケースにも対応するため、data属性の有無だけに頼らない）。
   var PROCESSED = new WeakSet();
 
   var EFFECT_BLOCK_CLS = 'czn-effect-text-ja';
 
-  // 挿入先のコンテナ（カード枠 box の親要素＝グリッドのセルに相当。box自体が
-  // position:absolute等でレイアウトされていても、その外側に置くことで
-  // 影響を受けないようにする）の中に既に効果文ブロックがあれば取り除く。
-  // querySelector で container 全体から探すため、box が差し替わって兄弟
-  // 関係が変わった場合や、data属性だけが再描画で失われた場合でも、同じ
-  // container に複数の効果文ブロックが並んでしまうことがないようにする。
-  function removeExistingEffectBlock(container) {
-    var existing = container.querySelector('.' + EFFECT_BLOCK_CLS);
-    if (existing) { existing.remove(); }
+  // box を外に出す方式（親要素やbox自身の兄弟として挿入）はgrid/flexの
+  // レイアウトに巻き込まれて幅・高さ0になってしまったため、box の「中」、
+  // 英語の効果文がもともと表示されている場所の直後にプレーンなブロックとして
+  // 追加する方式に変更した。querySelectorAll で box 内の既存の挿入ブロックを
+  // 全て探して削除してから作り直すため、SPA側の再描画で複数回処理されても
+  // 積み上がらない。
+  function removeExistingEffectBlocks(box) {
+    var existing = box.querySelectorAll('.' + EFFECT_BLOCK_CLS);
+    existing.forEach(function (el) { el.remove(); });
   }
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
@@ -431,6 +430,45 @@
     return null;
   }
 
+  // box 内で、コスト数字・カード名・種別表示・"Show Effects"・ローマ数字
+  // バッジを除いた葉要素のうち、最もテキストが長いものを英語の効果文とみなす。
+  // 効果文の挿入位置（「Show Effects」が無いカードのフォールバック）と、
+  // 挿入する日本語テキストの文字サイズ参照の両方に使う。
+  function findEffectTextEl(box, excludeEls) {
+    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
+    var node;
+    var best = null;
+    var bestLen = 0;
+    while ((node = walker.nextNode())) {
+      if (node.children.length > 0) { continue; }
+      if (excludeEls.indexOf(node) !== -1) { continue; }
+      var text = (node.textContent || '').trim();
+      if (!text) { continue; }
+      if (text === 'Attack' || text === 'Skill') { continue; }
+      if (text.indexOf('Show Effects') !== -1) { continue; }
+      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
+      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
+      if (text.length > bestLen) { best = node; bestLen = text.length; }
+    }
+    return best;
+  }
+
+  // box 内で「Show Effects」を含む葉要素を探し、リンク/ボタン全体（あれば）
+  // を返す。日本語効果文はこの直後に追加する。div をリンクの内側に紛れ込ま
+  // せないよう、closest('a, button') で実際のクリック領域まで遡る。
+  function findShowEffectsAnchor(box) {
+    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (node.children.length > 0) { continue; }
+      var text = (node.textContent || '').trim();
+      if (text === 'Show Effects' || text.indexOf('Show Effects') !== -1) {
+        return (node.closest && node.closest('a, button')) || node;
+      }
+    }
+    return null;
+  }
+
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
   //
   // 用語置換より前にこのフェーズを完全に終わらせることで、見出しが
@@ -572,53 +610,52 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      var parent = c.block.parentElement; // box の直後に挿入するための親要素
+      if (!c.entry) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      if (!c.entry) { if (parent) { removeExistingEffectBlock(parent); } PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { if (parent) { removeExistingEffectBlock(parent); } PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
-      if (!parent) { PROCESSED.add(c.block); return; } // 挿入先の親が無い（DOMから外れた等）
+      var excludeEls = [c.nameEl];
+      if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
+      if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
+      // 英語の効果文とみなす要素（フォントサイズの参照、「Show Effects」が
+      // 無いカードでの挿入位置フォールバックの両方に使う）。
+      var effectTextEl = findEffectTextEl(c.block, excludeEls);
+      // 挿入位置は「Show Effects」があればその直後、無ければ効果文の
+      // 最後のテキスト要素の直後。
+      var insertAnchor = findShowEffectsAnchor(c.block) || effectTextEl;
 
-      // 挿入先は box の直後（同じ親要素内の兄弟要素）。box の親要素が
-      // overflow:hidden 等で切り取っている可能性があるため、はみ出し対策と
-      // して親要素に overflow:visible を明示的に付与しておく。
-      removeExistingEffectBlock(parent);
-      var parentOverflow = getComputedStyle(parent).overflow;
-      parent.style.overflow = 'visible';
+      if (!insertAnchor) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // 挿入先が見つからない
 
-      var boxRect = c.block.getBoundingClientRect();
+      // box内に既にある挿入済みブロックを querySelectorAll で全て探して
+      // 削除してから作り直す。SPA側の再描画で同じboxが複数回処理されても、
+      // 積み上がらないようにするため。
+      removeExistingEffectBlocks(c.block);
 
       var div = document.createElement('div');
       div.className = EFFECT_BLOCK_CLS;
       div.textContent = effect;
+      // position・widthは指定しない（周囲の要素にそのまま従わせる）。
+      // 背景は付けず、文字色だけ白にして上に細い区切り線を1本入れる。
       div.style.cssText =
-        'position:static;display:block;visibility:visible;margin-top:6px;' +
-        'padding:8px 10px;border-radius:0 0 8px 8px;box-sizing:border-box;' +
-        'white-space:normal;word-break:normal;' +
-        'background:rgba(0,0,0,0.85);color:#fff;line-height:1.6;';
-      // カード名見出しと同程度の文字サイズに揃える。幅は親の値に依存せず、
-      // box の実測幅（getBoundingClientRect）をpxで直接指定する。
-      div.style.fontSize = getComputedStyle(c.nameEl).fontSize;
-      div.style.width = Math.round(boxRect.width) + 'px';
+        'margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.4);' +
+        'color:#fff;white-space:pre-wrap;';
+      if (effectTextEl) {
+        // 英語の効果文と同じ文字サイズに揃える（実測値をそのまま使う）。
+        div.style.fontSize = getComputedStyle(effectTextEl).fontSize;
+      }
 
-      c.block.insertAdjacentElement('afterend', div); // box の直後の兄弟要素として挿入
+      insertAnchor.insertAdjacentElement('afterend', div);
       c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
       inserted++;
 
-      // 挿入したブロック自身の実測値。非表示のときに原因を切り分けるための
-      // 診断情報（挿入先の幅・高さがゼロになっていないか、親のoverflowで
-      // 切られていないか、display/visibilityが想定どおりか）。
+      // 挿入したブロック自身の実測値（非表示になっていないかの確認用）。
       var divRect = div.getBoundingClientRect();
-      var divStyle = getComputedStyle(div);
       insertedDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
         width: Math.round(divRect.width),
         height: Math.round(divRect.height),
-        visible: div.offsetParent !== null,
-        parentOverflow: parentOverflow,
-        display: divStyle.display,
-        visibility: divStyle.visibility
+        visible: div.offsetParent !== null
       });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
@@ -803,17 +840,12 @@
       // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
       // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
       // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
-      // 挿入したブロック自身の幅・高さ・表示状態・親のoverflow・
-      // display/visibility も出す。非表示になっているときに、幅/高さが
-      // ゼロになっていないか、親のoverflowで切られていないか、CSSで
-      // display/visibilityを上書きされていないかをその場で切り分けられる
-      // ようにするため。
+      // 挿入したブロック自身の幅・高さ・表示状態も出し、非表示になって
+      // いないかその場で確認できるようにする。
       result.insertedDetails.forEach(function (d) {
         lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
           ' / ' + d.width + '×' + d.height +
-          ' / ' + (d.visible ? '表示中' : '非表示') +
-          ' / 親overflow:' + d.parentOverflow +
-          ' / display:' + d.display + ' visibility:' + d.visibility);
+          ' / ' + (d.visible ? '表示中' : '非表示'));
       });
     }
 
