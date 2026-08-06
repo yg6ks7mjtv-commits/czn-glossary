@@ -287,6 +287,17 @@
   アタッカー行動前に使用推奨。
   (source: https://gamerch.com/chaoszeronightmare/942032)
 
+## Lucas（ルーカス）
+
+- [ ] **防護焼夷弾** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/942033)
+- [ ] **S.S.S** — 固有カード。単体攻撃と弾丸バフを付与。単体攻撃は倍率も低く
+  1ターン付与される弾丸バフが本体。英数字の略称のため検索で有効な結果が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942033)
+- [ ] **R.P.G-7** — 固有カード。弾丸カード消滅時、敵全体に固定ダメージを与える。
+  英数字の略称のため検索で有効な結果が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942033)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
