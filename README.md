@@ -39,6 +39,10 @@ python3 scripts/sync.py
 - `confirmed` のみ使用。`guess` と `unmatched` は置換しない
 - 長い語から先に置換する（`Retain Shield` が `Retain` より先）
 - 単語境界を見るので `Marker` の中の `Mark` は置換しない。大文字小文字も区別する
+- 一般名詞としても使われる語は `Mark(標識)` のように英語を残す。対象は
+  `docs/bookmarklet.js` の `KEEP_EN`（`Mark` / `Lead` / `Remove` / `Wave` /
+  `Partner` / `Break` / `Save` / `Damage` / `Shield` / `Heal`）。完全一致のみで、
+  `Critical Damage` のような複合語は通常どおり日本語だけに置き換える
 - 置換箇所は薄い黄色になり、`title` 属性に元の英語が残る
 - 元に戻す機能はなし（再読み込みで戻る）
 

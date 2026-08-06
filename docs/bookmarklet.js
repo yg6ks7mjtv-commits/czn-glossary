@@ -5,6 +5,14 @@
 var SRC = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json';
 var CLS = 'czn-replaced';
 var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|INPUT|SELECT|OPTION)$/;
+// 一般名詞としても使われる語。日本語だけに置き換えると、その置換が正しいのか
+// 読み手が判断できなくなるので、Mark(標識) のように英語を残す。
+// 完全一致だけが対象。Critical Damage のような複合語は用語であることが明らかなので
+// 通常どおり日本語だけに置き換える。
+var KEEP_EN = ['Mark', 'Lead', 'Remove', 'Wave', 'Partner',
+               'Break', 'Save', 'Damage', 'Shield', 'Heal'];
+var keepEn = Object.create(null);
+KEEP_EN.forEach(function (w) { keepEn[w] = true; });
 // 色は rgb() で書く。# はURLのフラグメント区切りなので javascript: URL 内で切れる。
 var HL_STYLE = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;';
 var TOAST_BASE = 'position:fixed;left:12px;right:12px;bottom:20px;z-index:2147483647;'
@@ -41,10 +49,12 @@ function replaceIn(node, re, map, state) {
     if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; }
     if (frag === null) { frag = document.createDocumentFragment(); }
     if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); }
+    var en = m[0];
+    var ja = map[en];
     var span = document.createElement('span');
     span.className = CLS;
-    span.textContent = map[m[0]];
-    span.title = m[0];
+    span.textContent = keepEn[en] ? en + '(' + ja + ')' : ja;
+    span.title = en;
     span.style.cssText = HL_STYLE;
     frag.appendChild(span);
     last = e;
