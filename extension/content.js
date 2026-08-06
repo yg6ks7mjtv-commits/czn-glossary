@@ -16,9 +16,11 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、カード枠（box）自体の
-//      末尾に、独立したブロックとして日本語効果文を追加する（カード画像への
-//      重ね書きはしない。英語の効果文がどこにあっても消さずそのまま残す）
+//      する。該当levelの効果文が手元データにあれば、カード枠（box）の
+//      「中」ではなく box の直後の兄弟要素として、独立したブロックで日本語
+//      効果文を追加する（box の中は画像などが position:absolute で配置
+//      されていることがあり、中に入れると重なってしまうため box の外に
+//      置く。英語の効果文がどこにあっても消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -227,7 +229,27 @@
 
   // ---- 4. カード名 -> 効果文 挿入 ----
 
-  var PROCESSED = new WeakSet(); // 挿入済みの説明ブロック
+  // PROCESSED は「同一の insertEffects 呼び出し内で同じboxを二重処理しない」
+  // ためだけのもの。box はWeakSetのキーなので、SPA側の再描画でboxのDOM要素
+  // 自体が丸ごと差し替わればWeakSetの参照は自然に無効化される（＝古い参照は
+  // ガベージコレクトされ、新しいboxは「未処理」として扱われる）。呼び出しを
+  // またいだ永続的な「挿入済み」判定は removeExistingEffectBlock による
+  // 削除→再挿入の冪等性で担保する（box自体は残るがdata属性だけ再描画で
+  // 消えてしまうケースにも対応するため、data属性の有無だけに頼らない）。
+  var PROCESSED = new WeakSet();
+
+  var EFFECT_BLOCK_CLS = 'czn-effect-text-ja';
+
+  // box の直後（兄弟要素）に既に効果文ブロックがあれば取り除く。挿入のたびに
+  // 必ず呼んでから作り直すことで、box自体は生きているがdata属性だけ再描画で
+  // 失われた場合や、boxが差し替わって古い兄弟要素だけが取り残された場合でも、
+  // 同じカードに複数の効果文ブロックが並んでしまうことがないようにする。
+  function removeExistingEffectBlock(block) {
+    var next = block.nextElementSibling;
+    if (next && next.classList && next.classList.contains(EFFECT_BLOCK_CLS)) {
+      next.remove();
+    }
+  }
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
   // 同じ ja_card + character で level（ヒラメキ段階、0=無印）違いを複数持てる。
@@ -528,28 +550,33 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!c.entry) { removeExistingEffectBlock(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { removeExistingEffectBlock(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!c.block.parentNode) { PROCESSED.add(c.block); return; } // 兄弟挿入できない（DOMから外れた等）
 
-      // 挿入先は常にカード枠（box）自体の末尾。英語の効果文がカード画像に
-      // 重ねて表示されている場合でも、その重なりには手を出さず、box の
-      // 通常のドキュメントフローの最後に独立したブロックとして追加する
-      // （＝画像への重なりを避け、カードの下に地続きで表示される）。
-      if (c.block.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
+      // 挿入先は box の「中」ではなく box の直後の兄弟要素。box の中は
+      // カード内部の要素が position:absolute で配置されていることがあり、
+      // 中に追加すると画像の上に乗ってしまうため、box自体の外（同じ親の
+      // 直後）に static な独立ブロックとして置く。挿入のたびに
+      // removeExistingEffectBlock で既存ブロックを消してから作り直すため、
+      // 同じboxに複数回効果文ブロックが並ぶことはない。
+      removeExistingEffectBlock(c.block);
 
       var div = document.createElement('div');
-      div.className = 'czn-effect-text-ja';
+      div.className = EFFECT_BLOCK_CLS;
       div.textContent = effect;
       div.style.cssText =
-        'position:relative;z-index:2;display:block;margin-top:6px;' +
-        'padding:8px 10px;border-radius:0 0 8px 8px;' +
+        'position:static;display:block;margin-top:6px;' +
+        'padding:8px 10px;border-radius:0 0 8px 8px;box-sizing:border-box;' +
         'background:rgba(0,0,0,0.85);color:#fff;' +
         'white-space:pre-wrap;line-height:1.6;';
-      // カード名見出しと同程度の文字サイズに揃える（実測値をそのまま使う）。
+      // カード名見出しと同程度の文字サイズに揃え、幅もカード枠と揃える
+      // （実測値をそのまま使う）。
       div.style.fontSize = getComputedStyle(c.nameEl).fontSize;
+      div.style.width = getComputedStyle(c.block).width;
 
-      c.block.appendChild(div);
-      c.block.setAttribute('data-czn-effect', '1');
+      c.block.insertAdjacentElement('afterend', div); // box の直後の兄弟要素として挿入
+      c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
       inserted++;
       insertedDetails.push({ rawNameText: c.rawNameText || c.nameText, level: c.level });
@@ -583,7 +610,7 @@
       while (p && p.nodeType === 1) {
         var cls = p.className ? String(p.className) : '';
         if (SKIP_TAGS.test(p.nodeName) || cls.indexOf(REPLACED_CLS) !== -1 ||
-            cls.indexOf('czn-effect-text-ja') !== -1) {
+            cls.indexOf(EFFECT_BLOCK_CLS) !== -1) {
           ok = false;
           break;
         }
