@@ -6,15 +6,16 @@
       "en": "https://www.prydwen.gg/chaos-zero-nightmare/",
       "ja": "https://gamerch.com/chaoszeronightmare/947128",
       "en_effects_dictionary": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary",
-      "en_combat_explained": "https://www.prydwen.gg/chaos-zero-nightmare/guides/combat-explained"
+      "en_combat_explained": "https://www.prydwen.gg/chaos-zero-nightmare/guides/combat-explained",
+      "en_characters_hilde": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde"
     },
     "confidence_levels": {
       "confirmed": "Prydwen のページで実際に使われている語であることを確認したもの。他サイトの訳語は根拠として採用しない。",
       "guess": "説明文の一致は未確認。語感・見た目・文脈からの推測。根拠を note に記載",
-      "unmatched": "日本語側のみ確認。対応する英語用語が特定できていない (en は空欄)"
+      "unmatched": "片側のみ確認。対応語が特定できていない。en が空欄なら日本語側のみ確認、ja が空欄なら英語側のみ確認。両方が空になることはない。"
     },
     "status": "incomplete",
-    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。残り7件は敵付与の状態異常系で辞典に未収載のため未解決。別途『ストレス』は Combat Explained ガイドで確認済み、『欲望カード』は Prydwen での表記が未確認。",
+    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。加えてキャラ固有用語・戦闘システム用語を個別に追加。日本語側8件は英語表記が未特定、英語側5件は日本語表記が未特定。",
     "ja_list_as_of": "2026-04-14",
     "provenance": {
       "ja_terms": "日本語用語48件はユーザーが gamerch の状態異常・バフデバフ一覧 (2026/04/14時点) から転記して提供したもの。",
@@ -22,15 +23,18 @@
       "session_access": "この作業を行ったセッションでは egress ポリシーにより gamerch.com / www.prydwen.gg のいずれにも接続できず、出典ページを直接読んだ検証は行っていない。confirmed の根拠はすべてユーザーによる確認。"
     },
     "coverage": {
-      "total": 50,
-      "confirmed": 42,
-      "guess": 0,
-      "unmatched": 8
+      "total": 59,
+      "confirmed": 45,
+      "guess": 1,
+      "unmatched": 13,
+      "unmatched_ja_only": 8,
+      "unmatched_en_only": 5
     },
     "known_gaps": [
-      "日本語一覧は2026/04/14時点のもので、シーズン4以降に追加された用語（点火など）は含まれていない。",
-      "未解決8件（気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード）は Prydwen 側の表記を確認できていない。前7件は敵が付与する状態異常系で用語辞典に未収載。",
-      "『ストレス』『欲望カード』は日本語48件の一覧に含まれていない（合計が50件なのはこのため）。"
+      "日本語一覧は2026/04/14時点のもので、シーズン4以降の用語は網羅していない（点火のみ guess で暫定登録）。",
+      "日本語側で英語表記が未特定の8件: 気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード。前7件は敵が付与する状態異常系で用語辞典に未収載。",
+      "英語側で日本語表記が未特定の5件: Streak / Find the Gap / Piercing Damage / Manifest Ego / Potential。出典ページを個別に特定できていないため source はサイトルートを指している。",
+      "『点火』は guess。カードタグとしての存在は確認済みだが効果説明の突き合わせが未了。"
     ],
     "criteria": {
       "rule": "confirmed の条件は「Prydwen のページで実際に使われている語であること」。他サイトの訳語は根拠として採用しない。",
@@ -346,6 +350,67 @@
       "ja": "残り火",
       "confidence": "confirmed",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary"
+    },
+    {
+      "en": "Sortie",
+      "ja": "出撃",
+      "confidence": "confirmed",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde"
+    },
+    {
+      "en": "Great Rift",
+      "ja": "大亀裂",
+      "confidence": "confirmed",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde"
+    },
+    {
+      "en": "Double Tap",
+      "ja": "ダブルタップ",
+      "confidence": "confirmed",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "note": "Prydwen E2 と日本語側2凸で同じ効果、記述一致。"
+    },
+    {
+      "en": "Ignition",
+      "ja": "点火",
+      "confidence": "guess",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen でカードタグ [Ignition] として存在。日本語の点火と語義は一致するが、効果説明の突き合わせは未実施。ゲーム内で要確認。"
+    },
+    {
+      "en": "Streak",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+    },
+    {
+      "en": "Find the Gap",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+    },
+    {
+      "en": "Piercing Damage",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+    },
+    {
+      "en": "Manifest Ego",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+    },
+    {
+      "en": "Potential",
+      "ja": "",
+      "confidence": "unmatched",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
+      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
     }
   ]
 }
