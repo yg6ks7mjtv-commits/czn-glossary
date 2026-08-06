@@ -325,9 +325,26 @@
     return null;
   }
 
-  // box 内で、コスト数字・カード名・種別表示・"Show Effects" を除いた葉要素の
-  // うち、最もテキストが長いものを効果文の要素とみなす（画像下部の効果文を
-  // 想定）。日本語効果文はこの要素の直後（afterend）に挿入する。
+  // box 内で、カード名要素そのものとは別に、ローマ数字（I/II/III/IV/V）
+  // だけを内容とする葉要素を探す。カード名にローマ数字が含まれていない
+  // （stripRomanLevel が level 0 を返した）場合のフォールバックで、
+  // 名前とヒラメキ段階の表示が別要素に分かれているレイアウトに対応する。
+  function findLevelBadge(box, excludeEls) {
+    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (node.children.length > 0) { continue; }
+      if (excludeEls.indexOf(node) !== -1) { continue; }
+      var text = (node.textContent || '').trim();
+      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { return node; }
+    }
+    return null;
+  }
+
+  // box 内で、コスト数字・カード名・種別表示・"Show Effects"・ローマ数字
+  // バッジを除いた葉要素のうち、最もテキストが長いものを効果文の要素とみなす
+  // （画像下部の効果文を想定）。日本語効果文はこの要素の直後（afterend）に
+  // 挿入する。
   function findEffectTextEl(box, excludeEls) {
     var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
     var node;
@@ -340,6 +357,7 @@
       if (!text) { continue; }
       if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
       if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
+      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
       if (text.length > bestLen) { best = node; bestLen = text.length; }
     }
     return best;
@@ -365,12 +383,26 @@
 
       var nameText = (found.nameEl.textContent || '').trim();
       var parsed = stripRomanLevel(nameText);
+      var level = parsed.level;
+      var levelBadgeEl = null;
+
+      // カード名自体にローマ数字が含まれていなければ（level 0 のままなら）、
+      // 名前とは別要素になっているレベル表示（"III" だけの葉要素）を探す。
+      if (level === 0) {
+        levelBadgeEl = findLevelBadge(found.box, [found.nameEl, label]);
+        if (levelBadgeEl) {
+          level = ROMAN_LEVELS[(levelBadgeEl.textContent || '').trim()];
+        }
+      }
+
       candidates.push({
         block: found.box,
         nameEl: found.nameEl,
         typeLabelEl: label,
+        levelBadgeEl: levelBadgeEl,
+        rawNameText: nameText,
         nameText: nameText,
-        level: parsed.level,
+        level: level,
         entry: ctx.resolved[parsed.base] || null
       });
     });
@@ -394,12 +426,23 @@
 
       var nameText = (nameEl.textContent || '').trim();
       var parsed = stripRomanLevel(nameText);
+      var level = parsed.level;
+      var levelBadgeEl = null;
+      if (level === 0) {
+        levelBadgeEl = findLevelBadge(container, [nameEl]);
+        if (levelBadgeEl) {
+          level = ROMAN_LEVELS[(levelBadgeEl.textContent || '').trim()];
+        }
+      }
+
       candidates.push({
         block: slot,
         nameEl: nameEl,
         typeLabelEl: null,
+        levelBadgeEl: levelBadgeEl,
+        rawNameText: nameText,
         nameText: nameText,
-        level: parsed.level,
+        level: level,
         entry: ctx.resolved[parsed.base] || null
       });
     });
@@ -432,6 +475,7 @@
 
       if (diagnostics.length < 3) {
         diagnostics.push({
+          rawNameText: c.rawNameText || c.nameText,
           nameText: c.nameText,
           entry: c.entry,
           level: c.level,
@@ -444,6 +488,7 @@
 
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
+      if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
       var effectEl = findEffectTextEl(c.block, excludeEls);
       var target = effectEl || c.block; // 効果文要素が見つからなければ枠自体を対象に
 
@@ -596,7 +641,7 @@
         result.diagnostics.forEach(function (d) {
           var jaPart = d.entry ? d.entry.ja : '日本語化NG';
           var effectPart = d.effectFound ? '効果文あり' : '効果文なし';
-          lines.push('「' + d.nameText + '」→ ' + jaPart + ' / level ' + d.level +
+          lines.push('原文「' + d.rawNameText + '」→ ' + jaPart + ' / level ' + d.level +
             ' → ' + effectPart);
         });
       }
