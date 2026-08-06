@@ -255,6 +255,19 @@
   `Unbreakable` である可能性が高いが引用は得られず。
   (source: https://gamerch.com/chaoszeronightmare/942034)
 
+## Owen（オーウェン）
+
+- [ ] **打ち下ろし** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/942030)
+- [ ] **武器防ぎ** — 開始時基本シールドカード。
+  (source: https://gamerch.com/chaoszeronightmare/942030)
+- [ ] **風乗り** — 固有カード。シールド付与と捨て札のウィンドチャージをサーチ。
+  (source: https://gamerch.com/chaoszeronightmare/942030)
+- [ ] **見破り2** — 固有バフ（ダイス効果として付与されるもの）。
+  (source: https://gamerch.com/chaoszeronightmare/942030)
+- [ ] **論理の喪失** — 固有バフ。クレジット減少時にストレス1増加。
+  (source: https://gamerch.com/chaoszeronightmare/942030)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
