@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 143,
-      "confirmed": 121,
+      "total": 154,
+      "confirmed": 129,
       "guess": 2,
-      "unmatched": 20,
-      "unmatched_ja_only": 15,
+      "unmatched": 23,
+      "unmatched_ja_only": 18,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid"],
-      "remaining": 30,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie"],
+      "remaining": 29,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1062,6 +1062,94 @@
       "character": "Adelheid",
       "source": "https://gamerch.com/chaoszeronightmare/986739",
       "note": "アーデルハイトの固有バフ（祝福を付与または生成した数に応じて獲得。味方のダメージ量3%増加、最大10重複）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Effulgent Blade",
+      "ja": "極光剣",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの生成カード。Prydwen: 「creating as many Effulgent Blades as possible, discarding them from your hand using the Linked mechanic」。gamerch(983591): 「極光剣：破棄時に追加攻撃が発動する連結付きカード」と一致。"
+    },
+    {
+      "en": "Sword Rain",
+      "ja": "剣の雨",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの固有カード。Prydwen: 「[Linked] combo starter to Sword Rain for Effulgent Blades」。gamerch(983591): 「剣の雨：コスト1、連結の単体攻撃×2。感応で極光剣を1枚生成」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Linked",
+      "ja": "連結",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの固有キーワード。Prydwen: 「when a Linked card is used manually or Discarded, there is an Extra Attack trigger」。gamerch(983591)の各カード説明の「連結」付与記述と一致。"
+    },
+    {
+      "en": "Hero to All",
+      "ja": "万人の英雄",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの固有カード。Prydwen: 「'Hero to All IV' to increase odds of tutoring...early」。gamerch(983591): 「万人の英雄：1コストでドロー3枚、ドローしたカードに連結付与」とドロー・サーチ用途が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Sword Flash",
+      "ja": "剣光",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの開始時基本攻撃カード。Prydwen: 「Sword Flash is Heidemarie's Basic attack card, dealing 100% damage to an enemy at the cost of 1-AP」。gamerch(983591): 「剣光：基本攻撃カード。潜在力で極光剣のバフ効果が付く」と一致。"
+    },
+    {
+      "en": "Sword Barrier",
+      "ja": "剣の障壁",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの開始時基本シールドカード。Prydwen: 「Sword Barrier...being the first removal priority」。gamerch(983591): 「剣の障壁：シールドカード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Elysium of Blades",
+      "ja": "剣の楽園",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリのエゴスキル。Prydwen: 「Elysium of Blades...costs 5 Ego Points...deals 400% Damage...increasing by an additional +80%...for each card discarded (up to 20 cards discarded)」。gamerch(983591): 「剣の楽園：EP5で単体攻撃。破棄したカード最大20枚まで加算80%バフ」と数値まで一致。"
+    },
+    {
+      "en": "Effulgent Release",
+      "ja": "極光解放",
+      "confidence": "confirmed",
+      "character": "Heidemarie",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "ハイデマリの固有カード。Prydwen: 「'Effulgent Release' card receives +200% Damage Amount, and the added Damage Amount for each Effulgent Blade in Graveyard becomes +120%」。gamerch(983591): 「極光解放：墓地にある極光剣を全て消滅させてその数分だけバフが加算される単体攻撃」と機構が一致。"
+    },
+    {
+      "en": "",
+      "ja": "一筋の光",
+      "confidence": "unmatched",
+      "character": "Heidemarie",
+      "source": "https://gamerch.com/chaoszeronightmare/983591",
+      "note": "ハイデマリの固有カード（1コストの単体攻撃。手札の連結数に応じて倍率が上がる）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "極光展開",
+      "confidence": "unmatched",
+      "character": "Heidemarie",
+      "source": "https://gamerch.com/chaoszeronightmare/983591",
+      "note": "ハイデマリの固有カード（2コストで極光剣2枚生成。1ターンの間、極光剣に加算バフも入る）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "極光凝縮",
+      "confidence": "unmatched",
+      "character": "Heidemarie",
+      "source": "https://gamerch.com/chaoszeronightmare/983591",
+      "note": "ハイデマリの固有カード（3回墓地へ移動させると極光解放に変化するカード）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
