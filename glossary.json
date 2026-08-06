@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 416,
-      "confirmed": 313,
+      "total": 426,
+      "confirmed": 320,
       "guess": 3,
-      "unmatched": 100,
-      "unmatched_ja_only": 95,
+      "unmatched": 103,
+      "unmatched_ja_only": 98,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius"],
-      "remaining": 4,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius", "Nia"],
+      "remaining": 3,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -3247,6 +3247,86 @@
       "character": "Cassius",
       "source": "https://gamerch.com/chaoszeronightmare/942039",
       "note": "カシウスのエゴスキル（クエストカード2枚生成、敵に1ターン士気-3を付与するエゴスキル）。効果の一致するPrydwen記述は見つかったが（「decreases Morale of all enemies by 3 for 1 turn」）、スキル名自体の引用が得られなかった。"
+    },
+    {
+      "en": "Amp Therapy",
+      "ja": "アンプセラピー",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの開始時基本治癒カード。Prydwen: 「Amp Therapy is one of Nia's two basic healing Skill cards」。gamerch(942038): 「アンプセラピー：治癒カード（2枚）」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Elasticity",
+      "ja": "弾力",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの固有リソース。Prydwen: 「Elasticity allows Nia to provide sustenance without spending AP after the first two casts of Amp Therapy」。gamerch(942038)のソウルリーフ説明「デシベル+弾力追加」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "G Chord",
+      "ja": "Gコード",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの開始カード。Prydwen: 「Nia's G Chord has strong synergy with other effects that allow you to interact with the top of the Draw Pile」。gamerch(942038): 「Gコード：デシベル2と山札の一番上のカードを発動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Mute Accent",
+      "ja": "アクセントミュート",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの固有カード。Prydwen: 「'Mute Accent'...unless +1 Discard really matters for your team」。gamerch(942038): 「アクセントミュート：コストが高いカードを破棄、そのキャラが追加攻撃」と破棄関連という点が一致。語順は入れ替わっているが同一カードと判断。"
+    },
+    {
+      "en": "Adagio",
+      "ja": "アダジオ",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの固有カード。Prydwen: 「'Adagio,' as it is her bread and butter card for cycling your deck」。gamerch(942038): 「アダジオ：ドロー1枚、選択したカードを破棄して山札トップに移動」とデッキ回転という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Rock & Roll",
+      "ja": "ロックンロール",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアのエゴスキル。Prydwen: 「her 'Rock & Roll' Ego skill by increasing the amount of Decibel stacks granted by 2, to a total of 5」。gamerch(942038): 「ロックンロール：敵全体にダメージ、デシベル3～5、山札を全て破棄」とデシベル数値レンジが一致。語形も直訳一致。"
+    },
+    {
+      "en": "Nia's Curiosity",
+      "ja": "ニアの好奇心",
+      "confidence": "confirmed",
+      "character": "Nia",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nia",
+      "note": "ニアの固有カード。Prydwen: 「Nia's E1 reduces the cost of her 'Nia's Curiosity' card by 1」。gamerch(942038): 「ニアの好奇心：山札から上3枚を確認して1枚をドロー、2枚を破棄」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "ストローク",
+      "confidence": "unmatched",
+      "character": "Nia",
+      "source": "https://gamerch.com/chaoszeronightmare/942038",
+      "note": "ニアの開始時基本攻撃カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "ソウルリーフ",
+      "confidence": "unmatched",
+      "character": "Nia",
+      "source": "https://gamerch.com/chaoszeronightmare/942038",
+      "note": "ニアの固有カード（治癒と1ターン、カード破棄時にデシベル+弾力追加）。Prydwenの検索結果に『Soul Rip』という類似語が見つかったが、AIによる要約自体が『Soul Leaf』との表記揺れを指摘しており、確証が得られなかったため対応付けを見送った。"
+    },
+    {
+      "en": "",
+      "ja": "理性攪乱",
+      "confidence": "unmatched",
+      "character": "Nia",
+      "source": "https://gamerch.com/chaoszeronightmare/942038",
+      "note": "ニアのパッシブ効果（戦闘終了時のHPが戦闘開始時より高い場合、ストレス1増加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }

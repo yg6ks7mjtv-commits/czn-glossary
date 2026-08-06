@@ -306,6 +306,17 @@
   引用が得られなかった。
   (source: https://gamerch.com/chaoszeronightmare/942039)
 
+## Nia（ニア）
+
+- [ ] **ストローク** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/942038)
+- [ ] **ソウルリーフ** — 固有カード。治癒と1ターン、カード破棄時にデシベル+弾力追加。
+  Prydwenの検索結果に『Soul Rip』という類似語が見つかったが、AIによる要約自体が
+  『Soul Leaf』との表記揺れを指摘しており、確証が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942038)
+- [ ] **理性攪乱** — パッシブ効果。戦闘終了時のHPが戦闘開始時より高い場合、ストレス1増加。
+  (source: https://gamerch.com/chaoszeronightmare/942038)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
