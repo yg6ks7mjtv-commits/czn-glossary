@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 245,
-      "confirmed": 203,
+      "total": 259,
+      "confirmed": 211,
       "guess": 3,
-      "unmatched": 39,
-      "unmatched_ja_only": 34,
+      "unmatched": 45,
+      "unmatched_ja_only": 40,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru"],
-      "remaining": 21,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica"],
+      "remaining": 20,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1878,6 +1878,118 @@
       "character": "Haru",
       "source": "https://gamerch.com/chaoszeronightmare/946994",
       "note": "ハルの開始時基本カード（防御・サポート機能）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Ballista",
+      "ja": "バリスタ",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "ベロニカの固有生成カード群。Prydwen: 「Veronica delivers damage via Ballistas, which are unusable Attack Cards that activate themselves at the end of the turn for no cost」。gamerch(941895): 「バリスタ：ターン終了時に0コストで自動発動して敵にダメージを与える」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Firing Preparation",
+      "ja": "発射準備",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "ベロニカの固有カード（強化）。Prydwen: 「her Ballistas are created from her Firing Preparation Upgrade card」。gamerch(941895): 「発射準備：強化カード。バリスタを1枚生成し毎ターンバリスタを生成。開戦効果で1ターン目に確定登場」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Piercing Ballista",
+      "ja": "貫通バリスタ",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "バリスタの派生カード。Prydwen: 「Piercing Ballista deals 200% ATK and also has piercing, which ignores enemy shields」。gamerch(941895): 「貫通バリスタ：シールドを無視してダメージを与える」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Enhanced Ballista",
+      "ja": "強化バリスタ",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "バリスタの派生カード。Prydwen: 「Enhanced Ballista deals 200% ATK and has +30% critical chance」。gamerch(941895): 「強化バリスタ：会心率30%上乗せで会心が狙いやすい」と数値まで一致。語形も直訳一致。"
+    },
+    {
+      "en": "Giant Ballista",
+      "ja": "大型バリスタ",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "バリスタの派生カード。Prydwen: 「Giant Ballista deals 150% ATK but hits all enemies instead of one」。gamerch(941895): 「大型バリスタ：全体攻撃になるため対複数相手に優秀」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shelling Ballista",
+      "ja": "連射バリスタ",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "バリスタの派生カード。Prydwen: 「Shelling Ballista deals 100% but hits twice instead」。gamerch(941895): 「連射バリスタ：倍率は下がるが2回攻撃になる」と一致（2回攻撃・倍率低下）。直訳ではないが機能が完全一致するため対応と判断。"
+    },
+    {
+      "en": "Pendant of Resolution",
+      "ja": "決意のペンダント",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "ベロニカの固有カード。Prydwen: 「'Pendant of Resolution' - Can be removed in pure draw support builds, as her ballista damage tends to be very negligible」。gamerch(941895): 「決意のペンダント：装填を増やしてバリスタの火力を上げるカード」とバリスタ火力向上カードという点が一致。語形も直訳一致（語順のみ入れ替え）。"
+    },
+    {
+      "en": "Sir Kowalski",
+      "ja": "コワルスキー卿",
+      "confidence": "confirmed",
+      "character": "Veronica",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/veronica",
+      "note": "ベロニカの固有カード。Prydwen: 「'Sir Kowalski' - can be a great copy with Divine Epiphany cost-reduction, especially in Ballista-based builds」。gamerch(941895): 「コワルスキー卿：バリスタ強化とドロー1枚の組み合わせ」とバリスタ関連カードという点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "速射弾",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "ベロニカの開始時基本攻撃カード。Prydwenの検索スニペットに『Rapid Fire』という一致しそうな語が見つかったが、この英語名は既にルークの固有カード『連続撃発』に confirmed として登録済みで、同じ en を重複登録できない（schema制約）。同名カードが複数キャラに存在する可能性があり、ゲーム内で実際の表記を確認してから対応を決めること。"
+    },
+    {
+      "en": "",
+      "ja": "金琥花の幻想",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "ベロニカの開始時基本カード（詳細効果はgamerch側に記載なし）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "息抜き",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "ベロニカの固有カード（シールド付与と他キャラカードのドロー2枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "爆撃準備",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "ベロニカの固有カード（装填バフの最大数を4にする）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "狩りの時間",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "ベロニカの固有カード（全体貫通ダメージと装填最大まで得られる）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "超小型バリスタ",
+      "confidence": "unmatched",
+      "character": "Veronica",
+      "source": "https://gamerch.com/chaoszeronightmare/941895",
+      "note": "バリスタの派生カード（スキルカード3枚使用で生成が追加される）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
