@@ -142,6 +142,15 @@
 - [ ] **黒雲剣法** — 固有効果系統（黒雲態勢獲得カードから発動する効果系統の総称）。
   (source: https://gamerch.com/chaoszeronightmare/942023)
 
+## Orlea（オルレア）
+
+- [ ] **攻撃だ、みんな** — 開始時基本攻撃カード（2枚）。Prydwenでは「Orlea's
+  Basic Attack Card isn't notable」とだけ言及され、固有の英語カード名を
+  特定できなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942024)
+- [ ] **光の治癒** — 開始時基本治癒カード（1枚）。
+  (source: https://gamerch.com/chaoszeronightmare/942024)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

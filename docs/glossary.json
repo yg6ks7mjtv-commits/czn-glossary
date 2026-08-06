@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 290,
-      "confirmed": 234,
+      "total": 301,
+      "confirmed": 243,
       "guess": 3,
-      "unmatched": 53,
-      "unmatched_ja_only": 48,
+      "unmatched": 55,
+      "unmatched_ja_only": 50,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin"],
-      "remaining": 17,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea"],
+      "remaining": 16,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -2238,6 +2238,94 @@
       "character": "Rin",
       "source": "https://gamerch.com/chaoszeronightmare/942023",
       "note": "リンの固有効果系統（黒雲態勢獲得カードから発動する効果系統の総称）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Sacred Censer",
+      "ja": "聖なる香炉",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの固有カード。Prydwen: 「The Censer Build allows for 80% to 120% multiplicative buffing of all cards by using Sacred Censer」。gamerch(942024): 「聖なる香炉：創造物を2枚生成。開戦付きで開幕からランダムに創造物を生成」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Growth Acceleration",
+      "ja": "成長促進",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの固有カード。Prydwen: 「Growth Acceleration I is a base 0-cost card with Epiphany that can work on ally Retain effects」。gamerch(942024): 「成長促進：治癒+手札の自分カードの保存効果を2回発動」と保存効果起動という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Growing Creature",
+      "ja": "成長する創造物",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの固有カード。Prydwen: 「Sacred Censer can give more buffing than Growing Creature overall」。gamerch(942024): 「成長する創造物：創造物を1枚生成、保存で創造物★3に変更」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Softie",
+      "ja": "ふかちゃん",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの生成する創造物の一種。Prydwen: 「Softie 3-Star is the bread-and-butter buff for Orlea's Growth Acceleration」。gamerch(942024): 「ふかちゃん：ダメージバフ（保存効果で加算35%増加）」とダメージバフ役という点が一致。"
+    },
+    {
+      "en": "Sturdy",
+      "ja": "丈夫ちゃん",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの生成する創造物の一種。Prydwen: 「a Sturdie 3-star for healing/shielding」。gamerch(942024): 「丈夫ちゃん：回復・シールド（治癒100%）」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Speedy",
+      "ja": "素早いちゃん",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの生成する創造物の一種。Prydwen: 「Speedy...maximizing Orlea's own damage off her Swiftie creations」。gamerch(942024): 「素早いちゃん：アタッカー性能」とアタッカー役という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "Salvation",
+      "ja": "救援",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアのエゴスキル。Prydwen: 「Orlea's Ego Skill Salvation costs an exorbitant 6 EP and generates a ★★ of each creation」。gamerch(942024): 「救援：星2創造物を3種生成（ふかちゃん、素早いちゃん、丈夫ちゃん）」と完全一致。"
+    },
+    {
+      "en": "Annoying",
+      "ja": "めんどくさい",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの固有カード。Prydwen: 「'Annoying' - This is often the priority remove over basics...gives very little value」。gamerch(942024): 「めんどくさい：手札のカード数×固定40%ダメージ+20%治癒」と一致（優先度の低いカードという位置づけ）。語形も直訳一致。"
+    },
+    {
+      "en": "Will of Light",
+      "ja": "光の意志",
+      "confidence": "confirmed",
+      "character": "Orlea",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/orlea",
+      "note": "オルレアの固有カード。Prydwen: 「a variation of OTK-Lea (Softie 3's and Will of Lights)」。gamerch(942024): 「光の意志：1コストで200%回復と手札の保存効果全て発動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "攻撃だ、みんな",
+      "confidence": "unmatched",
+      "character": "Orlea",
+      "source": "https://gamerch.com/chaoszeronightmare/942024",
+      "note": "オルレアの開始時基本攻撃カード（2枚）。Prydwenでは「Orlea's Basic Attack Card isn't notable」とだけ言及され、固有の英語カード名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "光の治癒",
+      "confidence": "unmatched",
+      "character": "Orlea",
+      "source": "https://gamerch.com/chaoszeronightmare/942024",
+      "note": "オルレアの開始時基本治癒カード（1枚）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
