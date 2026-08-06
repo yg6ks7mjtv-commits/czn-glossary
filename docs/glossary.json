@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 94,
-      "confirmed": 80,
+      "total": 108,
+      "confirmed": 91,
       "guess": 2,
-      "unmatched": 12,
-      "unmatched_ja_only": 8,
+      "unmatched": 15,
+      "unmatched_ja_only": 11,
       "unmatched_en_only": 4
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria"],
-      "remaining": 34,
+      "done": ["Tenebria", "Luke"],
+      "remaining": 33,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -670,6 +670,118 @@
       "character": "Tenebria",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
       "note": "テネブレアがリズムカード発動時に敵へ付与する固有デバフ候補。Prydwen: 「When a Rhythm Card is activated, it inflicts 1 'All Eyes On You' on the target」。gamerch: 「リズムカードから受けるダメージ量40%増加」と効果の方向性は一致するが、英日で語形が大きく異なるため（直訳・音写の対応関係が無い）、効果説明の完全一致確認が特に重要。40%という数値の一致もゲーム内で未確認。ゲーム内での確認が必要。"
+    },
+    {
+      "en": "Rapid Fire",
+      "ja": "連続撃発",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの固有カード。Prydwen: 「Rapid Fire Epiphanies have a guaranteed chance at granting Handgun Bullets with each hit」。gamerch(942020): 「1コストの単体2回攻撃。会心攻撃数に応じて弾丸生成」と一致（会心/ヒットで弾丸生成）。"
+    },
+    {
+      "en": "Stealth Reload",
+      "ja": "隠密な装填",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの固有カード。Prydwen: 「Stealth Reload IV is a 0-cost Upgrade but cuts down the number of Bullets you get from this card」。gamerch(942020): 「1コストでハンドガン弾丸2枚生成。弾丸生成起点となるカード」と一致。"
+    },
+    {
+      "en": "Handgun Bullet",
+      "ja": "ハンドガン弾丸",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの生成カード群の総称。Prydwen: 「granting Handgun Bullets with each hit」等で頻出。gamerch(942020)の「ハンドガン弾丸（生成カード）」カテゴリ名と一致。"
+    },
+    {
+      "en": "Lethal Design",
+      "ja": "殺傷の設計",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークのエゴスキル。Prydwen: 「Lethal Design...deals more damage the more cards you have in your hand, starting at 450% Damage and dealing an additional 25% per card in your hand」。gamerch(942020): 「EP5、ダメージ450%、手札のカード数に応じて基本ダメージ量+25%」と数値まで一致。"
+    },
+    {
+      "en": "Magnum Shot",
+      "ja": "マグナム弾",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークのハンドガン弾丸カードの一つ。Prydwen: 「Magnum Shot (0 Cost Attack - 70% Damage)」。gamerch(942020): 「マグナム弾:【蒸発/消滅/弾丸】ダメージ85%」と数値は凸/強化差で異なるが同種の基本弾丸カードとして一致。"
+    },
+    {
+      "en": "Silver Shot",
+      "ja": "銀弾",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークのハンドガン弾丸カードの一つ。Prydwen: 「Silver Shot increases damage by 100% against Attack Weakness」。gamerch(942020): 「銀弾...弱点攻撃：ダメージ量100%増加」と一致。"
+    },
+    {
+      "en": "Uranium Shot",
+      "ja": "ウラニウム弾",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークのハンドガン弾丸カードの一つ。Prydwen: 「Uranium Shot increases damage by 100% if the target has Shield」。gamerch(942020): 「ウラニウム弾...対象がシールドを所持中の場合、ダメージ量100%増加」と一致。"
+    },
+    {
+      "en": "Tracer Shot",
+      "ja": "曳光弾",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークのハンドガン弾丸カードの一つ。Prydwen: 「Tracer Shot marks the target」。gamerch(942020): 「曳光弾...標識1」と一致（標識=Mark）。"
+    },
+    {
+      "en": "HVAP Round",
+      "ja": "高速徹甲弾",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの6凸限定カード。Prydwen: 「whenever 12 Bullet cards are used, Luke creates 1 'HVAP Round' card...deals 200% damage and is a guaranteed Critical Strike」。gamerch(942020): 「高速徹甲弾：6凸のみ入手可能な限定カード」と、限定入手条件が一致。"
+    },
+    {
+      "en": "Single Shot",
+      "ja": "単発射撃",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの開始カード（基本攻撃）。Prydwen: 「Single Shot」カードとして言及。gamerch(942020): 「単発射撃：1コストの単体攻撃。潜在力で弾丸属性が付与される」と一致。"
+    },
+    {
+      "en": "Shadow Concealment",
+      "ja": "影隠れ",
+      "confidence": "confirmed",
+      "character": "Luke",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "ルークの開始カード（基本シールド）。Prydwen: 「'Shadow Concealment' which is removed in basically any Luke deck」。gamerch(942020): 「影隠れ：シールド獲得カード。基本構成の定番シールドカード」と一致（基本構成では外れる定番カード）。"
+    },
+    {
+      "en": "",
+      "ja": "機会捕捉",
+      "confidence": "unmatched",
+      "character": "Luke",
+      "source": "https://gamerch.com/chaoszeronightmare/942020",
+      "note": "ルークの固有カード（主導、シールドと弾丸に加算バフ付与）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "魔眼の乱舞",
+      "confidence": "unmatched",
+      "character": "Luke",
+      "source": "https://gamerch.com/chaoszeronightmare/942020",
+      "note": "ルークの固有カード（使用済み弾丸カード数に応じてヒット数追加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "必殺弾",
+      "confidence": "unmatched",
+      "character": "Luke",
+      "source": "https://gamerch.com/chaoszeronightmare/942020",
+      "note": "ルークの固有カード（ハンドガン弾丸5枚使用で使用可能になる500%ダメージの必殺技）。Prydwenでは「Unique」「Bullet」タグの組み合わせとしてのみ言及されており、固有の英語カード名が見当たらない。"
     }
   ]
 }
