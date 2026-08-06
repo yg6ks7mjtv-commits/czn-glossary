@@ -231,6 +231,14 @@
 - [ ] **救** — 開始時基本回復カード。
   (source: https://gamerch.com/chaoszeronightmare/942028)
 
+## Beryl（ベリル）
+
+- [ ] **最大出力チャージ弾** — エゴスキル。EP5で全体攻撃するエゴスキル。
+  追加効果なく全体攻撃のみ。効果の一致するPrydwen記述は見つかったが
+  （「Ego skill costs 5 EP and does a large amount of AoE damage」）、
+  スキル名自体の引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942029)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 348,
-      "confirmed": 266,
+      "total": 357,
+      "confirmed": 274,
       "guess": 3,
-      "unmatched": 79,
-      "unmatched_ja_only": 74,
+      "unmatched": 80,
+      "unmatched_ja_only": 75,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron"],
-      "remaining": 11,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl"],
+      "remaining": 10,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2703,6 +2703,78 @@
       "character": "Kayron",
       "source": "https://gamerch.com/chaoszeronightmare/942028",
       "note": "カイロンの開始時基本回復カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Launcher",
+      "ja": "ランチャー",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの開始時基本攻撃カード。Prydwen: 「Beryl's 3-1 Potential increases the multipliers of both the Launcher and Charge Launcher Basic Attacks」。gamerch(942029): 「ランチャー：基本的な1コスト攻撃カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Charge Launcher",
+      "ja": "チャージランチャー",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの開始時基本攻撃カード。Prydwen: 「the Launcher and Charge Launcher Basic Attacks」。gamerch(942029): 「チャージランチャー：2コストの攻撃カード。より高いダメージを提供」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Barrier",
+      "ja": "バリア",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの開始時基本シールドカード。Prydwen: 「Barrier is removed in basically any Beryl deck」。gamerch(942029): 「バリア：シールド獲得カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Opening Found",
+      "ja": "隙あり",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの開始時基本攻撃カード。Prydwen: 「most efficiently used on Opening Found due to its multi-hitting」。gamerch(942029): 「隙あり：1コスト単体攻撃。保存でヒット数が1回追加される」とマルチヒットという点が一致。"
+    },
+    {
+      "en": "Guilty Pleasure",
+      "ja": "隠してたチョコバー",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの固有カード。Prydwen: 「'Guilty Pleasure' is a [Consume] card that draws 3 cards immediately upon use」。gamerch(942029): 「隠してたチョコバー：消滅付きのドロー3枚。一度切りだがコスト0で3枚ドロー」と完全一致。直訳ではないが「隠れて食べる後ろめたいお菓子」という共通イメージのある意訳と判断。"
+    },
+    {
+      "en": "Charged Shot",
+      "ja": "チャージ弾",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの固有カード。Prydwen: 「'Charged Shot' is a 2 Cost [Retain] card...if used while in the Retain state, its damage is additionally increased by 80%」。gamerch(942029): 「チャージ弾：保存で加算バフされるので保存するほどダメージが上がる。2コストの攻撃カード」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Unlimited Firepower",
+      "ja": "無限の火力",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの固有カード。Prydwen: 「'Unlimited Firepower' with variants I, II, and III」。gamerch(942029): 「無限の火力：シールドと次の攻撃カードに加算バフを付与」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Heavy Weapons Specialist",
+      "ja": "重火器専門家",
+      "confidence": "confirmed",
+      "character": "Beryl",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/beryl",
+      "note": "ベリルの固有カード。Prydwen: 「card creation via 'Heavy Weapons Specialist' to generate a card to hold onto」。gamerch(942029): 「重火器専門家：保存付きカードをコスト-1でランダム1枚生成」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "最大出力チャージ弾",
+      "confidence": "unmatched",
+      "character": "Beryl",
+      "source": "https://gamerch.com/chaoszeronightmare/942029",
+      "note": "ベリルのエゴスキル（EP5で全体攻撃するエゴスキル。追加効果なく全体攻撃のみ）。Prydwenで一致する効果説明（「Ego skill costs 5 EP and does a large amount of AoE damage」）は見つかったが、スキル名自体の引用が得られなかった。"
     }
   ]
 }
