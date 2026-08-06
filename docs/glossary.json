@@ -26,8 +26,8 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 204,
-      "confirmed": 170,
+      "total": 214,
+      "confirmed": 180,
       "guess": 2,
       "unmatched": 32,
       "unmatched_ja_only": 27,
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine"],
-      "remaining": 25,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel"],
+      "remaining": 24,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1550,6 +1550,86 @@
       "character": "Nine",
       "source": "https://gamerch.com/chaoszeronightmare/958782",
       "note": "ナインの開始時基本シールドカード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Homing Laser",
+      "ja": "ホーミングレーザー",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有カード。Prydwen: 「Homing Laser is Sereniel's main damage card and is essential to her kit」。gamerch(955573): 「ホーミングレーザー：コスト0の単体攻撃+残光2付与、大破時に墓地から手札に移動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Afterglow",
+      "ja": "残光",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有バフ。Prydwen: 「Afterglow is a buff that gives +1 Tenacity Damage to Attack Cards or +50% Damage if the enemy is already Ravaged, decreasing by 1 stack each time」。gamerch(955573)の各カードの「残光2付与」等の記述と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Plasma Missile",
+      "ja": "プラズマミサイル",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有カード。Prydwen: 「Plasma Missile III...Plasma Missile IV creates 3 Homing Laser-L's in the Draw Pile」。gamerch(955573): 「プラズマミサイル：コスト1の単体攻撃+強靭度ダメ0.5、非大破時に再発動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shining Core",
+      "ja": "シャイニングコア",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有カード。Prydwen: 「Shining Core III provides Homing Laser-L generation」。gamerch(955573): 「シャイニングコア：コスト1でホーミングレーザーL2枚生成」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Pale Shooting Star",
+      "ja": "ペイル・シューティングスター",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有カード。Prydwen: 「through Pale Shooting Star」でホーミングレーザーLの活用手段として言及。gamerch(955573): 「ペイル・シューティングスター：コスト2で単体攻撃、山札と墓地のホーミングレーザー3枚発動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Homing Laser-L",
+      "ja": "ホーミングレーザーL",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "ホーミングレーザーの劣化生成カード。Prydwen: 「creates 3 Homing Laser-L's in the Draw Pile」。gamerch(955573): 「ホーミングレーザーL：ホーミングレーザーの劣化版、2回使用で消滅」と一致。"
+    },
+    {
+      "en": "Pulse Fire",
+      "ja": "パルス攻撃",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの開始時基本攻撃カード。Prydwen: 「Sereniel's Pulse Fire receives +5% Damage Amount」。gamerch(955573): 「パルス攻撃：基本的な単体攻撃カード（2枚）」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Cobalt Light",
+      "ja": "コバルトライト",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの固有カード。Prydwen: 「Cobalt Light I is available as an epiphany option that reduces its cost by 1 on Ravage」。gamerch(955573): 「コバルトライト：コスト3でランダムな敵に4回攻撃+強靭度ダメージ1」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Death Halo",
+      "ja": "デスヘイロー",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルのエゴスキル。Prydwen: 「Death Halo can move Homing Laser L cards」。gamerch(955573): 「デスヘイロー：全体攻撃と消滅済みのホーミングレーザーLを手札に移動」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Magnetic Field",
+      "ja": "マグネティックフィールド",
+      "confidence": "confirmed",
+      "character": "Sereniel",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/sereniel",
+      "note": "セレニエルの開始時基本シールドカード。Prydwen: 「Magnetic Field is removed in basically any Sereniel deck. This is Sereniel's basic shield starting card」。gamerch(955573): 「マグネティックフィールド：シールド獲得カード」と一致。語形も直訳一致。"
     }
   ]
 }
