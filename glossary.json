@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 329,
-      "confirmed": 259,
+      "total": 339,
+      "confirmed": 262,
       "guess": 3,
-      "unmatched": 67,
-      "unmatched_ja_only": 62,
+      "unmatched": 74,
+      "unmatched_ja_only": 69,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa"],
-      "remaining": 13,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo"],
+      "remaining": 12,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -2551,6 +2551,86 @@
       "character": "Renoa",
       "source": "https://gamerch.com/chaoszeronightmare/942026",
       "note": "レノアの開始時基本シールドカード。Prydwenでは「Renoa has a basic shield that gains no additional functionality outside of Potential 2」とだけ言及され、固有の英語カード名を特定できなかった。"
+    },
+    {
+      "en": "Hunting Instincts",
+      "ja": "狩猟本能",
+      "confidence": "confirmed",
+      "character": "Hugo",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hugo",
+      "note": "ヒューゴの開始カード（強化）。Prydwen: 「gaining stacks whenever an Upgrade or Skill card of another Combatant is used whilst under the effect of Hugo's 'Hunting Instincts' Upgrade card」。gamerch(942027): 「狩猟本能：『狩猟の開始』をスタックできるようにする」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dingo Howling",
+      "ja": "ディンゴの遠吠え",
+      "confidence": "confirmed",
+      "character": "Hugo",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hugo",
+      "note": "ヒューゴの固有カード。Prydwenの検索結果に「Dingo Howling V」の言及あり。gamerch(942027): 「ディンゴの遠吠え：1コストでシールド + 狩猟の開始2獲得」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Defense System",
+      "ja": "防御システム",
+      "confidence": "confirmed",
+      "character": "Hugo",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hugo",
+      "note": "ヒューゴの開始時基本シールドカード。Prydwen: 「'Defense System' doesn't grant him stacks, making it a lower priority card」。gamerch(942027): 「防御システム：シールド獲得カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "ナイフ投げ",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの開始時基本攻撃カード（2枚）。Prydwenでは「Hugo's Basic Attack」とだけ言及され、固有の英語カード名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "ナイフ投擲",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの固有カード（ランダムな敵に攻撃×3 + 対象数分の狩猟の開始獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "早い解決方法",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの固有カード（コスト1で単体攻撃 + 狩猟の開始状態で攻撃カード1枚ドロー）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "万事屋のやり方",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの固有カード（狩猟の開始による追加攻撃のダメージ量が40%増加）。Prydwenに『Fixer's Approach』という似た語があったが、効果説明（40%×2の別ダメージ）が一致しないため対応付けを見送った。"
+    },
+    {
+      "en": "",
+      "ja": "最終解決手段",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴのエゴスキル（EP6で全体ダメージ + 狩猟の開始へのバフ、乗算30%バフ）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "万事屋の憤怒",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの固有バフ（ダメージ量+10%、最大4重複）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "狩猟の証",
+      "confidence": "unmatched",
+      "character": "Hugo",
+      "source": "https://gamerch.com/chaoszeronightmare/942027",
+      "note": "ヒューゴの固有バフ（狩猟の開始効果でヒット時、士気2を獲得）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }

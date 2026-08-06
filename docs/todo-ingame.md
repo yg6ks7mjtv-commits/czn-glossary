@@ -195,6 +195,26 @@
   日本語名を確認したら、en=Requiem, character=Renoa で新規登録すること。
   (source: https://gamerch.com/chaoszeronightmare/942026)
 
+## Hugo（ヒューゴ）
+
+- [ ] **ナイフ投げ** — 開始時基本攻撃カード（2枚）。Prydwenでは「Hugo's Basic
+  Attack」とだけ言及され、固有の英語カード名を特定できなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **ナイフ投擲** — 固有カード。ランダムな敵に攻撃×3 + 対象数分の狩猟の開始獲得。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **早い解決方法** — 固有カード。コスト1で単体攻撃 + 狩猟の開始状態で攻撃カード1枚ドロー。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **万事屋のやり方** — 固有カード。狩猟の開始による追加攻撃のダメージ量が40%増加。
+  Prydwenに『Fixer's Approach』という似た語があったが、効果説明（40%×2の
+  別ダメージ）が一致しないため対応付けを見送った。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **最終解決手段** — エゴスキル。EP6で全体ダメージ + 狩猟の開始へのバフ（乗算30%）。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **万事屋の憤怒** — 固有バフ。ダメージ量+10%、最大4重複。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+- [ ] **狩猟の証** — 固有バフ。狩猟の開始効果でヒット時、士気2を獲得。
+  (source: https://gamerch.com/chaoszeronightmare/942027)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。
