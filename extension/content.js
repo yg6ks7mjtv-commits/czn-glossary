@@ -268,7 +268,10 @@
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
       var level = normLevel(e.level);
-      var value = { effect: e.effect, source: effectSource(e) };
+      // incomplete: 自動収集時に「評価コメントとの境界が曖昧で、安全側
+      // （先頭の一文だけ）に切り出した」ことを示すフラグ。末尾の効果節を
+      // 取りこぼしている可能性がある（ingameで上書きされれば解消する）。
+      var value = { effect: e.effect, source: effectSource(e), incomplete: e.incomplete === true };
       if (e.character) {
         setEffectIfAllowed(idx, effectsKey(e.character, e.ja_card, level), value);
       }
@@ -571,7 +574,11 @@
       div.className = 'czn-effect-text-ja';
       // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
       // 実機確認済み（ingame）の文言と一目で区別できるようにする。
-      div.textContent = effect.effect + (effect.source === 'gamerch' ? '※' : '');
+      // incomplete（切り出しが不完全な可能性がある）には「(一部)」も付ける。
+      // 両方を満たす場合は併記する。
+      div.textContent = effect.effect +
+        (effect.source === 'gamerch' ? '※' : '') +
+        (effect.incomplete ? '(一部)' : '');
       div.style.cssText =
         'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
         'white-space:pre-wrap;font-size:0.9em;color:inherit;';
