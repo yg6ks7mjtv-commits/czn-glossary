@@ -18,7 +18,11 @@
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
 //      する。該当levelの効果文が手元データにあれば、カード枠内の効果文要素
 //      （画像下部、コスト数字・カード名・種別表示・Show Effectsを除いた
-//      最長のテキスト要素）の直後に、英語を消さず日本語効果文を追記する
+//      最長のテキスト要素）そのものを書き換える。新しい要素を挿入する方式は
+//      幅・高さが0に潰れて表示に失敗したため、既に確実に表示されている
+//      その要素の中身を日本語効果文に差し替え、背景白・文字黒・角丸を付け、
+//      元の英語は title 属性に退避する（消さずに保持するが表示はしない）。
+//      対象要素が見つからないカードには何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う
@@ -566,32 +570,32 @@
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
       var effectEl = findEffectTextEl(c.block, excludeEls);
-      var target = effectEl || c.block; // 効果文要素が見つからなければ枠自体を対象に
 
-      if (target.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
+      // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
+      // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
+      // にした。対象が見つからないカードには何もしない（英語のまま残す）。
+      if (!effectEl) { PROCESSED.add(c.block); return; }
+      if (effectEl.getAttribute('data-czn-done') === '1') { PROCESSED.add(c.block); return; }
 
-      var div = document.createElement('div');
-      div.className = 'czn-effect-text-ja';
       // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
       // 実機確認済み（ingame）の文言と一目で区別できるようにする。
       // incomplete（切り出しが不完全な可能性がある）には「(一部)」も付ける。
       // 両方を満たす場合は併記する。
-      div.textContent = effect.effect +
+      var jaText = effect.effect +
         (effect.source === 'gamerch' ? '※' : '') +
         (effect.incomplete ? '(一部)' : '');
-      div.style.cssText =
-        'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
-        'white-space:pre-wrap;font-size:0.9em;color:inherit;';
 
-      if (effectEl) {
-        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
-      } else {
-        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
-      }
-      target.setAttribute('data-czn-effect', '1');
+      effectEl.title = effectEl.textContent; // 元の英語をtitle属性に退避
+      effectEl.textContent = jaText;
+      effectEl.style.background = '#fff';
+      effectEl.style.color = '#111';
+      effectEl.style.padding = '4px 6px';
+      effectEl.style.borderRadius = '4px';
+      effectEl.setAttribute('data-czn-done', '1');
+
       PROCESSED.add(c.block);
       inserted++;
-      log('inserted effect for', c.nameText, 'level', c.level);
+      log('rewrote effect text for', c.nameText, 'level', c.level);
     });
 
     diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
@@ -616,7 +620,7 @@
       while (p && p.nodeType === 1) {
         var cls = p.className ? String(p.className) : '';
         if (SKIP_TAGS.test(p.nodeName) || cls.indexOf(REPLACED_CLS) !== -1 ||
-            cls.indexOf('czn-effect-text-ja') !== -1) {
+            p.getAttribute('data-czn-done') === '1') {
           ok = false;
           break;
         }
