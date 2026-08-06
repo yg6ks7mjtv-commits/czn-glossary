@@ -298,6 +298,14 @@
   英数字の略称のため検索で有効な結果が得られなかった。
   (source: https://gamerch.com/chaoszeronightmare/942033)
 
+## Cassius（カシウス）
+
+- [ ] **デストリック** — エゴスキル。クエストカード2枚生成、敵に1ターン士気-3を
+  付与するエゴスキル。効果の一致するPrydwen記述は見つかったが
+  （「decreases Morale of all enemies by 3 for 1 turn」）、スキル名自体の
+  引用が得られなかった。
+  (source: https://gamerch.com/chaoszeronightmare/942039)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

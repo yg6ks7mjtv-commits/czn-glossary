@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 407,
-      "confirmed": 305,
+      "total": 416,
+      "confirmed": 313,
       "guess": 3,
-      "unmatched": 99,
-      "unmatched_ja_only": 94,
+      "unmatched": 100,
+      "unmatched_ja_only": 95,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -48,8 +48,8 @@
     "duplicate_policy": "2026-08-06追加。en/ja は原則ユニークだが、character が全エントリで異なる場合のみ重複を許可する（同名カードが複数キャラに存在するケース。例: Rapid Fire = Luke『連続撃発』/ Veronica『速射弾』）。scripts/sync.py の validate() が機械的にチェックする。docs/bookmarklet.js は同じ en に複数の ja が存在する場合、実行時に動的に英語併記（KEEP_EN相当）として扱う。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas"],
-      "remaining": 5,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru", "Veronica", "Khalipe", "Magna", "Rin", "Orlea", "Mei Lin", "Narja", "Renoa", "Hugo", "Kayron", "Beryl", "Maribell", "Owen", "Rei", "Selena", "Lucas", "Cassius"],
+      "remaining": 4,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。Narja は当初 Nine の次に処理する予定だったが誤って抜けており、2026-08-06のバッチ3で気づいて処理した。"
     }
   },
@@ -3175,6 +3175,78 @@
       "character": "Lucas",
       "source": "https://gamerch.com/chaoszeronightmare/942033",
       "note": "ルーカスの固有カード（弾丸カード消滅時、敵全体に固定ダメージを与える）。英数字の略称のためsite:prydwen.gg 検索で有効な結果が得られなかった。"
+    },
+    {
+      "en": "Pop Eyed Popper",
+      "ja": "ポップアイドポッパー",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの開始カード。Prydwen: 「Pop Eyed Popper randomly starting 1 of 4 Quests, which generate their associated Quest Cards upon completion」。gamerch(942039): 「ポップアイドポッパー：ランダムでクエストを開始する。クエスト毎の条件を達成するとコスト0のカードが生成される」と完全一致。語形も音写として一致。"
+    },
+    {
+      "en": "Joker",
+      "ja": "ジョーカー",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスのSignature Card。Prydwen: 「Joker is Cassius' Signature Card that allows him to search the whole Draw Pile to draw a card of your choice for a 1 AP tax」。gamerch(942039): 「ジョーカー：山札から任意のカードをサーチできる。1凸で捨て札も対象に追加」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Shuffle",
+      "ja": "カードシャッフル",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの固有カード。Prydwen: 「it doesn't exhaust like Shuffle」。gamerch(942039): 「カードシャッフル：手札のカード全て破棄、枚数分ドロー。消滅付き」と、消滅(exhaust)を伴う点が一致。"
+    },
+    {
+      "en": "Devil Dice",
+      "ja": "デビルダイス",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの固有カード。Prydwen: 「Devil Dice is the go-to copy if you have a good Epiphany on it」。gamerch(942039): 「デビルダイス：単体攻撃とドロー1枚」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Wild Card",
+      "ja": "ワイルドカード",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの開始時基本カード。Prydwen: 「Cassius's basic cards (Card, Wild Card, Mana Field) are weak and should be removed in optimized builds」。gamerch(942039): 「ワイルドカード：基本的な汎用カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Card",
+      "ja": "カード",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの開始時基本攻撃カード。Prydwen: 「Cassius's basic cards (Card, Wild Card, Mana Field)」。gamerch(942039): 「カード：コスト1の基本攻撃カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Mana Field",
+      "ja": "魔力場",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの開始時基本治癒カード。Prydwen: 「Mana Field - Cassius' basic heal is kept in some decks to allow him to activate the Clover of the Forest effect」。gamerch(942039): 「魔力場：治癒効果を持つ基本カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Dice Trick",
+      "ja": "ダイストリック",
+      "confidence": "confirmed",
+      "character": "Cassius",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/cassius",
+      "note": "カシウスの固有カード。Prydwen: 「Dice Trick - If playing around morale buffing, Dice Trick...can become a 3-Morale for 0-cost card」。gamerch(942039): 「ダイストリック：コスト2の単体攻撃+1ターン士気1減少。クエスト完了で永続的にコスト減少する」と士気・コスト関連という点が一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "デストリック",
+      "confidence": "unmatched",
+      "character": "Cassius",
+      "source": "https://gamerch.com/chaoszeronightmare/942039",
+      "note": "カシウスのエゴスキル（クエストカード2枚生成、敵に1ターン士気-3を付与するエゴスキル）。効果の一致するPrydwen記述は見つかったが（「decreases Morale of all enemies by 3 for 1 turn」）、スキル名自体の引用が得られなかった。"
     }
   ]
 }
