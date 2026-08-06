@@ -21,7 +21,12 @@
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う
-//   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする
+//   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
+//      「カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件」の内訳を表示する。
+//      カード枠は種別表示から検出を試みた件数、名前取得はそのうちカード名まで
+//      特定できた件数、ユニークはベース名（ローマ数字を除いた名前、レベル違いは
+//      1件にまとめる）の種類数。同名でもカード枠ごとに別カードとして処理し、
+//      名前による集約・重複排除は一切行わない
 //
 // 実装上の注意:
 //   - www.prydwen.gg への自動アクセスが403で拒否されるため、細部のセレクタは
@@ -402,12 +407,17 @@
         levelBadgeEl: levelBadgeEl,
         rawNameText: nameText,
         nameText: nameText,
+        baseName: parsed.base,
         level: level,
         entry: ctx.resolved[parsed.base] || null
       });
     });
 
-    return candidates;
+    // attemptedCount: 種別表示(Attack/Skill)が見つかった件数（＝カード枠の
+    // 試行件数）。candidates.length はそのうちカード名まで特定できた件数。
+    // 同名カード（例: Sword Rain I〜V）も1件ずつ別の candidate として積む
+    // （box ごとに処理するため、名前で集約・重複排除はしない）。
+    return { candidates: candidates, attemptedCount: typeLabels.length };
   }
 
   // useMarkerStrategy: false のときだけ使う、セレクタ直指定の経路。
@@ -442,12 +452,13 @@
         levelBadgeEl: levelBadgeEl,
         rawNameText: nameText,
         nameText: nameText,
+        baseName: parsed.base,
         level: level,
         entry: ctx.resolved[parsed.base] || null
       });
     });
 
-    return candidates;
+    return { candidates: candidates, attemptedCount: containers.length };
   }
 
   function collectCardCandidates(ctx) {
@@ -460,7 +471,8 @@
   //
   // 戻り値の diagnostics は「効果文0件」のときにトーストで理由を出すための
   // デバッグ情報（検出名 / glossaryで日本語化できたか / 効果文が見つかったか）。
-  // 最大3件まで持つ。
+  // 最大10件まで持つ。candidates は box ごとに独立しているため、同名カード
+  // （Sword Rain I〜V 等）も集約せずそれぞれ別行として積む。
 
   function insertEffects(candidates, effectsIdx, charName) {
     var inserted = 0;
@@ -473,7 +485,7 @@
         ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName, c.level)
         : null;
 
-      if (diagnostics.length < 3) {
+      if (diagnostics.length < 10) {
         diagnostics.push({
           rawNameText: c.rawNameText || c.nameText,
           nameText: c.nameText,
@@ -613,29 +625,38 @@
     var ctx = buildContext(entries, charName);
     var effectsIdx = buildEffectsIndex(effects);
 
-    var candidates = collectCardCandidates(ctx);           // 1. カード名（原文）
+    var collected = collectCardCandidates(ctx);             // 1. カード名（原文）
+    var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName); // 2. 効果文挿入
-    var replacedCount = replaceTermsOnPage(ctx);            // 3. 用語置換
+    var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
+
+    // ユニーク件数はカード枠（box）単位ではなく、ベース名（ローマ数字除去後）
+    // 単位で数える。同じ名前の複数レベル（Sword Rain I〜V 等）は1件として
+    // まとめて数え、box ごとの処理そのものには一切影響しない（診断表示用）。
+    var uniqueNames = new Set(candidates.map(function (c) { return c.baseName; }));
 
     return {
       ctx: ctx,
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
-      candidateCount: insertResult.candidateCount,
+      attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
+      resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
+      uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
       replacedCount: replacedCount
     };
   }
 
   function formatToastMessage(result) {
-    if (result.candidateCount === 0 && result.replacedCount === 0) {
+    if (result.attemptedCount === 0 && result.replacedCount === 0) {
       return 'CZN: 対象が見つかりません';
     }
 
-    var lines = ['CZN: カード枠' + result.candidateCount + '件 / 効果文' +
+    var lines = ['CZN: カード枠' + result.attemptedCount + '件 / 名前取得' +
+      result.resolvedCount + '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件'];
 
     if (result.insertedCount === 0) {
-      if (result.candidateCount === 0) {
+      if (result.resolvedCount === 0) {
         lines.push('→ カード枠（カード名+種別表示の最小共通祖先）を検出できません');
       } else {
         result.diagnostics.forEach(function (d) {
@@ -672,7 +693,7 @@
         setTimeout(function () {
           pending = false;
           var freshEffectsIdx = buildEffectsIndex(effects);
-          var freshCandidates = collectCardCandidates(ctx);
+          var freshCandidates = collectCardCandidates(ctx).candidates;
           insertEffects(freshCandidates, freshEffectsIdx, currentCharacter());
         }, 500);
       });
