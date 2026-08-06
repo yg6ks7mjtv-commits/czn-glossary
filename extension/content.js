@@ -16,13 +16,19 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、カード枠内の効果文要素
-//      （画像下部、コスト数字・カード名・種別表示・Show Effectsを除いた
-//      最長のテキスト要素）そのものを書き換える。新しい要素を挿入する方式は
-//      幅・高さが0に潰れて表示に失敗したため、既に確実に表示されている
-//      その要素の中身を日本語効果文に差し替え、背景白・文字黒・角丸を付け、
-//      元の英語は title 属性に退避する（消さずに保持するが表示はしない）。
-//      対象要素が見つからないカードには何もしない（英語のまま残る）
+//      する。該当levelの効果文が手元データにあれば、カード枠内の「英語の
+//      効果文要素」そのものを書き換える。候補（コスト数字・カード名・種別
+//      表示・ローマ数字バッジを除いた葉要素）は、[Linked]/[Unique]のような
+//      角括弧タグを含むもの／「Show Effects」と同じ親要素を共有するもの／
+//      カード名要素より下（DOM順で後）にあるものを優先するスコアリングで
+//      選ぶ（単純な最長文字列だけを基準にすると、カード名の重複要素を
+//      誤って選ぶことがあったため）。カード名と同一テキストの重複要素も
+//      候補から除外する。新しい要素を挿入する方式は幅・高さが0に潰れて
+//      表示に失敗したため、既に確実に表示されているその要素の中身を日本語
+//      効果文に差し替え、背景白・文字黒・角丸を付け、白い折り返し表示
+//      （white-space:normal 等でカード名側の省略表示CSSの影響を打ち消す）
+//      にする。元の英語は title 属性に退避する（消さずに保持するが表示は
+//      しない）。対象要素が見つからないカードには何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う
@@ -37,7 +43,9 @@
 //      は、効果文が見つかったもの・glossaryで日本語化できたもの・ヒラメキ
 //      段階が付いているものを優先して並べ、実際に探索したキーと保有キー一覧
 //      も表示する（DOM順のキャップで手がかりの多いカードが漏れないように
-//      するため、また照合ミスの原因を切り分けやすくするため）
+//      するため、また照合ミスの原因を切り分けやすくするため）。1件以上
+//      書き換えられたときは、書き換えた要素のタグ名・クラス名・書き換え前の
+//      テキスト冒頭30文字も出す（対象を取り違えていないか確認するため）
 //   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
 //      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
@@ -401,26 +409,57 @@
     return null;
   }
 
-  // box 内で、コスト数字・カード名・種別表示・"Show Effects"・ローマ数字
-  // バッジを除いた葉要素のうち、最もテキストが長いものを効果文の要素とみなす
-  // （画像下部の効果文を想定）。日本語効果文はこの要素の直後（afterend）に
-  // 挿入する。
-  function findEffectTextEl(box, excludeEls) {
+  // box 内で、カード画像下部にある「英語の効果文」の要素を特定する。
+  // コスト数字・カード名・種別表示・ローマ数字バッジを除いた葉要素を候補にし、
+  // 以下の手がかりでスコアリングして最有力のものを選ぶ（単純な「最長文字列」
+  // だけを基準にすると、カード名の要素が幅固定・省略表示（…）のCSSを
+  // 持つ別の重複要素だった場合に誤って選んでしまうことがあったため）。
+  //   - [Linked] [Unique] のような角括弧タグを含む（効果文にほぼ必ず付く
+  //     ので最も強い手がかり）
+  //   - 「Show Effects」と同じ直近の親要素を共有している（＝同じ枠内）
+  //   - カード名要素より後（DOM順で下）に位置する
+  // nameEl 自身は除外済みでも、同じテキストを持つ別要素（重複表示）が
+  // box内に残っていることがあるため、テキスト内容でも比較して除外する。
+  function findEffectTextEl(box, excludeEls, nameEl) {
     var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
     var node;
-    var best = null;
-    var bestLen = 0;
+    var index = 0;
+    var nameIndex = -1;
+    var showEffectsParent = null;
+    var nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+    var candidates = [];
+
     while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; }
-      if (excludeEls.indexOf(node) !== -1) { continue; }
-      var text = (node.textContent || '').trim();
-      if (!text) { continue; }
-      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
-      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
-      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
-      if (text.length > bestLen) { best = node; bestLen = text.length; }
+      if (node === nameEl) { nameIndex = index; }
+      var rawText = (node.textContent || '').trim();
+      if (rawText === 'Show Effects' || rawText.indexOf('Show Effects') !== -1) {
+        showEffectsParent = node.parentElement;
+      }
+      if (node.children.length > 0) { index++; continue; } // 葉要素のみ
+      if (excludeEls.indexOf(node) !== -1) { index++; continue; }
+      var text = rawText;
+      if (!text) { index++; continue; }
+      if (nameText && text === nameText) { index++; continue; } // カード名の重複要素
+      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { index++; continue; }
+      if (/^[0-9]+$/.test(text)) { index++; continue; } // コストの数字
+      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { index++; continue; } // レベル表記
+      candidates.push({ node: node, text: text, index: index });
+      index++;
     }
-    return best;
+
+    if (candidates.length === 0) { return null; }
+
+    function score(c) {
+      var s = 0;
+      if (/\[[^\]]+\]/.test(c.text)) { s += 100; } // [Linked]等の角括弧タグ
+      if (showEffectsParent && c.node.parentElement === showEffectsParent) { s += 20; }
+      if (nameIndex !== -1 && c.index > nameIndex) { s += 5; } // カード名より下に位置する
+      s += Math.min(c.text.length, 200) / 200; // 同点時のタイブレーク用
+      return s;
+    }
+
+    candidates.sort(function (a, b) { return score(b) - score(a); });
+    return candidates[0].node;
   }
 
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
@@ -545,6 +584,7 @@
   function insertEffects(candidates, effectsIdx, charName) {
     var inserted = 0;
     var diagnostics = [];
+    var rewriteDetails = []; // 書き換えた要素の内訳（診断用）
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -569,7 +609,7 @@
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      var effectEl = findEffectTextEl(c.block, excludeEls);
+      var effectEl = findEffectTextEl(c.block, excludeEls, c.nameEl);
 
       // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
       // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
@@ -585,12 +625,29 @@
         (effect.source === 'gamerch' ? '※' : '') +
         (effect.incomplete ? '(一部)' : '');
 
+      // 診断用: 書き換え前のタグ名・クラス名・原文冒頭30文字を記録しておく
+      // （対象を取り違えていないかトーストで確認できるようにするため）。
+      var beforeText = (effectEl.textContent || '').trim();
+      rewriteDetails.push({
+        rawNameText: c.rawNameText || c.nameText,
+        level: c.level,
+        targetTag: effectEl.tagName,
+        targetClass: (effectEl.className || '').toString().slice(0, 40),
+        beforeText: beforeText.slice(0, 30)
+      });
+
       effectEl.title = effectEl.textContent; // 元の英語をtitle属性に退避
       effectEl.textContent = jaText;
       effectEl.style.background = '#fff';
       effectEl.style.color = '#111';
       effectEl.style.padding = '4px 6px';
       effectEl.style.borderRadius = '4px';
+      // カード名の要素が幅固定・省略表示（text-overflow:ellipsis）用のCSSを
+      // 持っていることがあり、その影響を受けないよう明示的に解除する。
+      effectEl.style.whiteSpace = 'normal';
+      effectEl.style.textOverflow = 'clip';
+      effectEl.style.overflow = 'visible';
+      effectEl.style.maxWidth = 'none';
       effectEl.setAttribute('data-czn-done', '1');
 
       PROCESSED.add(c.block);
@@ -601,7 +658,12 @@
     diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
     diagnostics = diagnostics.slice(0, 10);
 
-    return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
+    return {
+      insertedCount: inserted,
+      diagnostics: diagnostics,
+      rewriteDetails: rewriteDetails.slice(0, 10),
+      candidateCount: candidates.length
+    };
   }
 
   // ---- 3/6. 用語置換（ブックマークレットと同じアルゴリズム） ----
@@ -717,6 +779,7 @@
     return {
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
+      rewriteDetails: insertResult.rewriteDetails,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
@@ -751,6 +814,17 @@
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件 / 効果文データ' + result.effectsCount + '件'];
+
+    if (result.insertedCount > 0) {
+      // 書き換え先を間違えていないか（カード名要素等を誤って書き換えて
+      // いないか）その場で確認できるよう、書き換えた要素のタグ名・
+      // クラス名・書き換え前のテキスト冒頭30文字を出す。
+      result.rewriteDetails.forEach(function (d) {
+        lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
+          ' / ' + d.targetTag + (d.targetClass ? '.' + d.targetClass : '') +
+          ' / 元テキスト「' + d.beforeText + '」');
+      });
+    }
 
     if (result.insertedCount === 0) {
       if (result.resolvedCount === 0) {
