@@ -166,10 +166,10 @@
     var el = document.createElement('div');
     el.textContent = message;
     el.style.cssText =
-      'position:fixed;right:12px;bottom:12px;z-index:2147483647;' +
+      'position:fixed;right:12px;bottom:12px;z-index:2147483647;max-width:340px;' +
       'background:rgba(20,20,20,0.85);color:#fff;padding:6px 10px;' +
       'border-radius:6px;font:12px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;' +
-      'box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:none;';
+      'white-space:pre-line;box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:none;';
     document.body.appendChild(el);
     setTimeout(function () {
       if (el.parentNode) { el.parentNode.removeChild(el); }
@@ -288,28 +288,82 @@
     return cur;
   }
 
-  function insertEffectsIntoCardsByMarker(ctx, effectsIdx, charName) {
+  // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
+  //
+  // 用語置換より前にこのフェーズを完全に終わらせることで、見出しが
+  // 「Sword Rain(剣の雨)」のような置換後テキストに化けた状態で glossary を
+  // 引いてしまう事故を防ぐ。挿入・置換のどちらもまだ行っていない状態で、
+  // block（説明ブロック）・nameEl（見出し）・nameText（原文）・entry（glossary
+  // 照合結果、無ければ null）だけを集める。
+
+  function collectCardCandidatesByMarker(ctx) {
     var markers = findMarkerElements(CZN_SELECTORS.effectMarkerText || ['Show Effects']);
     log('marker elements found:', markers.length);
-    var inserted = 0;
+    var candidates = [];
 
     markers.forEach(function (marker) {
       var block = ancestorLevels(marker, CZN_SELECTORS.effectMarkerAncestorLevels || 2);
-      if (!block || PROCESSED.has(block)) { return; }
+      if (!block) { return; }
 
       var nameEl = findNearestHeading(block);
       if (!nameEl) { log('heading not found near marker'); return; }
 
       var nameText = (nameEl.textContent || '').trim();
-      var entry = ctx.resolved[nameText];
-      if (!entry) { return; } // glossary に無いカード名（英語以外の見出し等）
+      candidates.push({ block: block, nameEl: nameEl, nameText: nameText, entry: ctx.resolved[nameText] || null });
+    });
 
-      var effect = lookupEffect(effectsIdx, entry.ja, entry.character || charName);
-      if (!effect) {
-        PROCESSED.add(block); // 効果文が無いカードには何もしない
-        return;
+    return candidates;
+  }
+
+  // useMarkerStrategy: false のときだけ使う、セレクタ直指定の経路。
+  // 正確な cardContainer / cardName / effectSlot が selectors.js に
+  // 書かれている前提（空配列なら何も見つからず 0 件になる）。
+  function collectCardCandidatesBySelectors(ctx) {
+    var containers = queryAllAny(document.body, CZN_SELECTORS.cardContainer);
+    log('card containers found:', containers.length);
+    var candidates = [];
+
+    containers.forEach(function (container) {
+      var nameEl = queryAny(container, CZN_SELECTORS.cardName);
+      if (!nameEl) { return; }
+      var slot = queryAny(container, CZN_SELECTORS.effectSlot);
+      if (!slot) { return; }
+
+      var nameText = (nameEl.textContent || '').trim();
+      candidates.push({ block: slot, nameEl: nameEl, nameText: nameText, entry: ctx.resolved[nameText] || null });
+    });
+
+    return candidates;
+  }
+
+  function collectCardCandidates(ctx) {
+    return CZN_SELECTORS.useMarkerStrategy === false
+      ? collectCardCandidatesBySelectors(ctx)
+      : collectCardCandidatesByMarker(ctx);
+  }
+
+  // ---- フェーズ2: 効果文の挿入 ----
+  //
+  // 戻り値の diagnostics は「効果文0件」のときにトーストで理由を出すための
+  // デバッグ情報（検出名 / glossaryで日本語化できたか / 効果文が見つかったか）。
+  // 最大3件まで持つ。
+
+  function insertEffects(candidates, effectsIdx, charName) {
+    var inserted = 0;
+    var diagnostics = [];
+
+    candidates.forEach(function (c) {
+      if (PROCESSED.has(c.block)) { return; }
+
+      var effect = c.entry ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName) : null;
+
+      if (diagnostics.length < 3) {
+        diagnostics.push({ nameText: c.nameText, entry: c.entry, effectFound: !!effect });
       }
-      if (block.getAttribute('data-czn-effect') === '1') { PROCESSED.add(block); return; }
+
+      if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { PROCESSED.add(c.block); return; } // 効果文が無いカードには何もしない
+      if (c.block.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
 
       // 英語の説明文・Show Effects リンクは残したまま、その下に追記する。
       var div = document.createElement('div');
@@ -318,58 +372,14 @@
       div.style.cssText =
         'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
         'white-space:pre-wrap;font-size:0.9em;color:inherit;';
-      block.appendChild(div);
-      block.setAttribute('data-czn-effect', '1');
-      PROCESSED.add(block);
+      c.block.appendChild(div);
+      c.block.setAttribute('data-czn-effect', '1');
+      PROCESSED.add(c.block);
       inserted++;
-      log('inserted effect for', nameText);
+      log('inserted effect for', c.nameText);
     });
 
-    return inserted;
-  }
-
-  // useMarkerStrategy: false のときだけ使う、セレクタ直指定の経路。
-  // 正確な cardContainer / cardName / effectSlot が selectors.js に
-  // 書かれている前提（空配列なら何も見つからず 0 件になる）。
-  function insertEffectsIntoCardsBySelectors(ctx, effectsIdx, charName) {
-    var containers = queryAllAny(document.body, CZN_SELECTORS.cardContainer);
-    log('card containers found:', containers.length);
-    var inserted = 0;
-
-    containers.forEach(function (container) {
-      if (PROCESSED.has(container)) { return; }
-      var nameEl = queryAny(container, CZN_SELECTORS.cardName);
-      if (!nameEl) { return; }
-
-      var nameText = (nameEl.textContent || '').trim();
-      var entry = ctx.resolved[nameText];
-      if (!entry) { return; }
-
-      var effect = lookupEffect(effectsIdx, entry.ja, entry.character || charName);
-      if (!effect) { PROCESSED.add(container); return; }
-
-      var slot = queryAny(container, CZN_SELECTORS.effectSlot);
-      if (!slot) { return; }
-      if (slot.getAttribute('data-czn-effect') === '1') { PROCESSED.add(container); return; }
-
-      var div = document.createElement('div');
-      div.className = 'czn-effect-text-ja';
-      div.textContent = effect;
-      div.style.cssText = 'white-space:pre-wrap;font-size:0.9em;color:inherit;';
-      slot.appendChild(div);
-      slot.setAttribute('data-czn-effect', '1');
-      PROCESSED.add(container);
-      inserted++;
-    });
-
-    return inserted;
-  }
-
-  function insertEffectsIntoCards(ctx, effectsIdx, charName) {
-    if (CZN_SELECTORS.useMarkerStrategy === false) {
-      return insertEffectsIntoCardsBySelectors(ctx, effectsIdx, charName);
-    }
-    return insertEffectsIntoCardsByMarker(ctx, effectsIdx, charName);
+    return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
   }
 
   // ---- 3/6. 用語置換（ブックマークレットと同じアルゴリズム） ----
@@ -447,15 +457,54 @@
   }
 
   // ---- 起動 ----
+  //
+  // 順序が重要: 1) カード名を原文のまま収集 → 2) 効果文を挿入 →
+  // 3) そのあとで用語置換（テキストを書き換える）を実行する。
+  // 用語置換を先にやると見出しが「Sword Rain(剣の雨)」のように化けて
+  // glossary 照合に失敗するため、この順序を崩さないこと。
 
   function run(entries, effects) {
     var charName = currentCharacter();
     log('character context:', charName);
     var ctx = buildContext(entries, charName);
     var effectsIdx = buildEffectsIndex(effects);
-    var insertedCount = insertEffectsIntoCards(ctx, effectsIdx, charName);
-    var replacedCount = replaceTermsOnPage(ctx);
-    return { ctx: ctx, insertedCount: insertedCount, replacedCount: replacedCount };
+
+    var candidates = collectCardCandidates(ctx);           // 1. カード名（原文）
+    var insertResult = insertEffects(candidates, effectsIdx, charName); // 2. 効果文挿入
+    var replacedCount = replaceTermsOnPage(ctx);            // 3. 用語置換
+
+    return {
+      ctx: ctx,
+      insertedCount: insertResult.insertedCount,
+      diagnostics: insertResult.diagnostics,
+      candidateCount: insertResult.candidateCount,
+      replacedCount: replacedCount
+    };
+  }
+
+  function formatToastMessage(result) {
+    if (result.candidateCount === 0 && result.replacedCount === 0) {
+      return 'CZN: 対象が見つかりません';
+    }
+
+    var lines = ['CZN: ' + result.replacedCount + '件を置換 / ' +
+      result.insertedCount + '件の効果文を挿入'];
+
+    if (result.insertedCount === 0) {
+      if (result.candidateCount === 0) {
+        lines.push('→ カード（Show Effectsを含む説明ブロック）を検出できません');
+      } else if (result.diagnostics.length === 0) {
+        lines.push('→ ブロックは見つかったが近くの見出しを特定できません');
+      } else {
+        result.diagnostics.forEach(function (d) {
+          var jaPart = d.entry ? '日本語化OK「' + d.entry.ja + '」' : '日本語化NG';
+          var effectPart = d.effectFound ? '効果文あり' : '効果文なし';
+          lines.push('検出名「' + d.nameText + '」→ ' + jaPart + ' → ' + effectPart);
+        });
+      }
+    }
+
+    return lines.join('\n');
   }
 
   getEnabled().then(function (enabled) {
@@ -467,21 +516,21 @@
       var result = run(entries, effects);
       var ctx = result.ctx;
 
-      if (result.replacedCount === 0 && result.insertedCount === 0) {
-        showStatusToast('CZN: 対象が見つかりません');
-      } else {
-        showStatusToast('CZN: ' + result.replacedCount + '件を置換 / ' +
-          result.insertedCount + '件の効果文を挿入');
-      }
+      showStatusToast(formatToastMessage(result));
 
       // SPA的な後読みに対応する簡易 MutationObserver。連続発火を間引く。
+      // ここでも「収集してから挿入」の順を守る（用語置換はここでは行わない。
+      // 初回の replaceTermsOnPage 以降に増えたカードの原文はまだ置換されて
+      // いないので、そのまま名前を読める）。
       var pending = false;
       var observer = new MutationObserver(function () {
         if (pending) { return; }
         pending = true;
         setTimeout(function () {
           pending = false;
-          insertEffectsIntoCards(ctx, buildEffectsIndex(effects), currentCharacter());
+          var freshEffectsIdx = buildEffectsIndex(effects);
+          var freshCandidates = collectCardCandidates(ctx);
+          insertEffects(freshCandidates, freshEffectsIdx, currentCharacter());
         }, 500);
       });
       observer.observe(document.body, { childList: true, subtree: true });
