@@ -5,15 +5,16 @@
     "sources": {
       "en": "https://www.prydwen.gg/chaos-zero-nightmare/",
       "ja": "https://gamerch.com/chaoszeronightmare/947128",
-      "en_effects_dictionary": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary"
+      "en_effects_dictionary": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary",
+      "en_combat_explained": "https://www.prydwen.gg/chaos-zero-nightmare/guides/combat-explained"
     },
     "confidence_levels": {
-      "confirmed": "英語ページと日本語ページの効果説明文を突き合わせて一致を確認したもの",
+      "confirmed": "Prydwen のページで実際に使われている語であることを確認したもの。他サイトの訳語は根拠として採用しない。",
       "guess": "説明文の一致は未確認。語感・見た目・文脈からの推測。根拠を note に記載",
       "unmatched": "日本語側のみ確認。対応する英語用語が特定できていない (en は空欄)"
     },
     "status": "incomplete",
-    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。残り7件は敵付与の状態異常系で、辞典に未収載のため未解決。",
+    "status_note": "日本語一覧48件のうち41件は Prydwen 用語辞典と突き合わせ済み。残り7件は敵付与の状態異常系で辞典に未収載のため未解決。別途『ストレス』は Combat Explained ガイドで確認済み、『欲望カード』は Prydwen での表記が未確認。",
     "ja_list_as_of": "2026-04-14",
     "provenance": {
       "ja_terms": "日本語用語48件はユーザーが gamerch の状態異常・バフデバフ一覧 (2026/04/14時点) から転記して提供したもの。",
@@ -22,15 +23,19 @@
     },
     "coverage": {
       "total": 50,
-      "confirmed": 43,
+      "confirmed": 42,
       "guess": 0,
-      "unmatched": 7
+      "unmatched": 8
     },
     "known_gaps": [
       "日本語一覧は2026/04/14時点のもので、シーズン4以降に追加された用語（点火など）は含まれていない。",
-      "未解決7件（気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ）は敵が付与する状態異常系で、Prydwen の用語辞典に未収載。別ページまたは別ソースでの確認が必要。",
-      "『ストレス』『欲望カード』は日本語48件の一覧にも Prydwen 用語辞典の対応表にも含まれていないが、ユーザー確認済みのため confirmed のまま据え置き（source は 'user-verified'）。"
-    ]
+      "未解決8件（気絶・挑発・隠蔽・毒・氷結・妄想・クリスタライズ・欲望カード）は Prydwen 側の表記を確認できていない。前7件は敵が付与する状態異常系で用語辞典に未収載。",
+      "『ストレス』『欲望カード』は日本語48件の一覧に含まれていない（合計が50件なのはこのため）。"
+    ],
+    "criteria": {
+      "rule": "confirmed の条件は「Prydwen のページで実際に使われている語であること」。他サイトの訳語は根拠として採用しない。",
+      "rationale": "サイト間で訳語が異なるため。例: 不屈 = Indomitability (他サイト) / Fortitude (Prydwen)、ヒラメキ = Flash of Insight (他サイト) / Epiphany (Prydwen)。"
+    }
   },
   "entries": [
     {
@@ -86,8 +91,8 @@
       "en": "Stress",
       "ja": "ストレス",
       "confidence": "confirmed",
-      "source": "user-verified",
-      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/guides/combat-explained",
+      "note": "効果ではなく戦闘システムのため用語辞典には未収載。ガイド本文で Stress / Mental Breakdown として使用。"
     },
     {
       "en": "Mental Breakdown",
@@ -96,11 +101,11 @@
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary"
     },
     {
-      "en": "Desire Card",
+      "en": "",
       "ja": "欲望カード",
-      "confidence": "confirmed",
+      "confidence": "unmatched",
       "source": "user-verified",
-      "note": "ユーザー提供の事前確認済みリスト。本セッションでは出典ページに未アクセスのため再検証していない。"
+      "note": "Prydwen での使用を確認できず。Game8 では 'Desire Cards' と表記。Prydwen 側の表記が判明したら復帰。"
     },
     {
       "en": "Commence the Hunt",
