@@ -16,20 +16,12 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、box内でコスト数字・
-//      カード名・種別表示・Show Effects・ローマ数字バッジを除いた最長の
-//      テキスト要素（＝英語の効果文が表示されている要素、見つからなければ
-//      カード名の要素）そのものの子として、<br> と
-//      <span class="czn-effect-text-ja">（文字色のみ指定）を直接追加する。
-//      新しいブロック要素は作らず、既に画面に表示されている要素にテキスト
-//      を足す形にした（新規のブロック/兄弟要素として挿入する方式はいずれも
-//      実際には幅・高さ0で非表示になり表示に失敗したため）。
-//      英語の効果文は消さずそのまま残す）
+//      する。該当levelの効果文が手元データにあれば、カード枠内の効果文要素
+//      （画像下部、コスト数字・カード名・種別表示・Show Effectsを除いた
+//      最長のテキスト要素）の直後に、英語を消さず日本語効果文を追記する
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
-//      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
-//      特定した nameEl）の中だけは、幅が限られ英語併記だと表示が途中で
-//      切れるため、英語併記をせず日本語のみにする（本文側は従来どおり）
+//      まとめて1つの用語として扱う
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
 //      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
 //      効果文データ◯件」の内訳を表示する。カード枠は種別表示から検出を試みた
@@ -37,13 +29,11 @@
 //      （ローマ数字を除いた名前、レベル違いは1件にまとめる）の種類数、
 //      効果文データは effects-ja.json から読めた件数（0ならファイル未配置か
 //      読み込み失敗）。同名でもカード枠ごとに別カードとして処理し、名前による
-//      集約・重複排除は一切行わない。効果文が1件以上挿入できたときは、実際に
-//      挿入した「原文 / level」の内訳（最大10件）も表示する。これは効果文
-//      データの件数と挿入件数が一致しない（＝重複挿入やlevel違いへの誤挿入）
-//      場合に、その場で確認できるようにするため。0件のときの内訳表示
-//      （最大10件）は、効果文が見つかったもの・glossaryで日本語化できた
-//      もの・ヒラメキ段階が付いているものを優先して並べ、実際に探索した
-//      キーと保有キー一覧も表示する
+//      集約・重複排除は一切行わない。効果文が0件のときの内訳表示（最大10件）
+//      は、効果文が見つかったもの・glossaryで日本語化できたもの・ヒラメキ
+//      段階が付いているものを優先して並べ、実際に探索したキーと保有キー一覧
+//      も表示する（DOM順のキャップで手がかりの多いカードが漏れないように
+//      するため、また照合ミスの原因を切り分けやすくするため）
 //   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
 //      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
@@ -233,48 +223,7 @@
 
   // ---- 4. カード名 -> 効果文 挿入 ----
 
-  // PROCESSED は「同一の insertEffects 呼び出し内で同じboxを二重処理しない」
-  // ためだけのもの。box はWeakSetのキーなので、SPA側の再描画でboxのDOM要素
-  // 自体が丸ごと差し替わればWeakSetの参照は自然に無効化される（＝古い参照は
-  // ガベージコレクトされ、新しいboxは「未処理」として扱われる）。呼び出しを
-  // またいだ永続的な「挿入済み」判定は removeExistingEffectBlocks による
-  // 削除→再挿入の冪等性で担保する（box自体は残るがdata属性だけ再描画で
-  // 消えてしまうケースにも対応するため、data属性の有無だけに頼らない）。
-  var PROCESSED = new WeakSet();
-
-  var EFFECT_BLOCK_CLS = 'czn-effect-text-ja';
-
-  // 新しいブロック要素を作って挿入する方式（box内・box外どちらも）は
-  // レイアウトに巻き込まれて表示に失敗したため、既に画面に表示されている
-  // 要素（英語の効果文の要素、無ければカード名の要素）の子として
-  // <br> + <span class="czn-effect-text-ja"> を直接追記する方式にした。
-  // querySelectorAll で box 内の既存の挿入分（spanとその直前のbr）を
-  // 全て探して削除してから作り直すため、SPA側の再描画で複数回処理されても
-  // 積み上がらない。
-  function removeExistingEffectBlocks(box) {
-    var spans = box.querySelectorAll('.' + EFFECT_BLOCK_CLS);
-    spans.forEach(function (span) {
-      var prev = span.previousElementSibling;
-      if (prev && prev.tagName === 'BR') { prev.remove(); }
-      span.remove();
-    });
-  }
-
-  // nameEl.textContent をそのまま読むと、フォールバックで nameEl 自身に
-  // 追記した日本語効果文（br+span）まで含まれてしまい、次回のカード名
-  // 解析（stripRomanLevel）が壊れる。自分が追記したspanとその直前のbrを
-  // 除いた本来の名前テキストだけを取り出す。
-  function readNameText(nameEl) {
-    if (!nameEl.querySelector('.' + EFFECT_BLOCK_CLS)) {
-      return (nameEl.textContent || '').trim();
-    }
-    var clone = nameEl.cloneNode(true);
-    var span = clone.querySelector('.' + EFFECT_BLOCK_CLS);
-    var prev = span.previousElementSibling;
-    if (prev && prev.tagName === 'BR') { prev.remove(); }
-    span.remove();
-    return (clone.textContent || '').trim();
-  }
+  var PROCESSED = new WeakSet(); // 挿入済みの説明ブロック
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
   // 同じ ja_card + character で level（ヒラメキ段階、0=無印）違いを複数持てる。
@@ -389,36 +338,17 @@
   // 完全一致するものを探す。「Starting Cards:」のようなグループ見出しは、
   // コロン除外・glossary不一致の両方で弾かれる。excludeRoot（種別表示要素自身）
   // の内側は見ない。
-  //
-  // scope を広く登った結果、同じ scope 内に複数のカード名候補が入ってしまう
-  // ことがある（例: 一覧表示でカード名の列と種別表示の列が離れていて、名前と
-  // 種別表示が別々の親を持つ場合、名前1件が見つかるまで登った時点で他の
-  // カードの名前も一緒に scope に入ってしまう）。単純に「最初に見つかった
-  // 候補」を返すと、excludeRoot（種別表示要素）から実際には遠い、無関係な
-  // 別カードの名前を誤って採用しうる。そこで候補が複数あるときは、DOM順の
-  // 走査位置が excludeRoot に最も近いものを選ぶ。
   function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
-    var index = 0;
-    var excludeIndex = -1;
-    var matches = []; // { node, index }
     while ((node = walker.nextNode())) {
-      if (node === excludeRoot) { excludeIndex = index; }
-      if (node.children.length > 0) { index++; continue; } // 葉要素のみ
-      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { index++; continue; }
+      if (node.children.length > 0) { continue; } // 葉要素のみ
+      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { continue; }
       var text = (node.textContent || '').trim();
-      if (text && !hasExcludedSuffix(text) && knownEnNames.has(stripRomanLevel(text).base)) {
-        matches.push({ node: node, index: index });
-      }
-      index++;
+      if (!text || hasExcludedSuffix(text)) { continue; }
+      if (knownEnNames.has(stripRomanLevel(text).base)) { return node; }
     }
-    if (matches.length === 0) { return null; }
-    if (matches.length === 1 || excludeIndex === -1) { return matches[0].node; }
-    matches.sort(function (a, b) {
-      return Math.abs(a.index - excludeIndex) - Math.abs(b.index - excludeIndex);
-    });
-    return matches[0].node;
+    return null;
   }
 
   // 種別表示要素（"Attack"/"Skill"）から親を1階層ずつたどり、「カード名候補
@@ -454,9 +384,9 @@
   }
 
   // box 内で、コスト数字・カード名・種別表示・"Show Effects"・ローマ数字
-  // バッジを除いた葉要素のうち、最もテキストが長いものを英語の効果文とみなす。
-  // 効果文の挿入位置（「Show Effects」が無いカードのフォールバック）と、
-  // 挿入する日本語テキストの文字サイズ参照の両方に使う。
+  // バッジを除いた葉要素のうち、最もテキストが長いものを効果文の要素とみなす
+  // （画像下部の効果文を想定）。日本語効果文はこの要素の直後（afterend）に
+  // 挿入する。
   function findEffectTextEl(box, excludeEls) {
     var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
     var node;
@@ -467,8 +397,7 @@
       if (excludeEls.indexOf(node) !== -1) { continue; }
       var text = (node.textContent || '').trim();
       if (!text) { continue; }
-      if (text === 'Attack' || text === 'Skill') { continue; }
-      if (text.indexOf('Show Effects') !== -1) { continue; }
+      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
       if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
       if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
       if (text.length > bestLen) { best = node; bestLen = text.length; }
@@ -494,7 +423,7 @@
       var found = findCardBox(label, knownEnNames);
       if (!found) { log('card box (name + type label) not found for a label'); return; }
 
-      var nameText = readNameText(found.nameEl);
+      var nameText = (found.nameEl.textContent || '').trim();
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -542,7 +471,7 @@
       var slot = queryAny(container, CZN_SELECTORS.effectSlot);
       if (!slot) { return; }
 
-      var nameText = readNameText(nameEl);
+      var nameText = (nameEl.textContent || '').trim();
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -598,7 +527,6 @@
   function insertEffects(candidates, effectsIdx, charName) {
     var inserted = 0;
     var diagnostics = [];
-    var insertedDetails = []; // 実際に挿入できたカードの内訳（診断用）
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -617,58 +545,39 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      if (!c.entry) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      // 追加先は、box内でコスト数字・カード名・種別表示・Show Effects・
-      // ローマ数字バッジを除いた最長のテキスト要素（＝英語の効果文が表示
-      // されている要素）そのもの。見つからなければカード名の要素に同じ
-      // 方法で追加する。
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
       var effectEl = findEffectTextEl(c.block, excludeEls);
-      var target = effectEl || c.nameEl;
+      var target = effectEl || c.block; // 効果文要素が見つからなければ枠自体を対象に
 
-      // box内の既存の追加分（spanとその直前のbr）を querySelectorAll で
-      // 全て探して削除してから作り直す。SPA側の再描画で同じboxが複数回
-      // 処理されても、積み上がらないようにするため。
-      removeExistingEffectBlocks(c.block);
+      if (target.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
 
-      // 新しいブロック要素は作らない。対象要素の末尾に <br> と
-      // <span class="czn-effect-text-ja"> を子として直接追加し、
-      // スタイルは文字色（薄い黄色）のみにする。
-      var br = document.createElement('br');
-      var span = document.createElement('span');
-      span.className = EFFECT_BLOCK_CLS;
-      span.textContent = effect;
-      span.style.color = '#f0e070';
+      var div = document.createElement('div');
+      div.className = 'czn-effect-text-ja';
+      div.textContent = effect;
+      div.style.cssText =
+        'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
+        'white-space:pre-wrap;font-size:0.9em;color:inherit;';
 
-      target.appendChild(br);
-      target.appendChild(span);
-
-      c.block.setAttribute('data-czn-inserted', '1');
+      if (effectEl) {
+        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
+      } else {
+        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
+      }
+      target.setAttribute('data-czn-effect', '1');
       PROCESSED.add(c.block);
       inserted++;
-
-      insertedDetails.push({
-        rawNameText: c.rawNameText || c.nameText,
-        level: c.level,
-        targetTag: target.tagName,
-        targetClass: (target.className || '').toString().slice(0, 40)
-      });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
 
     diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
     diagnostics = diagnostics.slice(0, 10);
 
-    return {
-      insertedCount: inserted,
-      diagnostics: diagnostics,
-      insertedDetails: insertedDetails.slice(0, 10),
-      candidateCount: candidates.length
-    };
+    return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
   }
 
   // ---- 3/6. 用語置換（ブックマークレットと同じアルゴリズム） ----
@@ -687,7 +596,7 @@
       while (p && p.nodeType === 1) {
         var cls = p.className ? String(p.className) : '';
         if (SKIP_TAGS.test(p.nodeName) || cls.indexOf(REPLACED_CLS) !== -1 ||
-            cls.indexOf(EFFECT_BLOCK_CLS) !== -1) {
+            cls.indexOf('czn-effect-text-ja') !== -1) {
           ok = false;
           break;
         }
@@ -698,13 +607,7 @@
     return nodes;
   }
 
-  // nameEls: 現在のページで検出済みのカード名見出し要素の Set（省略可）。
-  // このセット内の要素の子孫にあるテキストは、英語併記（"En(日本語)"）を
-  // 行わず常に日本語のみにする。カード名の見出しは横幅が限られており、
-  // 併記すると「Sword Rain III(剣の...」のように途中で切れてしまうため。
-  // 本文（効果文など）はこの対象外で、従来どおり KEEP_EN / ambiguous による
-  // 併記判定を行う。
-  function replaceTermsOnPage(ctx, nameEls) {
+  function replaceTermsOnPage(ctx) {
     var keepEn = Object.create(null);
     KEEP_EN_STATIC.forEach(function (w) { keepEn[w] = true; });
     // 同じ en に character 違いで複数の ja がある場合も英語併記にする
@@ -720,15 +623,6 @@
 
     var count = 0;
     collectTextNodes().forEach(function (node) {
-      var isNameHeading = false;
-      if (nameEls && nameEls.size) {
-        var anc = node.parentNode;
-        while (anc && anc.nodeType === 1) {
-          if (nameEls.has(anc)) { isNameHeading = true; break; }
-          anc = anc.parentNode;
-        }
-      }
-
       var text = node.nodeValue;
       var frag = null;
       var last = 0;
@@ -755,7 +649,7 @@
         var ja = ctx.resolved[en].ja + levelSuffix;
         var span = document.createElement('span');
         span.className = REPLACED_CLS;
-        span.textContent = (!isNameHeading && keepEn[en]) ? en + levelSuffix + '(' + ja + ')' : ja;
+        span.textContent = keepEn[en] ? en + levelSuffix + '(' + ja + ')' : ja;
         span.title = en + levelSuffix;
         span.style.cssText = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;';
         frag.appendChild(span);
@@ -789,8 +683,7 @@
     var collected = collectCardCandidates(ctx);             // 1. カード名（原文）
     var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName); // 2. 効果文挿入
-    var nameEls = new Set(candidates.map(function (c) { return c.nameEl; }));
-    var replacedCount = replaceTermsOnPage(ctx, nameEls);    // 3. 用語置換（見出しは日本語のみ）
+    var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
 
     // ユニーク件数はカード枠（box）単位ではなく、ベース名（ローマ数字除去後）
     // 単位で数える。同じ名前の複数レベル（Sword Rain I〜V 等）は1件として
@@ -800,7 +693,6 @@
     return {
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
-      insertedDetails: insertResult.insertedDetails,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
@@ -835,17 +727,6 @@
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件 / 効果文データ' + result.effectsCount + '件'];
-
-    if (result.insertedCount > 0) {
-      // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
-      // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
-      // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
-      // 追加先要素のタグ名とクラス名も出す。
-      result.insertedDetails.forEach(function (d) {
-        lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          ' / 追加先:' + d.targetTag + (d.targetClass ? '.' + d.targetClass : ''));
-      });
-    }
 
     if (result.insertedCount === 0) {
       if (result.resolvedCount === 0) {
