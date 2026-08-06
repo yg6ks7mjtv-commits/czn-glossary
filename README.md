@@ -1,10 +1,28 @@
 # カオスゼロナイトメア 英日用語対応表
 
-Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応表。
+Chaos Zero Nightmare の用語の英日対応表。状態異常・バフデバフを中心に、
+戦闘システム用語・カード関連用語・キャラ固有用語を含む。
+
+**検索ページ: https://yg6ks7mjtv-commits.github.io/czn-glossary/**
+（GitHub Pages の設定後に有効。手順は下記「検索ページの公開」）
 
 ## ファイル
 
-- `glossary.json` — 用語対応表本体
+- `glossary.json` — **用語対応表本体。編集するのはここだけ。**
+- `docs/index.html` — 検索ページ（外部ライブラリなしの単一 HTML）
+- `docs/glossary.json` — 上記の**自動生成コピー**。直接編集しないこと
+- `scripts/sync.py` — 検証 + `docs/` へのコピー
+
+`glossary.json` を編集したら必ず実行する:
+
+```sh
+python3 scripts/sync.py
+```
+
+GitHub Pages は `docs/` 配下しか配信しないため、ルートの `glossary.json` を
+検索ページから直接読めない。このスクリプトがコピーを作る。あわせて下記
+「判定基準」をコードで検証するので、`confirmed` に Prydwen 以外の出典が
+紛れ込んだ場合などはここで落ちる。
 
 ## スキーマ
 
@@ -61,10 +79,10 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 
 | confidence | 件数 |
 |---|---|
-| `confirmed` | 45 |
+| `confirmed` | 63 |
 | `guess` | 1 |
-| `unmatched` | 14 （日本語のみ 8 / 英語のみ 6） |
-| **合計** | **60** |
+| `unmatched` | 12 （日本語のみ 8 / 英語のみ 4） |
+| **合計** | **76** |
 
 日本語一覧 48 件のうち 41 件は Prydwen の用語辞典と突き合わせ済み。
 残り 7 件は辞典に未収載のため未解決。これに一覧外の用語（戦闘システム用語、
@@ -79,12 +97,17 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 - **`ストレス`** — 効果ではなく戦闘システムのため用語辞典には未収載。
   Combat Explained ガイド本文で `Stress` / `Mental Breakdown` として
   使われていることを確認済み。
-- **キャラ固有用語 3 件**（`出撃` / `大亀裂` / `ダブルタップ`）—
+- **用語辞典から追加 4 件** — `基本カード` / `戦闘員` / `墓地` / `強靭度`。
+- **キャラ固有用語 15 件** —
   [Hilde のキャラページ](https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde)
-  で確認。
-- **英語のみ 6 件**（`Streak` / `Find the Gap` / `Piercing Damage` /
-  `Manifest Ego` / `Potential` / `Attunement`）— Prydwen 側の表記のみ判明。
-  対応する日本語が未特定。
+  で確認（`出撃` / `大亀裂` / `ダブルタップ` / `ヒラメキ` / `感応発動` ほか）。
+- **サイト共通 2 件** — `共用カード` / `パートナー`。
+- **英語のみ 4 件**（`Streak` / `Find the Gap` / `Piercing Damage` /
+  `Potential`）— Prydwen 側の表記のみ判明。対応する日本語が未特定。
+
+`ヒラメキ` は日本語側の「状態異常・バフデバフ一覧」に無いが、これはカテゴリが
+異なるだけで、Prydwen の各キャラページで `Epiphany Cards` として常用されている
+ため判定基準を満たす。
 
 この作業を行ったセッションでは egress ポリシーにより `gamerch.com` および
 `www.prydwen.gg` への接続が拒否され（CONNECT に 403）、出典ページを直接読んだ
@@ -101,11 +124,11 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
   - `欲望カード` — Prydwen での使用を確認できず。Game8 では `Desire Cards`
     と表記されているが、**他サイトの訳語は採用しない**（上記「判定基準」）
     ため空欄のまま。Prydwen 側の表記が判明したら復帰させる。
-- **日本語表記が未特定の 6 件** — `Streak` / `Find the Gap` /
-  `Piercing Damage` / `Manifest Ego` / `Potential` / `Attunement`。出典ページを
-  個別に特定できていないため `source` はサイトルートを指している。
-- **キャラ固有バフは網羅していない。** 上記 6 件のほかにも未収録のキャラ固有バフが
-  存在する。キャラページを順に当たって拾う必要がある。
+- **日本語表記が未特定の 4 件** — `Streak` / `Find the Gap` /
+  `Piercing Damage` / `Potential`。出典ページを個別に特定できていないため
+  `source` はサイトルートを指している。
+- **キャラ固有バフは網羅していない。** 収録済みのものは Hilde のページ由来。
+  他のキャラページを順に当たって拾う必要がある。
 - **`点火` は `guess`** — カードタグ `[Ignition]` としての存在は確認済みだが、
   効果説明の突き合わせが未了。ゲーム内で要確認。
 - 収録語は日本語一覧 48 件と一致しない。一覧外の用語（`ストレス`、
@@ -119,15 +142,54 @@ Chaos Zero Nightmare の状態異常・バフ・デバフ用語の英日対応�
 - `欲望カード` を `confirmed`（`Desire Card`）から `unmatched` に降格。
   Prydwen での使用が未確認のため。
 
+## 検索ページの公開（GitHub Pages）
+
+`docs/index.html` を GitHub Pages で公開する手順。
+
+1. GitHub でこのリポジトリを開く
+2. **Settings** → 左サイドバーの **Pages**
+3. **Build and deployment** の **Source** で **Deploy from a branch** を選ぶ
+4. **Branch** で公開したいブランチ（`main` など）を選び、
+   隣のフォルダ選択で **`/docs`** を選ぶ
+5. **Save**
+
+1〜2 分で `https://<ユーザー名>.github.io/czn-glossary/` に公開される。
+URL は Pages 設定画面の上部にも表示される。
+
+### 注意
+
+- **公開範囲** — Public リポジトリなら誰でも閲覧できる。Private の場合、
+  Pages の公開は GitHub の有料プランが必要。
+- **`/docs` を選ぶこと** — `/(root)` を選ぶと `docs/index.html` が
+  トップページにならない。
+- **`docs/glossary.json` が必要** — Pages は `docs/` 配下しか配信しないため、
+  ルートの `glossary.json` は検索ページから読めない。`scripts/sync.py` が
+  作るコピーをコミットに含めること。含め忘れると、ページは表示されるが
+  「glossary.json を読み込めませんでした」と出る。
+- **反映されないとき** — Pages はビルドに数分かかることがある。
+  Actions タブの `pages build and deployment` の完了を待つ。
+  それでも古い内容が出る場合はブラウザのキャッシュを疑う。
+
+### ローカルで確認する
+
+`file://` で直接開くとブラウザの制限で `glossary.json` を読み込めない。
+簡易サーバー経由で開くこと:
+
+```sh
+python3 scripts/sync.py
+python3 -m http.server 8000
+# http://localhost:8000/docs/
+```
+
 ## 残作業
 
 1. 英語表記が未特定の 8 件を、用語辞典以外のページ（敵情報ページ、
    カード関連ガイド等）で特定する
-2. 日本語表記が未特定の 6 件を日本語側ソースで特定し、あわせて
+2. 日本語表記が未特定の 4 件を日本語側ソースで特定し、あわせて
    `source` を実際の出典ページに絞り込む
 3. `点火` の効果説明を突き合わせ、`guess` から `confirmed` に上げる
 4. シーズン4以降の用語を日本語ページから追加する
-5. キャラページを順に当たって、未収録のキャラ固有バフを拾う
+5. Hilde 以外のキャラページを順に当たって、未収録のキャラ固有バフを拾う
 
 いずれも、Prydwen のページで実際に使われていることを確認していないものを
 `confirmed` にしないこと。
