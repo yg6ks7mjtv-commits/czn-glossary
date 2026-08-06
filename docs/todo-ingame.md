@@ -85,6 +85,15 @@
 - [ ] **制圧準備** — 開始カード。ドロー効果とバフを提供。
   (source: https://gamerch.com/chaoszeronightmare/949615)
 
+## Haru（ハル）
+
+- [ ] **アンカー** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/946994)
+- [ ] **パワーアンカー** — 開始時基本攻撃カード。
+  (source: https://gamerch.com/chaoszeronightmare/946994)
+- [ ] **アンカードロップ** — 開始時基本カード（防御・サポート機能）。
+  (source: https://gamerch.com/chaoszeronightmare/946994)
+
 ## Nine（ナイン）
 
 - [ ] **会心の一撃** — 固有カード。防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加。

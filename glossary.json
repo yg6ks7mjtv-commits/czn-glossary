@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 236,
-      "confirmed": 197,
+      "total": 245,
+      "confirmed": 203,
       "guess": 3,
-      "unmatched": 36,
-      "unmatched_ja_only": 31,
+      "unmatched": 39,
+      "unmatched_ja_only": 34,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki"],
-      "remaining": 22,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid", "Heidemarie", "Diana", "Rita", "Tiphera", "Nine", "Sereniel", "Chizuru", "Yuki", "Haru"],
+      "remaining": 21,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -1806,6 +1806,78 @@
       "character": "Yuki",
       "source": "https://gamerch.com/chaoszeronightmare/949615",
       "note": "ユキの開始カード（ドロー効果とバフを提供）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Anchor Shot",
+      "ja": "アンカーシュート",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルのメイン火力カード。Prydwen: 「Anchor Shot costs 2 AP and starts at 300% Damage. It gains an additive +80% Damage each time it is played」。gamerch(946994): 「アンカーシュート：使う度に火力が増加する効果を持っているメイン火力カード」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Anchor Pointer",
+      "ja": "アンカーポインター",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルの固有カード。Prydwen: 「Anchor Pointer is a 0 Cost Skill Card that moves 'Anchor Shot' back to hand」。gamerch(946994): 「アンカーポインター：アンカーシュートを手札に移動する回収カード」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Power Charge",
+      "ja": "パワーチャージ",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルの固有カード。Prydwen: 「'Power Charge' which is an Attack that deals 180% Damage to all enemies, and if the target is single, it adds +80% Damage」。gamerch(946994): 「パワーチャージ：敵全体にダメージを与えられる上に、敵が単体なら火力が増加する優秀なカード」と完全一致。語形も直訳一致。"
+    },
+    {
+      "en": "Charge Energy",
+      "ja": "エネルギーチャージ",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルの固有カード。Prydwen: 「'Charge Energy,' a Skill that increases Damage Amount of Attack Cards by 30% for 1 turn」。gamerch(946994): 「エネルギーチャージ：1ターンの間自分のカードをバフする乗算バフカード」と一致（語順のみ入れ替え）。"
+    },
+    {
+      "en": "Quick Lift",
+      "ja": "クイックリフト",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルの固有カード。Prydwen: 「Epiphany 2 for the 'Quick Lift' card (Retain): Can be used again next turn」。gamerch(946994): 「クイックリフト：アンカーシュート限定のバフで、保存効果付き」と保存(Retain)効果が一致。語形も直訳一致。近い機能を持つ『Lift Anchor』という別カード名もPrydwenに存在するが、語形が一致するクイックリフト=Quick Lift を採用した。"
+    },
+    {
+      "en": "Power Strike",
+      "ja": "パワーストライク",
+      "confidence": "confirmed",
+      "character": "Haru",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/haru",
+      "note": "ハルのエゴスキル。Prydwen: 「'Power Strike' is mentioned in relation to damage amount increases」。gamerch(946994): 「パワーストライク：所持中のバフ数に応じてダメージが増加するエゴスキル」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "",
+      "ja": "アンカー",
+      "confidence": "unmatched",
+      "character": "Haru",
+      "source": "https://gamerch.com/chaoszeronightmare/946994",
+      "note": "ハルの開始時基本攻撃カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "パワーアンカー",
+      "confidence": "unmatched",
+      "character": "Haru",
+      "source": "https://gamerch.com/chaoszeronightmare/946994",
+      "note": "ハルの開始時基本攻撃カード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "アンカードロップ",
+      "confidence": "unmatched",
+      "character": "Haru",
+      "source": "https://gamerch.com/chaoszeronightmare/946994",
+      "note": "ハルの開始時基本カード（防御・サポート機能）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
