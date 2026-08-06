@@ -3,14 +3,24 @@
 //
 // やること:
 //   1. glossary.json（公開URL）と effects-ja.json（拡張に同梱・非公開）を読む
-//   2. ページ上の「Show Effects」を含む要素から親を1階層ずつたどり、
-//      「glossary.json の英語カード名と完全一致する（末尾コロンでない）葉要素」が
-//      現れた時点でそこを「カード枠」として確定する（＝カード名とShow Effects
-//      両方を含む最小の共通祖先）。それより外は探索しない。単純な固定階層数や
-//      見出しタグの総当たりだと、カードのグループ見出し（「Starting Cards:」等）
-//      まで拾ってしまうため、glossary名との完全一致を主な判定基準にしている
-//   3. 効果文が手元データにあれば、英語の説明文を残したまま、その下に追記する
-//   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も行う
+//   2. ページ上の種別表示（"Attack" または "Skill"、完全一致の2値）を目印に、
+//      そこから親を1階層ずつたどり、「glossary.json の英語カード名（ヒラメキ
+//      段階のローマ数字は除いたベース名）と完全一致する、末尾コロンでない
+//      葉要素」が現れた時点でそこを「カード枠」として確定する（＝カード名と
+//      種別表示の両方を含む最小の共通祖先）。それより外は探索しない。
+//      "Show Effects" は効果文が短いカードには存在しないため目印にしない。
+//      単純な固定階層数や見出しタグの総当たりだと、カードのグループ見出し
+//      （「Starting Cards:」等）まで拾ってしまうため、glossary名との完全一致
+//      （ローマ数字除去後）を主な判定基準にしている
+//   3. カード名末尾のローマ数字（I/II/III/IV/V）をヒラメキ段階(level 1-5)、
+//      無ければ level 0 として扱い、effects-ja.json を
+//      (character, ja_card, level) で引く。該当levelの効果文が手元データに
+//      あれば、カード枠内の効果文要素（画像下部、コスト数字・カード名・種別
+//      表示・Show Effectsを除いた最長のテキスト要素）の直後に、英語を消さず
+//      日本語効果文を追記する
+//   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
+//      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
+//      まとめて1つの用語として扱う
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする
 //
 // 実装上の注意:
@@ -92,6 +102,22 @@
 
   function isWordChar(c) {
     return /[A-Za-z0-9]/.test(c);
+  }
+
+  // ヒラメキ段階を表すカード名末尾のローマ数字。I〜Vの5段階のみ（それ以外の
+  // 大文字語を誤って数字扱いしないよう、この5つの完全一致だけを対象にする）。
+  var ROMAN_LEVELS = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+
+  // "Sword Rain III" -> { base: "Sword Rain", level: 3 }
+  // "Sword Rain"     -> { base: "Sword Rain", level: 0 }
+  function stripRomanLevel(text) {
+    var idx = text.lastIndexOf(' ');
+    if (idx === -1) { return { base: text, level: 0 }; }
+    var last = text.slice(idx + 1);
+    if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, last)) {
+      return { base: text.slice(0, idx), level: ROMAN_LEVELS[last] };
+    }
+    return { base: text, level: 0 };
   }
 
   // ---- データ読み込み ----
@@ -182,31 +208,39 @@
 
   var PROCESSED = new WeakSet(); // 挿入済みの説明ブロック
 
+  // effects-ja.json は { ja_card, character, level, effect } の配列。
+  // 同じ ja_card + character で level（ヒラメキ段階、0=無印）違いを複数持てる。
+  function effectsKey(character, jaName, level) {
+    return (character || '') + '|' + jaName + '|' + level;
+  }
+
   function buildEffectsIndex(effects) {
-    // key: character + ' ' + ja_card 、character不明時は ' ' + ja_card
     var idx = Object.create(null);
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
+      var level = typeof e.level === 'number' ? e.level : 0;
       if (e.character) {
-        idx[e.character + ' ' + e.ja_card] = e.effect;
+        idx[effectsKey(e.character, e.ja_card, level)] = e.effect;
       }
-      // character なし・またはフォールバック用に ja_card 単独キーも登録
-      // （同名カードが character 違いで複数あると上書きされるが、
-      //   character が分かっている場面では上の複合キーが優先されるので実害は小さい）
-      if (!((' ' + e.ja_card) in idx)) {
-        idx[' ' + e.ja_card] = e.effect;
+      // character なし・またはフォールバック用に character 抜きキーも登録
+      // （character が分かっている場面では上の複合キーが優先されるので実害は小さい）
+      var fallbackKey = effectsKey(null, e.ja_card, level);
+      if (!(fallbackKey in idx)) {
+        idx[fallbackKey] = e.effect;
       }
     });
     return idx;
   }
 
-  function lookupEffect(effectsIdx, jaName, character) {
-    if (character && effectsIdx[character + ' ' + jaName] !== undefined) {
-      return effectsIdx[character + ' ' + jaName];
+  // level は完全一致のみ。該当レベルの効果文が無ければ null（他レベルへの
+  // フォールバックはしない）。
+  function lookupEffect(effectsIdx, jaName, character, level) {
+    if (character) {
+      var withChar = effectsKey(character, jaName, level);
+      if (effectsIdx[withChar] !== undefined) { return effectsIdx[withChar]; }
     }
-    if (effectsIdx[' ' + jaName] !== undefined) {
-      return effectsIdx[' ' + jaName];
-    }
+    var withoutChar = effectsKey(null, jaName, level);
+    if (effectsIdx[withoutChar] !== undefined) { return effectsIdx[withoutChar]; }
     return null;
   }
 
@@ -230,7 +264,8 @@
     return Array.from(found);
   }
 
-  // "Show Effects" 等のマーカー文字列を含む要素（葉要素優先）を全ページから探す。
+  // 種別表示（"Attack"/"Skill"）等、指定した文字列と一致する要素（葉要素優先）を
+  // 全ページから探す。
   function findMarkerElements(markerTexts) {
     var exact = [];
     var partial = [];
@@ -256,10 +291,11 @@
     return false;
   }
 
-  // scope 内の葉要素で、末尾がコロン等でなく、かつ knownEnNames
-  // （glossary.json の英語カード名一覧）と完全一致するものを探す。
-  // 「Starting Cards:」のようなグループ見出しは、コロン除外・glossary不一致の
-  // 両方で弾かれる。excludeRoot（マーカー自身）の内側は見ない。
+  // scope 内の葉要素で、末尾がコロン等でなく、かつ（ヒラメキ段階のローマ数字を
+  // 除いたベース名が）knownEnNames（glossary.json の英語カード名一覧）と
+  // 完全一致するものを探す。「Starting Cards:」のようなグループ見出しは、
+  // コロン除外・glossary不一致の両方で弾かれる。excludeRoot（種別表示要素自身）
+  // の内側は見ない。
   function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
@@ -268,25 +304,45 @@
       if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { continue; }
       var text = (node.textContent || '').trim();
       if (!text || hasExcludedSuffix(text)) { continue; }
-      if (knownEnNames.has(text)) { return node; }
+      if (knownEnNames.has(stripRomanLevel(text).base)) { return node; }
     }
     return null;
   }
 
-  // マーカーから親を1階層ずつたどり、「カード名候補（glossaryと完全一致、かつ
-  // コロン終わりでない）を含む最小の祖先」をカード枠として返す。それより外は
-  // 探索しない。見つからなければ null。
-  function findCardBox(marker, knownEnNames) {
+  // 種別表示要素（"Attack"/"Skill"）から親を1階層ずつたどり、「カード名候補
+  // （glossaryと完全一致、かつコロン終わりでない）を含む最小の祖先」を
+  // カード枠として返す。それより外は探索しない。見つからなければ null。
+  function findCardBox(typeLabelEl, knownEnNames) {
     var maxClimb = CZN_SELECTORS.maxAncestorClimb || 10;
-    var el = marker;
+    var el = typeLabelEl;
     for (var depth = 0; depth < maxClimb && el.parentElement; depth++) {
       el = el.parentElement;
-      var nameEl = findGlossaryNameLeaf(el, marker, knownEnNames);
+      var nameEl = findGlossaryNameLeaf(el, typeLabelEl, knownEnNames);
       if (nameEl) {
         return { box: el, nameEl: nameEl };
       }
     }
     return null;
+  }
+
+  // box 内で、コスト数字・カード名・種別表示・"Show Effects" を除いた葉要素の
+  // うち、最もテキストが長いものを効果文の要素とみなす（画像下部の効果文を
+  // 想定）。日本語効果文はこの要素の直後（afterend）に挿入する。
+  function findEffectTextEl(box, excludeEls) {
+    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
+    var node;
+    var best = null;
+    var bestLen = 0;
+    while ((node = walker.nextNode())) {
+      if (node.children.length > 0) { continue; }
+      if (excludeEls.indexOf(node) !== -1) { continue; }
+      var text = (node.textContent || '').trim();
+      if (!text) { continue; }
+      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
+      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
+      if (text.length > bestLen) { best = node; bestLen = text.length; }
+    }
+    return best;
   }
 
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
@@ -298,21 +354,24 @@
   // 照合結果、無ければ null）だけを集める。
 
   function collectCardCandidatesByMarker(ctx) {
-    var markers = findMarkerElements(CZN_SELECTORS.effectMarkerText || ['Show Effects']);
-    log('marker elements found:', markers.length);
+    var typeLabels = findMarkerElements(CZN_SELECTORS.typeLabelText || ['Attack', 'Skill']);
+    log('type label elements found:', typeLabels.length);
     var knownEnNames = new Set(Object.keys(ctx.resolved));
     var candidates = [];
 
-    markers.forEach(function (marker) {
-      var found = findCardBox(marker, knownEnNames);
-      if (!found) { log('card box (name + marker) not found for a marker'); return; }
+    typeLabels.forEach(function (label) {
+      var found = findCardBox(label, knownEnNames);
+      if (!found) { log('card box (name + type label) not found for a label'); return; }
 
       var nameText = (found.nameEl.textContent || '').trim();
+      var parsed = stripRomanLevel(nameText);
       candidates.push({
         block: found.box,
         nameEl: found.nameEl,
+        typeLabelEl: label,
         nameText: nameText,
-        entry: ctx.resolved[nameText] || null
+        level: parsed.level,
+        entry: ctx.resolved[parsed.base] || null
       });
     });
 
@@ -334,7 +393,15 @@
       if (!slot) { return; }
 
       var nameText = (nameEl.textContent || '').trim();
-      candidates.push({ block: slot, nameEl: nameEl, nameText: nameText, entry: ctx.resolved[nameText] || null });
+      var parsed = stripRomanLevel(nameText);
+      candidates.push({
+        block: slot,
+        nameEl: nameEl,
+        typeLabelEl: null,
+        nameText: nameText,
+        level: parsed.level,
+        entry: ctx.resolved[parsed.base] || null
+      });
     });
 
     return candidates;
@@ -359,28 +426,45 @@
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
 
-      var effect = c.entry ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName) : null;
+      var effect = c.entry
+        ? lookupEffect(effectsIdx, c.entry.ja, c.entry.character || charName, c.level)
+        : null;
 
       if (diagnostics.length < 3) {
-        diagnostics.push({ nameText: c.nameText, entry: c.entry, effectFound: !!effect });
+        diagnostics.push({
+          nameText: c.nameText,
+          entry: c.entry,
+          level: c.level,
+          effectFound: !!effect
+        });
       }
 
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { PROCESSED.add(c.block); return; } // 効果文が無いカードには何もしない
-      if (c.block.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
+      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      // 英語の説明文・Show Effects リンクは残したまま、その下に追記する。
+      var excludeEls = [c.nameEl];
+      if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
+      var effectEl = findEffectTextEl(c.block, excludeEls);
+      var target = effectEl || c.block; // 効果文要素が見つからなければ枠自体を対象に
+
+      if (target.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
+
       var div = document.createElement('div');
       div.className = 'czn-effect-text-ja';
       div.textContent = effect;
       div.style.cssText =
         'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
         'white-space:pre-wrap;font-size:0.9em;color:inherit;';
-      c.block.appendChild(div);
-      c.block.setAttribute('data-czn-effect', '1');
+
+      if (effectEl) {
+        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
+      } else {
+        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
+      }
+      target.setAttribute('data-czn-effect', '1');
       PROCESSED.add(c.block);
       inserted++;
-      log('inserted effect for', c.nameText);
+      log('inserted effect for', c.nameText, 'level', c.level);
     });
 
     return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
@@ -438,14 +522,25 @@
         var s = m.index;
         var e = s + m[0].length;
         if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; }
+
+        var en = m[0];
+        var levelSuffix = ''; // " III" のように、先頭スペース込みで保持する
+        // 直後にヒラメキ段階のローマ数字が単語境界付きで続いていれば、
+        // まとめて1つの用語として扱う（例: "Sword Rain III"）。
+        var romanMatch = /^ (I{1,3}|IV|V)(?![A-Za-z0-9])/.exec(text.slice(e));
+        if (romanMatch) {
+          levelSuffix = romanMatch[0];
+          e += romanMatch[0].length;
+        }
+        re.lastIndex = e;
+
         if (frag === null) { frag = document.createDocumentFragment(); }
         if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); }
-        var en = m[0];
-        var ja = ctx.resolved[en].ja;
+        var ja = ctx.resolved[en].ja + levelSuffix;
         var span = document.createElement('span');
         span.className = REPLACED_CLS;
-        span.textContent = keepEn[en] ? en + '(' + ja + ')' : ja;
-        span.title = en;
+        span.textContent = keepEn[en] ? en + levelSuffix + '(' + ja + ')' : ja;
+        span.title = en + levelSuffix;
         span.style.cssText = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;';
         frag.appendChild(span);
         last = e;
@@ -491,17 +586,18 @@
       return 'CZN: 対象が見つかりません';
     }
 
-    var lines = ['CZN: ' + result.replacedCount + '件を置換 / カード枠' +
-      result.candidateCount + '件を検出 / 効果文' + result.insertedCount + '件を挿入'];
+    var lines = ['CZN: カード枠' + result.candidateCount + '件 / 効果文' +
+      result.insertedCount + '件'];
 
     if (result.insertedCount === 0) {
       if (result.candidateCount === 0) {
-        lines.push('→ カード枠（カード名+Show Effectsの最小共通祖先）を検出できません');
+        lines.push('→ カード枠（カード名+種別表示の最小共通祖先）を検出できません');
       } else {
         result.diagnostics.forEach(function (d) {
-          var jaPart = d.entry ? '日本語化OK「' + d.entry.ja + '」' : '日本語化NG';
+          var jaPart = d.entry ? d.entry.ja : '日本語化NG';
           var effectPart = d.effectFound ? '効果文あり' : '効果文なし';
-          lines.push('検出名「' + d.nameText + '」→ ' + jaPart + ' → ' + effectPart);
+          lines.push('「' + d.nameText + '」→ ' + jaPart + ' / level ' + d.level +
+            ' → ' + effectPart);
         });
       }
     }
