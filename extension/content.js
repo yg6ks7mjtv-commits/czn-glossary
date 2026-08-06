@@ -283,11 +283,18 @@
     return normChar(character) + '|' + normText(jaName) + '|' + normLevel(level);
   }
 
-  // source は "ingame"（実機で確認した文言）か "gamerch"（gamerchから自動
-  // 収集した文言、公式の言い回しそのままとは限らない）。同じキーに複数の
-  // エントリがあっても ingame は gamerch に上書きされない（逆は可）。
+  // source は "ingame"（実機で確認した文言）「aosns"（nightmare.aosns.com
+  // から取得した文言）「gamerch"（gamerchから自動収集した文言）のいずれか。
+  //
+  // 【緊急】gamerch由来の828件について、無関係な別カードの効果文を誤って
+  // 表示してしまうケースが見つかったため、信頼性を再評価するまで
+  // buildEffectsIndex で source:"gamerch" のエントリを一切索引に載せない
+  // （＝常に「効果文なし」扱いとなり英語のまま残る。誤った効果文を出す
+  // ほうが英語のまま残すより有害なため）。
   function effectSource(e) {
-    return e.source === 'ingame' ? 'ingame' : 'gamerch';
+    if (e.source === 'ingame') { return 'ingame'; }
+    if (e.source === 'aosns') { return 'aosns'; }
+    return 'gamerch';
   }
 
   function setEffectIfAllowed(idx, key, value) {
@@ -300,11 +307,13 @@
     var idx = Object.create(null);
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
+      var source = effectSource(e);
+      if (source === 'gamerch') { return; } // 信頼性の問題により一時停止中
       var level = normLevel(e.level);
       // incomplete: 自動収集時に「評価コメントとの境界が曖昧で、安全側
       // （先頭の一文だけ）に切り出した」ことを示すフラグ。末尾の効果節を
       // 取りこぼしている可能性がある（ingameで上書きされれば解消する）。
-      var value = { effect: e.effect, source: effectSource(e), incomplete: e.incomplete === true };
+      var value = { effect: e.effect, source: source, incomplete: e.incomplete === true };
       if (e.character) {
         setEffectIfAllowed(idx, effectsKey(e.character, e.ja_card, level), value);
       }
