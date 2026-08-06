@@ -16,12 +16,14 @@
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
-//      する。該当levelの効果文が手元データにあれば、カード枠内の効果文要素
-//      （画像下部、コスト数字・カード名・種別表示・Show Effectsを除いた
-//      最長のテキスト要素）の直後に、英語を消さず日本語効果文を追記する
+//      する。該当levelの効果文が手元データにあれば、カード枠（box）自体の
+//      末尾に、独立したブロックとして日本語効果文を追加する（カード画像への
+//      重ね書きはしない。英語の効果文がどこにあっても消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
-//      まとめて1つの用語として扱う
+//      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
+//      特定した nameEl）の中だけは、幅が限られ英語併記だと表示が途中で
+//      切れるため、英語併記をせず日本語のみにする（本文側は従来どおり）
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
 //      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
 //      効果文データ◯件」の内訳を表示する。カード枠は種別表示から検出を試みた
@@ -29,11 +31,13 @@
 //      （ローマ数字を除いた名前、レベル違いは1件にまとめる）の種類数、
 //      効果文データは effects-ja.json から読めた件数（0ならファイル未配置か
 //      読み込み失敗）。同名でもカード枠ごとに別カードとして処理し、名前による
-//      集約・重複排除は一切行わない。効果文が0件のときの内訳表示（最大10件）
-//      は、効果文が見つかったもの・glossaryで日本語化できたもの・ヒラメキ
-//      段階が付いているものを優先して並べ、実際に探索したキーと保有キー一覧
-//      も表示する（DOM順のキャップで手がかりの多いカードが漏れないように
-//      するため、また照合ミスの原因を切り分けやすくするため）
+//      集約・重複排除は一切行わない。効果文が1件以上挿入できたときは、実際に
+//      挿入した「原文 / level」の内訳（最大10件）も表示する。これは効果文
+//      データの件数と挿入件数が一致しない（＝重複挿入やlevel違いへの誤挿入）
+//      場合に、その場で確認できるようにするため。0件のときの内訳表示
+//      （最大10件）は、効果文が見つかったもの・glossaryで日本語化できた
+//      もの・ヒラメキ段階が付いているものを優先して並べ、実際に探索した
+//      キーと保有キー一覧も表示する
 //   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
 //      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
@@ -383,28 +387,6 @@
     return null;
   }
 
-  // box 内で、コスト数字・カード名・種別表示・"Show Effects"・ローマ数字
-  // バッジを除いた葉要素のうち、最もテキストが長いものを効果文の要素とみなす
-  // （画像下部の効果文を想定）。日本語効果文はこの要素の直後（afterend）に
-  // 挿入する。
-  function findEffectTextEl(box, excludeEls) {
-    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
-    var node;
-    var best = null;
-    var bestLen = 0;
-    while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; }
-      if (excludeEls.indexOf(node) !== -1) { continue; }
-      var text = (node.textContent || '').trim();
-      if (!text) { continue; }
-      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
-      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
-      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
-      if (text.length > bestLen) { best = node; bestLen = text.length; }
-    }
-    return best;
-  }
-
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
   //
   // 用語置換より前にこのフェーズを完全に終わらせることで、見出しが
@@ -527,6 +509,7 @@
   function insertEffects(candidates, effectsIdx, charName) {
     var inserted = 0;
     var diagnostics = [];
+    var insertedDetails = []; // 実際に挿入できたカードの内訳（診断用）
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -548,36 +531,40 @@
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
       if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      var excludeEls = [c.nameEl];
-      if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
-      if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      var effectEl = findEffectTextEl(c.block, excludeEls);
-      var target = effectEl || c.block; // 効果文要素が見つからなければ枠自体を対象に
-
-      if (target.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
+      // 挿入先は常にカード枠（box）自体の末尾。英語の効果文がカード画像に
+      // 重ねて表示されている場合でも、その重なりには手を出さず、box の
+      // 通常のドキュメントフローの最後に独立したブロックとして追加する
+      // （＝画像への重なりを避け、カードの下に地続きで表示される）。
+      if (c.block.getAttribute('data-czn-effect') === '1') { PROCESSED.add(c.block); return; }
 
       var div = document.createElement('div');
       div.className = 'czn-effect-text-ja';
       div.textContent = effect;
       div.style.cssText =
-        'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
-        'white-space:pre-wrap;font-size:0.9em;color:inherit;';
+        'position:relative;z-index:2;display:block;margin-top:6px;' +
+        'padding:8px 10px;border-radius:0 0 8px 8px;' +
+        'background:rgba(0,0,0,0.85);color:#fff;' +
+        'white-space:pre-wrap;line-height:1.6;';
+      // カード名見出しと同程度の文字サイズに揃える（実測値をそのまま使う）。
+      div.style.fontSize = getComputedStyle(c.nameEl).fontSize;
 
-      if (effectEl) {
-        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
-      } else {
-        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
-      }
-      target.setAttribute('data-czn-effect', '1');
+      c.block.appendChild(div);
+      c.block.setAttribute('data-czn-effect', '1');
       PROCESSED.add(c.block);
       inserted++;
+      insertedDetails.push({ rawNameText: c.rawNameText || c.nameText, level: c.level });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
 
     diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
     diagnostics = diagnostics.slice(0, 10);
 
-    return { insertedCount: inserted, diagnostics: diagnostics, candidateCount: candidates.length };
+    return {
+      insertedCount: inserted,
+      diagnostics: diagnostics,
+      insertedDetails: insertedDetails.slice(0, 10),
+      candidateCount: candidates.length
+    };
   }
 
   // ---- 3/6. 用語置換（ブックマークレットと同じアルゴリズム） ----
@@ -607,7 +594,13 @@
     return nodes;
   }
 
-  function replaceTermsOnPage(ctx) {
+  // nameEls: 現在のページで検出済みのカード名見出し要素の Set（省略可）。
+  // このセット内の要素の子孫にあるテキストは、英語併記（"En(日本語)"）を
+  // 行わず常に日本語のみにする。カード名の見出しは横幅が限られており、
+  // 併記すると「Sword Rain III(剣の...」のように途中で切れてしまうため。
+  // 本文（効果文など）はこの対象外で、従来どおり KEEP_EN / ambiguous による
+  // 併記判定を行う。
+  function replaceTermsOnPage(ctx, nameEls) {
     var keepEn = Object.create(null);
     KEEP_EN_STATIC.forEach(function (w) { keepEn[w] = true; });
     // 同じ en に character 違いで複数の ja がある場合も英語併記にする
@@ -623,6 +616,15 @@
 
     var count = 0;
     collectTextNodes().forEach(function (node) {
+      var isNameHeading = false;
+      if (nameEls && nameEls.size) {
+        var anc = node.parentNode;
+        while (anc && anc.nodeType === 1) {
+          if (nameEls.has(anc)) { isNameHeading = true; break; }
+          anc = anc.parentNode;
+        }
+      }
+
       var text = node.nodeValue;
       var frag = null;
       var last = 0;
@@ -649,7 +651,7 @@
         var ja = ctx.resolved[en].ja + levelSuffix;
         var span = document.createElement('span');
         span.className = REPLACED_CLS;
-        span.textContent = keepEn[en] ? en + levelSuffix + '(' + ja + ')' : ja;
+        span.textContent = (!isNameHeading && keepEn[en]) ? en + levelSuffix + '(' + ja + ')' : ja;
         span.title = en + levelSuffix;
         span.style.cssText = 'background:rgb(255,240,150);border-radius:3px;padding:0 1px;';
         frag.appendChild(span);
@@ -683,7 +685,8 @@
     var collected = collectCardCandidates(ctx);             // 1. カード名（原文）
     var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName); // 2. 効果文挿入
-    var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
+    var nameEls = new Set(candidates.map(function (c) { return c.nameEl; }));
+    var replacedCount = replaceTermsOnPage(ctx, nameEls);    // 3. 用語置換（見出しは日本語のみ）
 
     // ユニーク件数はカード枠（box）単位ではなく、ベース名（ローマ数字除去後）
     // 単位で数える。同じ名前の複数レベル（Sword Rain I〜V 等）は1件として
@@ -693,6 +696,7 @@
     return {
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
+      insertedDetails: insertResult.insertedDetails,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
@@ -727,6 +731,15 @@
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件 / 効果文データ' + result.effectsCount + '件'];
+
+    if (result.insertedCount > 0) {
+      // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
+      // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
+      // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
+      result.insertedDetails.forEach(function (d) {
+        lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level);
+      });
+    }
 
     if (result.insertedCount === 0) {
       if (result.resolvedCount === 0) {
