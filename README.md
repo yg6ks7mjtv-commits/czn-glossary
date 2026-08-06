@@ -60,9 +60,12 @@ python3 scripts/sync.py
   "ja": "士気",
   "confidence": "confirmed",
   "source": "確認したURL",
-  "note": "任意。guess の場合は根拠を必ず記載"
+  "note": "任意。guess の場合は根拠を必ず記載",
+  "character": "任意。キャラ固有のカード名・固有バフの場合のみキャラ名（Prydwen の英語表記）。共通用語には付与しない"
 }
 ```
+
+`character` は 2026-08-06 にキャラ固有カード追加作業のため新設。既存の共通用語エントリには遡って付与していない。
 
 ### confidence の値
 
@@ -107,10 +110,20 @@ python3 scripts/sync.py
 
 | confidence | 件数 |
 |---|---|
-| `confirmed` | 63 |
+| `confirmed` | 81 |
 | `guess` | 1 |
 | `unmatched` | 12 （日本語のみ 8 / 英語のみ 4） |
-| **合計** | **76** |
+| **合計** | **94** |
+
+### キャラ固有カード追加の進捗
+
+全35キャラのカード名・固有バフを1キャラずつ追加中（2026-08-06開始）。
+Prydwen の該当キャラページと gamerch の該当キャラページを突き合わせ、
+効果説明が一致する語のみ `confirmed` として `glossary.json` の
+`meta.character_progress` に進捗を記録している。
+
+- 完了: テネブレア（Tenebria） — 18件追加
+- 残り: 34キャラ
 
 日本語一覧 48 件のうち 41 件は Prydwen の用語辞典と突き合わせ済み。
 残り 7 件は辞典に未収載のため未解決。これに一覧外の用語（戦闘システム用語、

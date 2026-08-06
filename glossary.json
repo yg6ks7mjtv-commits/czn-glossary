@@ -7,7 +7,9 @@
       "ja": "https://gamerch.com/chaoszeronightmare/947128",
       "en_effects_dictionary": "https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary",
       "en_combat_explained": "https://www.prydwen.gg/chaos-zero-nightmare/guides/combat-explained",
-      "en_characters_hilde": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde"
+      "en_characters_hilde": "https://www.prydwen.gg/chaos-zero-nightmare/characters/hilde",
+      "en_characters_tenebria": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "ja_characters_tenebria": "https://gamerch.com/chaoszeronightmare/990974"
     },
     "confidence_levels": {
       "confirmed": "Prydwen のページで実際に使われている語であることを確認したもの。他サイトの訳語は根拠として採用しない。",
@@ -20,11 +22,12 @@
     "provenance": {
       "ja_terms": "日本語用語48件はユーザーが gamerch の状態異常・バフデバフ一覧 (2026/04/14時点) から転記して提供したもの。",
       "en_pairs": "英語対応はユーザーが Prydwen の用語辞典 (https://www.prydwen.gg/chaos-zero-nightmare/guides/effects-dictionary) の効果説明文と突き合わせて確認し、提供したもの。",
-      "session_access": "この作業を行ったセッションでは egress ポリシーにより gamerch.com / www.prydwen.gg のいずれにも接続できず、出典ページを直接読んだ検証は行っていない。confirmed の根拠はすべてユーザーによる確認。"
+      "session_access": "この作業を行ったセッションでは egress ポリシーにより gamerch.com / www.prydwen.gg のいずれにも接続できず、出典ページを直接読んだ検証は行っていない。confirmed の根拠はすべてユーザーによる確認。",
+      "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 76,
-      "confirmed": 63,
+      "total": 94,
+      "confirmed": 81,
       "guess": 1,
       "unmatched": 12,
       "unmatched_ja_only": 8,
@@ -40,6 +43,13 @@
     "criteria": {
       "rule": "confirmed の条件は「Prydwen のページで実際に使われている語であること」。他サイトの訳語は根拠として採用しない。",
       "rationale": "サイト間で訳語が異なるため。例: 不屈 = Indomitability (他サイト) / Fortitude (Prydwen)、ヒラメキ = Flash of Insight (他サイト) / Epiphany (Prydwen)。"
+    },
+    "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
+    "character_progress": {
+      "total_characters": 35,
+      "done": ["Tenebria"],
+      "remaining": 34,
+      "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
   "entries": [
@@ -516,6 +526,150 @@
       "ja": "パートナー",
       "confidence": "confirmed",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/"
+    },
+    {
+      "en": "Music, Start!",
+      "ja": "ミュージックスタート",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの開始カード。Prydwen: 基本攻撃カードを全て変換してリズムカードを生成する起点カードとして言及。gamerch(990974): 「コスト0、全ての基本攻撃カード消滅、山札に味方のリズムを2枚ずつ生成」と説明が一致。"
+    },
+    {
+      "en": "Sound Check",
+      "ja": "サウンドチェック",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの基本攻撃カード（開始時2枚所持）。Prydwen: Epiphany 効果の対象として言及。gamerch(990974): 「サウンドチェック×2：基本攻撃カード」と一致。"
+    },
+    {
+      "en": "Fan Service",
+      "ja": "ファンサービス",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの開始時治癒カード。Prydwen: 「Tenebria's starting Basic-Skill card that costs 1 AP to heal for 100%」。gamerch(990974): 「ファンサービス×1：治癒カード」と一致。"
+    },
+    {
+      "en": "Spotlight",
+      "ja": "スポットライト",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有カード。Prydwen: リズムカードを手札に戻すカードとして言及。gamerch(990974): 「単体攻撃+リズムカード1枚手札に移動」と一致。"
+    },
+    {
+      "en": "Call & Response",
+      "ja": "コール&レスポンス",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有カード。表記は Prydwen 準拠でアンパサンド区切り（gamerch も「コール&レスポンス」で一致）。Prydwen: デッキ回転用カードとして言及。gamerch(990974): 「単体攻撃、手札にあるとリズム扱い」と一致。"
+    },
+    {
+      "en": "Encore",
+      "ja": "アンコール",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有カード。Prydwen: 「Encore I allows you to activate the last used Rhythm card 2x」。gamerch(990974): 「直前に発動したリズムカードを再発動」と一致。"
+    },
+    {
+      "en": "Photo Time",
+      "ja": "フォトタイム",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有カード（Mythic/Epiphany 扱い）。Prydwen: Performance Buzz 量に応じたフォローアップダメージカードとして言及。gamerch(990974): 「コスト1でボルテージを付与。ターン終了時、ボルテージ数に応じてランダムな敵に100%ダメージ」と一致。"
+    },
+    {
+      "en": "Photo Card",
+      "ja": "フォトカード",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有カード（2凸以降）。Prydwen: 「At the start of battle, Tenebria creates 1 Photo Card」。gamerch(990974): 「フォトカード（2凸以降）：EP2でエゴポイント2」と一致。"
+    },
+    {
+      "en": "Performance Buzz",
+      "ja": "ボルテージ",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有バフ。フォトタイムが付与し、ターン終了時ダメージに変換される蓄積値。Prydwen: 「Performance Buzz」の蓄積量に応じたダメージ量を100%→150%に増加、と記述。gamerch(990974)のフォトタイム説明「ボルテージを付与...ボルテージ数に応じて...ダメージ」と対応。"
+    },
+    {
+      "en": "Rhythm",
+      "ja": "リズム",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアのミュージックスタートで生成されるカード群の総称。Prydwen: 「her various 'Rhythm' cards」。gamerch(990974)のリズムカード一覧と一致。"
+    },
+    {
+      "en": "Rhythm: Crescendo",
+      "ja": "リズム：クレッシェンド",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "リズムカードの変種の一つ。Prydwen: 「Rhythm: Crescendo」。gamerch(990974)のリズムカード一覧に同名で記載。"
+    },
+    {
+      "en": "Rhythm: Staccato",
+      "ja": "リズム：スタッカート",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "リズムカードの変種の一つ。Prydwen: 「Rhythm: Staccato」。gamerch(990974)のリズムカード一覧に同名で記載。"
+    },
+    {
+      "en": "Rhythm: Fortissimo",
+      "ja": "リズム：フォルティッシモ",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "リズムカードの変種の一つ。Prydwen: 「Rhythm: Fortissimo」。gamerch(990974)のリズムカード一覧に同名で記載。"
+    },
+    {
+      "en": "Rhythm: Fermata",
+      "ja": "リズム：フェルマータ",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "リズムカードの変種の一つ。基本スキルカードに変化する特殊枠。Prydwen: 「Rhythm: Fermata is a unique card that turns into a Basic Skill card instead」。gamerch(990974)のリズムカード一覧に同名で記載。"
+    },
+    {
+      "en": "Rhythm: Arpeggio",
+      "ja": "リズム：アルペジオ",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "リズムカードの変種の一つ。Prydwen: 生成時にコスト・効果違いの6種（Arpeggio 0〜5）が全てテネブレア専用で生成されると説明。gamerch(990974): 「リズム：アルペジオ0～5（6種類）」と一致。番号違いは強度違いのため個別エントリ化せず。"
+    },
+    {
+      "en": "Everyone's Idol",
+      "ja": "みんなのアイドル",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアのエゴスキル。Prydwen: 「'Everyone's Idol' skill increases the damage amount increase effect it gives to Rhythm cards from 7% to 11%」。gamerch(990974): 「次に発動するリズムカードに追加効果を付与。リズムカード発動時にダメージ量7%増加」と一致。"
+    },
+    {
+      "en": "Everyone's Cheer",
+      "ja": "みんなの応援",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアの固有バフ。Prydwen: 「'Everyone's Cheer,' which increases her damage amount by 1% (max 20 stacks)」。gamerch(990974相当ページ): 「テネブレアのダメージ量が1%増加（最大20重複）」と一致。"
+    },
+    {
+      "en": "All Eyes On You",
+      "ja": "ロックオン",
+      "confidence": "confirmed",
+      "character": "Tenebria",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/tenebria",
+      "note": "テネブレアがリズムカード発動時に敵へ付与する固有デバフ。Prydwen: 「When a Rhythm Card is activated, it inflicts 1 'All Eyes On You' on the target」。gamerch: 「リズムカードから受けるダメージ量40%増加」と効果の方向性が一致（対象が受けるダメージ増加）。"
     }
   ]
 }
