@@ -17,10 +17,12 @@
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
 //      する。該当levelの効果文が手元データにあれば、カード枠（box）の
-//      「中」ではなく box の直後の兄弟要素として、独立したブロックで日本語
-//      効果文を追加する（box の中は画像などが position:absolute で配置
-//      されていることがあり、中に入れると重なってしまうため box の外に
-//      置く。英語の効果文がどこにあっても消さずそのまま残す）
+//      「中」でも box の兄弟要素でもなく、box の親要素（グリッドのセルに
+//      相当）自体の末尾に、独立したブロックで日本語効果文を追加する
+//      （box自身がposition:absoluteでレイアウトされている可能性を考慮し、
+//      より外側に置く。幅はwidth:100%+box-sizing:border-boxで親に追従させ、
+//      white-space/word-breakはnormalにする。英語の効果文がどこにあっても
+//      消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -240,15 +242,15 @@
 
   var EFFECT_BLOCK_CLS = 'czn-effect-text-ja';
 
-  // box の直後（兄弟要素）に既に効果文ブロックがあれば取り除く。挿入のたびに
-  // 必ず呼んでから作り直すことで、box自体は生きているがdata属性だけ再描画で
-  // 失われた場合や、boxが差し替わって古い兄弟要素だけが取り残された場合でも、
-  // 同じカードに複数の効果文ブロックが並んでしまうことがないようにする。
-  function removeExistingEffectBlock(block) {
-    var next = block.nextElementSibling;
-    if (next && next.classList && next.classList.contains(EFFECT_BLOCK_CLS)) {
-      next.remove();
-    }
+  // 挿入先のコンテナ（カード枠 box の親要素＝グリッドのセルに相当。box自体が
+  // position:absolute等でレイアウトされていても、その外側に置くことで
+  // 影響を受けないようにする）の中に既に効果文ブロックがあれば取り除く。
+  // querySelector で container 全体から探すため、box が差し替わって兄弟
+  // 関係が変わった場合や、data属性だけが再描画で失われた場合でも、同じ
+  // container に複数の効果文ブロックが並んでしまうことがないようにする。
+  function removeExistingEffectBlock(container) {
+    var existing = container.querySelector('.' + EFFECT_BLOCK_CLS);
+    if (existing) { existing.remove(); }
   }
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
@@ -364,17 +366,36 @@
   // 完全一致するものを探す。「Starting Cards:」のようなグループ見出しは、
   // コロン除外・glossary不一致の両方で弾かれる。excludeRoot（種別表示要素自身）
   // の内側は見ない。
+  //
+  // scope を広く登った結果、同じ scope 内に複数のカード名候補が入ってしまう
+  // ことがある（例: 一覧表示でカード名の列と種別表示の列が離れていて、名前と
+  // 種別表示が別々の親を持つ場合、名前1件が見つかるまで登った時点で他の
+  // カードの名前も一緒に scope に入ってしまう）。単純に「最初に見つかった
+  // 候補」を返すと、excludeRoot（種別表示要素）から実際には遠い、無関係な
+  // 別カードの名前を誤って採用しうる。そこで候補が複数あるときは、DOM順の
+  // 走査位置が excludeRoot に最も近いものを選ぶ。
   function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
+    var index = 0;
+    var excludeIndex = -1;
+    var matches = []; // { node, index }
     while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; } // 葉要素のみ
-      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { continue; }
+      if (node === excludeRoot) { excludeIndex = index; }
+      if (node.children.length > 0) { index++; continue; } // 葉要素のみ
+      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { index++; continue; }
       var text = (node.textContent || '').trim();
-      if (!text || hasExcludedSuffix(text)) { continue; }
-      if (knownEnNames.has(stripRomanLevel(text).base)) { return node; }
+      if (text && !hasExcludedSuffix(text) && knownEnNames.has(stripRomanLevel(text).base)) {
+        matches.push({ node: node, index: index });
+      }
+      index++;
     }
-    return null;
+    if (matches.length === 0) { return null; }
+    if (matches.length === 1 || excludeIndex === -1) { return matches[0].node; }
+    matches.sort(function (a, b) {
+      return Math.abs(a.index - excludeIndex) - Math.abs(b.index - excludeIndex);
+    });
+    return matches[0].node;
   }
 
   // 種別表示要素（"Attack"/"Skill"）から親を1階層ずつたどり、「カード名候補
@@ -550,17 +571,19 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      if (!c.entry) { removeExistingEffectBlock(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
-      if (!effect) { removeExistingEffectBlock(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
-      if (!c.block.parentNode) { PROCESSED.add(c.block); return; } // 兄弟挿入できない（DOMから外れた等）
+      var container = c.block.parentElement; // カード枠(box)の親要素＝グリッドのセルに相当
 
-      // 挿入先は box の「中」ではなく box の直後の兄弟要素。box の中は
-      // カード内部の要素が position:absolute で配置されていることがあり、
-      // 中に追加すると画像の上に乗ってしまうため、box自体の外（同じ親の
-      // 直後）に static な独立ブロックとして置く。挿入のたびに
-      // removeExistingEffectBlock で既存ブロックを消してから作り直すため、
-      // 同じboxに複数回効果文ブロックが並ぶことはない。
-      removeExistingEffectBlock(c.block);
+      if (!c.entry) { if (container) { removeExistingEffectBlock(container); } PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!effect) { if (container) { removeExistingEffectBlock(container); } PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!container) { PROCESSED.add(c.block); return; } // 挿入先の親が無い（DOMから外れた等）
+
+      // 挿入先は box の「中」でも box の直後（同じ親内の兄弟）でもなく、
+      // box の親要素（グリッドのセル）自体の末尾。box自身がposition:absolute
+      // でレイアウトされている可能性を考慮し、より外側の container に置く。
+      // 挿入のたびに removeExistingEffectBlock で container 内の既存ブロックを
+      // querySelector で探して削除してから作り直すため、boxのdata属性が
+      // 再描画で失われても同じカードに複数の効果文ブロックが並ぶことはない。
+      removeExistingEffectBlock(container);
 
       var div = document.createElement('div');
       div.className = EFFECT_BLOCK_CLS;
@@ -568,18 +591,26 @@
       div.style.cssText =
         'position:static;display:block;margin-top:6px;' +
         'padding:8px 10px;border-radius:0 0 8px 8px;box-sizing:border-box;' +
-        'background:rgba(0,0,0,0.85);color:#fff;' +
-        'white-space:pre-wrap;line-height:1.6;';
-      // カード名見出しと同程度の文字サイズに揃え、幅もカード枠と揃える
-      // （実測値をそのまま使う）。
+        'width:100%;white-space:normal;word-break:normal;' +
+        'background:rgba(0,0,0,0.85);color:#fff;line-height:1.6;';
+      // カード名見出しと同程度の文字サイズに揃える（実測値をそのまま使う）。
+      // 幅は親要素からの継承に頼らず明示的に100%（box-sizing:border-box併用）。
       div.style.fontSize = getComputedStyle(c.nameEl).fontSize;
-      div.style.width = getComputedStyle(c.block).width;
 
-      c.block.insertAdjacentElement('afterend', div); // box の直後の兄弟要素として挿入
+      container.appendChild(div);
       c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
       inserted++;
-      insertedDetails.push({ rawNameText: c.rawNameText || c.nameText, level: c.level });
+      // top/visible は「本当に別々のカード要素が5件あるのか」を確認するための
+      // 診断情報。ページ上の縦位置（top）が同じ/近い値ばかりなら重なっている
+      // 疑いがあり、visible が false ならその box は非表示要素だったことになる。
+      var rect = c.block.getBoundingClientRect();
+      insertedDetails.push({
+        rawNameText: c.rawNameText || c.nameText,
+        level: c.level,
+        top: Math.round(rect.top),
+        visible: c.block.offsetParent !== null
+      });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
 
@@ -763,8 +794,12 @@
       // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
       // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
       // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
+      // top/表示状態も出す。同じ名前が複数行に見えても、ページ上で本当に
+      // 別々の位置にある別要素なのか（＝正しい挙動）、それとも非表示要素
+      // まで拾ってしまっているのかをその場で切り分けられるようにするため。
       result.insertedDetails.forEach(function (d) {
-        lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level);
+        lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
+          ' / top' + d.top + ' / ' + (d.visible ? '表示中' : '非表示'));
       });
     }
 
