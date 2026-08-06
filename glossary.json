@@ -26,11 +26,11 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 133,
-      "confirmed": 114,
+      "total": 143,
+      "confirmed": 121,
       "guess": 2,
-      "unmatched": 17,
-      "unmatched_ja_only": 12,
+      "unmatched": 20,
+      "unmatched_ja_only": 15,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -47,8 +47,8 @@
     "character_field": "entries[].character はキャラ固有のカード名・固有バフ/デバフである場合にキャラクター名（Prydwen の英語表記、例: Tenebria）を記録する。共通用語（効果辞典・戦闘システム用語など）には character フィールド自体を付与しない。既存76件（本フィールド導入前に登録済み）には遡って付与していない。",
     "character_progress": {
       "total_characters": 35,
-      "done": ["Tenebria", "Luke", "Hilde", "Fei"],
-      "remaining": 31,
+      "done": ["Tenebria", "Luke", "Hilde", "Fei", "Adelheid"],
+      "remaining": 30,
       "note": "全キャラのカード名・固有バフ追加作業の進捗。1キャラごとにコミットして進める。"
     }
   },
@@ -982,6 +982,86 @@
       "character": "Fei",
       "source": "https://gamerch.com/chaoszeronightmare/995382",
       "note": "フェイの固有カード（消滅/唯一。コスト0で降臨数に応じて炎舞曲を手札に移動）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "Once Upon a Time",
+      "ja": "むかしむかし",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトの固有カード（唯一の開始時Epiphanyカード）。Prydwen: 「Once Upon a Time is Adelheid's only starting Epiphany card」。gamerch(986739): 「むかしむかし：消滅2、山札のランダムな2枚に祝福付与+その1枚ドロー」と、開始時の主要固有カードという位置づけが一致。語形も直訳一致。"
+    },
+    {
+      "en": "Blessing",
+      "ja": "祝福",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトの中核メカニクス。Prydwen: 「When a Blessed card moves from hand to the graveyard, your team gains a 60% fixed shield」。gamerch(986739): 「祝福：手札から墓地にカードが移動した時にシールド付与ができる新規効果」と機構まで一致。"
+    },
+    {
+      "en": "Protect Us",
+      "ja": "私たちを守って",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトの固有カード。Prydwen: 「'Protect Us' can be used to cycle through your deck to obtain more Blessing tagged cards」。gamerch(986739): 「私たちを守って：次の2回まで祝福カード発動で1ドロー」とBlessingカードのドロー/デッキ回転という点で一致。語形も直訳一致。"
+    },
+    {
+      "en": "Garden of Secrets",
+      "ja": "秘密の庭園",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトのMythicカード。Prydwen: 「'Garden of Secrets' that allows her to retain a portion of the Shield generated each turn」。gamerch(986739): 「秘密の庭園：1コストでシールド200%とシールド保存25%の強化カード」と一致（シールド保存＝Retain Shield機構）。"
+    },
+    {
+      "en": "Gather Round",
+      "ja": "みんな集まれ",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトの開始時基本攻撃カード。Prydwen: 「'Gather Round' is Adelheid's basic offense card, a 1 Cost Attack Card dealing 100% Defense-Based Damage to a single enemy」。gamerch(986739): 「みんな集まれ：攻撃カード。ダメージを与える基本攻撃」と一致。語形も直訳一致。"
+    },
+    {
+      "en": "Fairy's Protection",
+      "ja": "妖精の加護",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトの開始時基本シールドカード。Prydwen: 「'Fairy's Protection' is her Basic support card; she starts with 2 copies of this card」。gamerch(986739): 「妖精の加護：シールド獲得カード（2枚）」と枚数まで一致。語形も直訳一致。"
+    },
+    {
+      "en": "Happy Ending",
+      "ja": "ハッピーエンド",
+      "confidence": "confirmed",
+      "character": "Adelheid",
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/adelheid",
+      "note": "アーデルハイトのエゴスキル。Prydwen: 「'Happy Ending' is Adelheid's Ego Skill, costing 6 Ego Points...Shield for 300%, and will also apply a fixed heal equal to Shield currently owned - but cannot exceed 30% of your Max HP」。gamerch(986739): 「ハッピーエンド：EP6でシールド付与と所持シール分の固定治癒。回復量には最大HPの30%までという上限」と数値まで一致。"
+    },
+    {
+      "en": "",
+      "ja": "童話の中のお友だち",
+      "confidence": "unmatched",
+      "character": "Adelheid",
+      "source": "https://gamerch.com/chaoszeronightmare/986739",
+      "note": "アーデルハイトの固有カード（ワンちゃんまたはクマさんを選択して1枚生成）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "物語の真実",
+      "confidence": "unmatched",
+      "character": "Adelheid",
+      "source": "https://gamerch.com/chaoszeronightmare/986739",
+      "note": "アーデルハイトの固有カード（防御依存ダメージ+被ダメ量アップ、対象敵へのダメージ加算100%バフ）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+    },
+    {
+      "en": "",
+      "ja": "夢の幸せ",
+      "confidence": "unmatched",
+      "character": "Adelheid",
+      "source": "https://gamerch.com/chaoszeronightmare/986739",
+      "note": "アーデルハイトの固有バフ（祝福を付与または生成した数に応じて獲得。味方のダメージ量3%増加、最大10重複）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     }
   ]
 }
