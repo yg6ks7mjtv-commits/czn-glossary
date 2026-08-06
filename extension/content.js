@@ -18,10 +18,13 @@
 //      空白を無視、level は数値/文字列どちらでも一致するよう正規化して比較
 //      する。該当levelの効果文が手元データにあれば、box内でコスト数字・
 //      カード名・種別表示・Show Effects・ローマ数字バッジを除いた最長の
-//      テキスト要素（＝英語の効果文）の直後に、日本語効果文を追記する
-//      （見つからなければ box 自体の末尾に追加する）。box の外に出す方式
-//      （親要素やboxの兄弟として挿入）は実際に幅・高さ0で非表示になり
-//      表示に失敗したため採用していない。英語の効果文は消さずそのまま残す）
+//      テキスト要素（＝英語の効果文が表示されている要素、見つからなければ
+//      カード名の要素）そのものの子として、<br> と
+//      <span class="czn-effect-text-ja">（文字色のみ指定）を直接追加する。
+//      新しいブロック要素は作らず、既に画面に表示されている要素にテキスト
+//      を足す形にした（新規のブロック/兄弟要素として挿入する方式はいずれも
+//      実際には幅・高さ0で非表示になり表示に失敗したため）。
+//      英語の効果文は消さずそのまま残す）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。ただしカード名の見出し要素（手順2で
@@ -241,15 +244,36 @@
 
   var EFFECT_BLOCK_CLS = 'czn-effect-text-ja';
 
-  // box を外に出す方式（親要素やbox自身の兄弟として挿入）はgrid/flexの
-  // レイアウトに巻き込まれて幅・高さ0になってしまったため、box の「中」、
-  // 英語の効果文がもともと表示されている場所の直後にプレーンなブロックとして
-  // 追加する方式に変更した。querySelectorAll で box 内の既存の挿入ブロックを
+  // 新しいブロック要素を作って挿入する方式（box内・box外どちらも）は
+  // レイアウトに巻き込まれて表示に失敗したため、既に画面に表示されている
+  // 要素（英語の効果文の要素、無ければカード名の要素）の子として
+  // <br> + <span class="czn-effect-text-ja"> を直接追記する方式にした。
+  // querySelectorAll で box 内の既存の挿入分（spanとその直前のbr）を
   // 全て探して削除してから作り直すため、SPA側の再描画で複数回処理されても
   // 積み上がらない。
   function removeExistingEffectBlocks(box) {
-    var existing = box.querySelectorAll('.' + EFFECT_BLOCK_CLS);
-    existing.forEach(function (el) { el.remove(); });
+    var spans = box.querySelectorAll('.' + EFFECT_BLOCK_CLS);
+    spans.forEach(function (span) {
+      var prev = span.previousElementSibling;
+      if (prev && prev.tagName === 'BR') { prev.remove(); }
+      span.remove();
+    });
+  }
+
+  // nameEl.textContent をそのまま読むと、フォールバックで nameEl 自身に
+  // 追記した日本語効果文（br+span）まで含まれてしまい、次回のカード名
+  // 解析（stripRomanLevel）が壊れる。自分が追記したspanとその直前のbrを
+  // 除いた本来の名前テキストだけを取り出す。
+  function readNameText(nameEl) {
+    if (!nameEl.querySelector('.' + EFFECT_BLOCK_CLS)) {
+      return (nameEl.textContent || '').trim();
+    }
+    var clone = nameEl.cloneNode(true);
+    var span = clone.querySelector('.' + EFFECT_BLOCK_CLS);
+    var prev = span.previousElementSibling;
+    if (prev && prev.tagName === 'BR') { prev.remove(); }
+    span.remove();
+    return (clone.textContent || '').trim();
   }
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
@@ -470,7 +494,7 @@
       var found = findCardBox(label, knownEnNames);
       if (!found) { log('card box (name + type label) not found for a label'); return; }
 
-      var nameText = (found.nameEl.textContent || '').trim();
+      var nameText = readNameText(found.nameEl);
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -518,7 +542,7 @@
       var slot = queryAny(container, CZN_SELECTORS.effectSlot);
       if (!slot) { return; }
 
-      var nameText = (nameEl.textContent || '').trim();
+      var nameText = readNameText(nameEl);
       var parsed = stripRomanLevel(nameText);
       var level = parsed.level;
       var levelBadgeEl = null;
@@ -596,32 +620,32 @@
       if (!c.entry) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // glossaryに無いカード名
       if (!effect) { removeExistingEffectBlocks(c.block); PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      // 挿入位置は、実際に表示に成功していた元の方式に戻す: box内で
-      // コスト数字・カード名・種別表示・Show Effects・ローマ数字バッジを
-      // 除いた最長のテキスト要素（＝英語の効果文）の直後。見つからなければ
-      // box自体の末尾にフォールバックする。
+      // 追加先は、box内でコスト数字・カード名・種別表示・Show Effects・
+      // ローマ数字バッジを除いた最長のテキスト要素（＝英語の効果文が表示
+      // されている要素）そのもの。見つからなければカード名の要素に同じ
+      // 方法で追加する。
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
       var effectEl = findEffectTextEl(c.block, excludeEls);
+      var target = effectEl || c.nameEl;
 
-      // box内の既存の挿入ブロックを querySelectorAll で全て探して削除して
-      // から作り直す。SPA側の再描画で同じboxが複数回処理されても、
-      // 積み上がらないようにするため。
+      // box内の既存の追加分（spanとその直前のbr）を querySelectorAll で
+      // 全て探して削除してから作り直す。SPA側の再描画で同じboxが複数回
+      // 処理されても、積み上がらないようにするため。
       removeExistingEffectBlocks(c.block);
 
-      var div = document.createElement('div');
-      div.className = EFFECT_BLOCK_CLS;
-      div.textContent = effect;
-      div.style.cssText =
-        'margin-top:4px;padding-top:4px;border-top:1px dashed rgba(120,120,120,0.4);' +
-        'white-space:pre-wrap;font-size:0.9em;color:inherit;';
+      // 新しいブロック要素は作らない。対象要素の末尾に <br> と
+      // <span class="czn-effect-text-ja"> を子として直接追加し、
+      // スタイルは文字色（薄い黄色）のみにする。
+      var br = document.createElement('br');
+      var span = document.createElement('span');
+      span.className = EFFECT_BLOCK_CLS;
+      span.textContent = effect;
+      span.style.color = '#f0e070';
 
-      if (effectEl) {
-        effectEl.insertAdjacentElement('afterend', div); // 効果文要素の直後に挿入
-      } else {
-        c.block.appendChild(div); // フォールバック: 枠の末尾に追加
-      }
+      target.appendChild(br);
+      target.appendChild(span);
 
       c.block.setAttribute('data-czn-inserted', '1');
       PROCESSED.add(c.block);
@@ -630,8 +654,8 @@
       insertedDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
-        textLength: (div.textContent || '').length,
-        outerHtmlHead: (div.outerHTML || '').slice(0, 100)
+        targetTag: target.tagName,
+        targetClass: (target.className || '').toString().slice(0, 40)
       });
       log('inserted effect for', c.nameText, 'level', c.level);
     });
@@ -816,12 +840,10 @@
       // 何件挿入されたかだけでなく「どのカードのどのlevelに」入ったかを
       // 見せる。効果文データの件数より挿入数が多い/少ないときに、重複挿入や
       // level違いへの誤挿入が無いかをここで直接確認できるようにするため。
-      // textContentの文字数とouterHTMLの先頭100文字も出す。文字数が0なら
-      // 中身が入っていない、文字数があるのに画面に出ないならCSS側の問題、
-      // と切り分けられるようにするため。
+      // 追加先要素のタグ名とクラス名も出す。
       result.insertedDetails.forEach(function (d) {
         lines.push('挿入: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          ' / 文字数' + d.textLength + ' / ' + d.outerHtmlHead);
+          ' / 追加先:' + d.targetTag + (d.targetClass ? '.' + d.targetClass : ''));
       });
     }
 
