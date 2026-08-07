@@ -846,6 +846,50 @@
     return s;
   }
 
+  // 書き込み直後の .chaos-content が、既存の間引き済み（500ms）全体再スキャン
+  // より先にページ側の再描画で上書きされ、日本語が失われることがあると
+  // 分かった（赤枠は正しい位置に出るが中身だけ英語に戻る）。そのため、
+  // 書き込んだ .chaos-content ごとに個別の MutationObserver を設置し、
+  // 中身から日本語（jaText）が消えていたら書き直す。自分自身の書き込みで
+  // 再発火しないよう、書き直す前に監視を止め、書き直した後に再度監視する。
+  // 同一要素への書き直しは最大 WATCH_MAX_RETRIES 回までとし、超えたら
+  // 監視を解除する（無限ループ防止）。
+  var WATCH_MAX_RETRIES = 10;
+  var watchInstalledCount = 0;
+  var watchAutoRewriteCount = 0;
+
+  function watchEffectScope(effectScope, c, jaText) {
+    var retries = 0;
+    var mo = new MutationObserver(function () {
+      var currentText = effectScope.textContent || '';
+      if (currentText.indexOf(jaText) !== -1) { return; } // まだ正しい
+
+      retries++;
+      if (retries > WATCH_MAX_RETRIES) {
+        mo.disconnect();
+        return;
+      }
+
+      var freshNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl);
+      if (freshNodes.length === 0) { return; } // 書き直す先が見つからない
+
+      mo.disconnect(); // 自分の書き込みで再発火しないよう一時停止
+      freshNodes[0].nodeValue = jaText;
+      for (var ti = 1; ti < freshNodes.length; ti++) {
+        freshNodes[ti].nodeValue = '';
+      }
+      effectScope.setAttribute('data-czn-done', '1');
+      mo.observe(effectScope, { childList: true, subtree: true, characterData: true });
+
+      watchAutoRewriteCount++;
+      log('overwrite detected, auto-rewrote effect text for', c.nameText, 'retry', retries);
+      showStatusToast('CZN: 上書き検知→自動再書換「' + (c.rawNameText || c.nameText) +
+        '」/ 監視' + watchInstalledCount + '件 / 自動再書換' + watchAutoRewriteCount + '件');
+    });
+    mo.observe(effectScope, { childList: true, subtree: true, characterData: true });
+    watchInstalledCount++;
+  }
+
   function insertEffects(candidates, effectsIdx, charName, allTypeLabels) {
     var inserted = 0;
     var diagnostics = [];
@@ -986,6 +1030,13 @@
       // カード全体（c.block）に黄緑枠を付ける。
       effectScope.style.outline = '3px solid red';
       if (c.block) { c.block.style.outline = '3px solid lime'; }
+
+      // この .chaos-content にはまだ監視を付けていなければ設置する
+      // （reapply等で同じ要素へ複数回来ても二重に設置しないための目印）。
+      if (!effectScope.hasAttribute('data-czn-watched')) {
+        effectScope.setAttribute('data-czn-watched', '1');
+        watchEffectScope(effectScope, c, jaText);
+      }
 
       if (reapplied) { reappliedCount++; }
 
