@@ -537,27 +537,49 @@
   }
 
   // box 内で、カード画像下部にある「英語の効果文」の要素の候補を全て集め、
-  // 実測幅の広い順に並べて返す（コスト数字・カード名・種別表示・ローマ数字
-  // バッジ、カード名と同一テキストの重複要素は除く）。ここでは「事前に
-  // 正しそうなものを1つ選ぶ」ことはせず、幅の広い順に並べるだけにとどめる。
-  // どれが正しいかは、実際に書き換えてみて結果（幅・高さ）を測定してから
-  // 判断する（呼び出し側）。事前のスコアリング・幅フィルタでは縦書きになる
-  // 誤選択を防ぎきれなかったため。
-  function collectEffectTextCandidates(box, excludeEls, nameEl) {
+  // 実測幅の広い順に並べて返す。除外するのはカード名要素（c.nameEl）・
+  // 既に書き換え済み（data-czn-done="1"）・textContentが空の3種類のみ。
+  // 種別表示・コスト数字・ローマ数字バッジ・Show Effects等はあえて除外せず
+  // 候補に含める（幅の狭さで自然と後回しになり、実測検証で弾かれる）。
+  // 以前はテキスト内容による事前除外（カード名重複・"Attack"/"Skill"文字列
+  // 一致・数字・ローマ数字表記）を行っていたが、これが効果文要素まで
+  // 巻き込んで候補0件（除外条件で全て弾かれた）を引き起こすことがあったため
+  // 撤廃した。どれが正しいかは、実際に書き換えてみて結果（幅・高さ）を
+  // 測定してから判断する（呼び出し側）。
+  //
+  // diagLog を渡すと、走査した葉要素を最大8件まで診断用に記録する
+  // （タグ名・クラス名・幅・高さ・textContent先頭20文字・除外理由）。
+  function collectEffectTextCandidates(box, nameEl, diagLog) {
     var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
     var node;
-    var nameText = nameEl ? readNameText(nameEl) : '';
     var candidates = [];
 
     while ((node = walker.nextNode())) {
       if (node.children.length > 0) { continue; } // 葉要素のみ
-      if (excludeEls.indexOf(node) !== -1) { continue; }
       var text = (node.textContent || '').trim();
-      if (!text) { continue; }
-      if (nameText && text === nameText) { continue; } // カード名の重複要素
-      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
-      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
-      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
+
+      var reason = null;
+      if (node === nameEl) {
+        reason = 'カード名';
+      } else if (node.getAttribute('data-czn-done') === '1') {
+        reason = '処理済み';
+      } else if (!text) {
+        reason = 'その他（空）';
+      }
+
+      if (diagLog && diagLog.length < 8) {
+        var rect = node.getBoundingClientRect();
+        diagLog.push({
+          tag: node.tagName,
+          cls: (node.className || '').toString().slice(0, 30),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          textHead: text.slice(0, 20),
+          reason: reason || '(候補)'
+        });
+      }
+
+      if (reason) { continue; }
       candidates.push(node);
     }
 
@@ -843,20 +865,22 @@
       // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
       // 内容の増分を基準にそこから親をたどって広げる（box が単なるヘッダー
       // 部分で、効果文が全く別の場所にあることがあるため）。ただし2つ目の
-      // 種別表示を含む範囲までは広げない。幅の判定基準（60%）は box では
-      // なく、この拡大後の探索範囲自体の幅に対して計算する。候補は実測幅の
-      // 広い順に並んでいる。
+      // 種別表示を含む範囲までは広げない。候補は実測幅の広い順に並んでいる。
+      // candDiag には走査した葉要素を最大8件まで（タグ・クラス・幅高さ・
+      // 先頭20文字・除外理由）記録し、除外条件で候補が0件になった場合の
+      // 切り分けに使う。
       var scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
       var effectScope = scopeResult.scope;
-      var scopeWidth = effectScope.getBoundingClientRect().width;
-      var minEffectWidth = scopeWidth * 0.6;
-      var effectCandidates = collectEffectTextCandidates(effectScope, excludeEls, c.nameEl);
+      var candDiag = [];
+      var effectCandidates = collectEffectTextCandidates(effectScope, c.nameEl, candDiag);
 
       // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
       // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
       // にした。事前の条件判定（角括弧タグ・幅フィルタ等）では縦書きの
       // 誤選択を防ぎきれなかったため、幅の広い候補から順に実際に書き換えて
-      // みて、結果を実測してから採用可否を判断する。失敗したら元に戻して
+      // みて、結果を実測してから採用可否を判断する。判定は「縦書きになって
+      // いないか（高さが幅以下）」「幅が0でないか」のみで、カード枠に対する
+      // 相対幅（60%等）による事前の足切りはしない。失敗したら元に戻して
       // 次の候補を試す。候補が尽きたら英語のまま残す。
       var effectEl = null;
       var attemptLog = []; // { index, width, height, ok }
@@ -878,9 +902,9 @@
         var rect = cand.getBoundingClientRect();
         var w = Math.round(rect.width);
         var h = Math.round(rect.height);
-        // 失敗条件: 縦書きになっている（高さが幅より大きい）、または
-        // 幅がカード枠の60%未満。
-        var ok = h <= w && w >= minEffectWidth;
+        // 失敗条件: 縦書きになっている（高さが幅より大きい）、または幅が0
+        // （非表示要素）。
+        var ok = w > 0 && h <= w;
         attemptLog.push({ index: ci + 1, width: w, height: h, ok: ok });
 
         if (!ok) {
@@ -908,7 +932,7 @@
           level: c.level,
           reason: effectCandidates.length === 0
             ? '書き換え候補が見つからない（除外条件で全て弾かれた）'
-            : ('候補' + effectCandidates.length + '件を試したが全て失敗（縦書きまたは幅不足）'),
+            : ('候補' + effectCandidates.length + '件を試したが全て失敗（縦書きまたは幅0）'),
           triedCount: effectCandidates.length,
           attemptsSummary: attemptsSummary,
           boxTag: c.block.tagName,
@@ -919,7 +943,8 @@
           scopeClass: (effectScope.className || '').toString().slice(0, 40),
           scopeClimbedLevels: scopeResult.climbedLevels,
           scopeTextLeafCount: countTextLeaves(effectScope),
-          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50)
+          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50),
+          candDiag: candDiag
         });
         PROCESSED.add(c.block);
         return;
@@ -1170,6 +1195,17 @@
           : '';
         lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
           ' / ' + f.reason + attemptsPart + boxPart + scopePart);
+
+        // scope内の葉要素それぞれの内訳（最大8件）。除外条件で候補が0件に
+        // なった場合、何が・なぜ除外されたか（またはされていないか）を
+        // その場で確認できるようにする。
+        if (f.candDiag && f.candDiag.length > 0) {
+          f.candDiag.forEach(function (cd, i) {
+            lines.push('  候補' + (i + 1) + ': ' + cd.tag +
+              (cd.cls ? '.' + cd.cls : '') + ' ' + cd.width + 'x' + cd.height +
+              ' 「' + cd.textHead + '」→ ' + cd.reason);
+          });
+        }
       });
     }
 
