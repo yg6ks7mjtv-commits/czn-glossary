@@ -69,3 +69,17 @@
   - 参考: 同じ抽出方式で"rules"（クラス制限表記）8種類、"epi"（別系統テキスト）6種類も確認したが、今回の対象（神ヒラメキ）外のため対訳表には含めていない
 - 未解決: guessの1種類（コモンカード関連）は根拠不十分のため今後の確認待ち。divine要素の書き換えにはSPA再描画時の再適用監視（MutationObserver）を付けていない（基本効果側にある仕組みだが、今回は要件になかったため未実装）
 - コミット: 6ac08b8
+
+## 2026-08-07 15:45
+- 依頼: 【1】神ヒラメキ等の追加行にも、基本効果と同じ上書き監視（MutationObserverで英語に戻ったら書き直す）を追加する 【2】"Common Card"の日本語訳を調査する。ユーザーの仮説は Common/Rare/Legendary/Mythic Card = 一般/希少/伝説/神話カード。確認できればglossary.jsonにconfirmedで追加、確認できなければextra-lines.jsonのguessを維持する
+- 実施:
+  - 【1】extension/content.js・docs/bookmarklet.jsそれぞれに、基本効果側のwatchEffectScope/watchContentTargetと同じ設計のwatchDivineElementを追加。divine要素ごとに個別監視し、最大10回まで再書換
+  - 【2】aosnsの「共用カード一覧」ページを確認したところ、一般/希少/伝説カード（#白/#青/#黄タグ）という3段階の分類は存在したが、これはPrydwenのCommon/Rare/Legendary/Mythic Cardとは別軸（共用カードプール内の希少度）で、神話に相当する4段階目も見つからず、ユーザーの仮説は確認できなかった
+  - 代わりに、aosnsハイデマリページの神ヒラメキ表内「共用カードとして扱う　共用カードを1枚ドロー」が、Prydwenの本テンプレート（Treated as a Common Card/Draw 1 Common Card(s)）と数値・構造完全一致することを発見。同ページの潜在力5凸説明「【基本カード強化】【固有カード強化】【共用カード強化】…3増加」もPrydwen側「[Basic Card Upgrade], [Unique Card Upgrade], and [Common Card Upgrade]…by 3」と一致
+- 結果:
+  - Common Card = 共用カード、Unique Card = 固有カードの訳語を特定（Basic Card = 基本カードは既存confirmed語）
+  - glossary.jsonにUnique Cardのみ新規confirmed追加（coverage: confirmed 345→346 / total 453→454）。Common Cardは既存confirmed語Neutral Card（同じ共用カード）とja重複になり sync.py の重複チェックに抵触するため未登録（訳語自体は確定）
+  - docs/extra-lines.jsonの該当テンプレートをguess→confirmedへ昇格（コモンカードの音写から共用カードへ訳文修正）
+  - Rare Card・Legendary Card・Mythic Cardの日本語対応は今回未確認（Legendary CardはPrydwen上に用例自体が無い）
+- 未解決: Rare Card・Mythic Cardの日本語訳は未調査。Common Cardをglossary.jsonへ登録する場合、Neutral Cardとのja重複をどう扱うか（sync.pyの重複チェック仕様変更 or どちらか一方の削除）はユーザー判断待ち
+- コミット: 43ff467
