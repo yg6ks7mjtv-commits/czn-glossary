@@ -38,25 +38,19 @@
 //      広げる（box が効果文の領域を含んでいないことがあるため）。ただし
 //      2つ目の種別表示を含む範囲までは広げない（findCardBoxと同じ「複数
 //      カードをまたいだら打ち切る」歯止め）。候補（コスト数字・カード名・
-//      種別表示・ローマ数字バッジを除いた葉要素）は、[Linked]/[Unique]の
-//      ような角括弧タグを含むもの／「Show Effects」と同じ親要素を共有する
-//      もの／カード名要素より下（DOM順で後）にあるものを優先するスコアリング
-//      で選ぶ（単純な最長文字列だけを基準にすると、カード名の重複要素を
-//      誤って選ぶことがあったため）。カード名と同一テキストの重複要素も
-//      候補から除外する。さらに、実測幅がカード枠の60%未満の要素は候補から
-//      除外する（英語の効果文は横幅いっぱいに広がっているはずなので、
-//      幅の狭い要素——縦書きのような細い帯になる原因——を弾く）。それでも
-//      候補が見つからない場合の最終フォールバックとして、その範囲内で
-//      最も文字数の多い要素（カード名等を除く。幅の条件は維持）を条件を
-//      課さず無条件で採用する。新しい要素を挿入する方式は幅・高さが0に
-//      潰れて表示に失敗したため、既に確実に表示されているその要素の中身を
-//      日本語効果文に差し替え、背景白・文字黒・角丸を付け、white-space:
-//      normal・word-break:normal・writing-mode:horizontal-tb・
-//      width:auto・min-width:0を強制してカード名側の省略表示CSSや縦書き
-//      指定の影響を打ち消す。元の英語は title 属性に退避する（消さずに
-//      保持するが表示はしない）。同じ効果文ブロック内に残る他の英語テキスト
-//      （複数行に分かれている場合）は display:none で隠す（「Show Effects」の
-//      展開トグルは除く）。それでも
+//      種別表示・ローマ数字バッジ、カード名と同一テキストの重複要素を除いた
+//      葉要素）は実測幅の広い順に並べる。事前のスコアリングや幅フィルタでは
+//      縦書きの誤選択を防ぎきれなかったため、「事前に正しそうなものを選ぶ」
+//      のではなく、幅の広い候補から順に実際に書き換えてみて結果を実測する:
+//      高さが幅より大きい（縦書きになっている）か、幅がカード枠の60%未満
+//      なら失敗と判定し、元のテキスト・スタイルに戻して次の候補を試す。
+//      候補が尽きれば英語のまま残す。採用できた要素には背景白・文字黒・
+//      角丸を付け、white-space:normal・word-break:normal・
+//      writing-mode:horizontal-tb・width:auto・min-width:0を強制して
+//      カード名側の省略表示CSSや縦書き指定の影響を打ち消す。元の英語は
+//      title 属性に退避する（消さずに保持するが表示はしない）。同じ効果文
+//      ブロック内に残る他の英語テキスト（複数行に分かれている場合）は
+//      display:none で隠す（「Show Effects」の展開トグルは除く）。それでも
 //      対象要素が見つからないカードや日本語の効果文が無いカードには何も
 //      しない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
@@ -80,18 +74,20 @@
 //      段階で失敗したカードがあれば（全体の挿入件数が0件でなくても）、
 //      「挿入失敗: 原文 / level / 理由」を必ず表示する（「効果文あり」なのに
 //      画面が変わらないという矛盾の原因をその場で確認できるようにするため）。
-//      書き換え先の要素が見つからなかった場合は、名前照合用のカード枠
-//      （box）自体のタグ名・クラス名・中のテキスト要素数・textContent冒頭
-//      50文字も併せて出す（枠が小さすぎるのか、除外条件が厳しすぎるのかを
+//      試した候補があれば各候補の書き換え後の幅と高さも出す。書き換え先の
+//      要素が1つも見つからなかった場合は、名前照合用のカード枠（box）自体の
+//      タグ名・クラス名・中のテキスト要素数・textContent冒頭50文字も
+//      併せて出す（枠が小さすぎるのか、除外条件が厳しすぎるのかを
 //      切り分けるため）。
 //      効果文が0件のときの内訳表示（最大10件）は、効果文が見つかったもの・
 //      glossaryで日本語化できたもの・ヒラメキ段階が付いているものを優先して
 //      並べ、実際に探索したキーと保有キー一覧（有効なもののみ）も表示する
 //      （DOM順のキャップで手がかりの多いカードが漏れないようにするため、
 //      また照合ミスの原因を切り分けやすくするため）。1件以上書き換えられた
-//      ときは、書き換えた要素のタグ名・クラス名・書き換え前のテキスト冒頭
-//      30文字・選ばれた要素の幅とカード枠の幅も出す（対象を取り違えていない
-//      か、幅の狭い帯になっていないか確認するため）
+//      ときは、書き換えた要素のタグ名・クラス名・試した候補数・採用された
+//      候補の番目・各候補の書き換え後の幅と高さ（例: 1:120x300(失敗)、
+//      2:340x40(採用)）も出す（対象を取り違えていないか、なぜその候補が
+//      採用されたのか確認するため）
 //   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
 //      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
@@ -532,61 +528,35 @@
     return null;
   }
 
-  // box 内で、カード画像下部にある「英語の効果文」の要素を特定する。
-  // コスト数字・カード名・種別表示・ローマ数字バッジを除いた葉要素を候補にし、
-  // 以下の手がかりでスコアリングして最有力のものを選ぶ（単純な「最長文字列」
-  // だけを基準にすると、カード名の要素が幅固定・省略表示（…）のCSSを
-  // 持つ別の重複要素だった場合に誤って選んでしまうことがあったため）。
-  //   - [Linked] [Unique] のような角括弧タグを含む（効果文にほぼ必ず付く
-  //     ので最も強い手がかり）
-  //   - 「Show Effects」と同じ直近の親要素を共有している（＝同じ枠内）
-  //   - カード名要素より後（DOM順で下）に位置する
-  // nameEl 自身は除外済みでも、同じテキストを持つ別要素（重複表示）が
-  // box内に残っていることがあるため、テキスト内容でも比較して除外する。
-  // minWidth を指定すると、実測幅がそれ未満の要素は候補から除外する
-  // （カード枠に対して幅の狭い要素を選んでしまい、縦書きのような細い帯に
-  // なるのを防ぐため）。
-  function findEffectTextEl(box, excludeEls, nameEl, minWidth) {
+  // box 内で、カード画像下部にある「英語の効果文」の要素の候補を全て集め、
+  // 実測幅の広い順に並べて返す（コスト数字・カード名・種別表示・ローマ数字
+  // バッジ、カード名と同一テキストの重複要素は除く）。ここでは「事前に
+  // 正しそうなものを1つ選ぶ」ことはせず、幅の広い順に並べるだけにとどめる。
+  // どれが正しいかは、実際に書き換えてみて結果（幅・高さ）を測定してから
+  // 判断する（呼び出し側）。事前のスコアリング・幅フィルタでは縦書きになる
+  // 誤選択を防ぎきれなかったため。
+  function collectEffectTextCandidates(box, excludeEls, nameEl) {
     var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
     var node;
-    var index = 0;
-    var nameIndex = -1;
-    var showEffectsParent = null;
     var nameText = nameEl ? readNameText(nameEl) : '';
     var candidates = [];
 
     while ((node = walker.nextNode())) {
-      if (node === nameEl) { nameIndex = index; }
-      var rawText = (node.textContent || '').trim();
-      if (rawText === 'Show Effects' || rawText.indexOf('Show Effects') !== -1) {
-        showEffectsParent = node.parentElement;
-      }
-      if (node.children.length > 0) { index++; continue; } // 葉要素のみ
-      if (excludeEls.indexOf(node) !== -1) { index++; continue; }
-      var text = rawText;
-      if (!text) { index++; continue; }
-      if (nameText && text === nameText) { index++; continue; } // カード名の重複要素
-      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { index++; continue; }
-      if (/^[0-9]+$/.test(text)) { index++; continue; } // コストの数字
-      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { index++; continue; } // レベル表記
-      if (minWidth != null && node.getBoundingClientRect().width < minWidth) { index++; continue; } // 幅が狭すぎる
-      candidates.push({ node: node, text: text, index: index });
-      index++;
+      if (node.children.length > 0) { continue; } // 葉要素のみ
+      if (excludeEls.indexOf(node) !== -1) { continue; }
+      var text = (node.textContent || '').trim();
+      if (!text) { continue; }
+      if (nameText && text === nameText) { continue; } // カード名の重複要素
+      if (text === 'Attack' || text === 'Skill' || text === 'Show Effects') { continue; }
+      if (/^[0-9]+$/.test(text)) { continue; } // コストの数字
+      if (Object.prototype.hasOwnProperty.call(ROMAN_LEVELS, text)) { continue; } // レベル表記
+      candidates.push(node);
     }
 
-    if (candidates.length === 0) { return null; }
-
-    function score(c) {
-      var s = 0;
-      if (/\[[^\]]+\]/.test(c.text)) { s += 100; } // [Linked]等の角括弧タグ
-      if (showEffectsParent && c.node.parentElement === showEffectsParent) { s += 20; }
-      if (nameIndex !== -1 && c.index > nameIndex) { s += 5; } // カード名より下に位置する
-      s += Math.min(c.text.length, 200) / 200; // 同点時のタイブレーク用
-      return s;
-    }
-
-    candidates.sort(function (a, b) { return score(b) - score(a); });
-    return candidates[0].node;
+    candidates.sort(function (a, b) {
+      return b.getBoundingClientRect().width - a.getBoundingClientRect().width;
+    });
+    return candidates;
   }
 
   // 名前照合用の（狭い）カード枠 box から、さらに数階層まで親をたどり、
@@ -608,27 +578,6 @@
       }
       if (labelsInScope > 1) { break; } // 別カードの種別表示を含んだので打ち切る
       best = el;
-    }
-    return best;
-  }
-
-  // findEffectTextEl のスコアリング（角括弧タグ等）で候補が見つからない
-  // ときの最終フォールバック。scope内でカード名要素等（excludeEls）を除いた
-  // 最も文字数の多い葉要素を、スコアリングの条件を一切課さずに無条件で
-  // 採用する。minWidth 指定時は findEffectTextEl と同じく幅の狭い要素を除く
-  // （フォールバックだからといって縦書きの帯を選んでよいわけではないため）。
-  function findLongestTextFallback(scope, excludeEls, minWidth) {
-    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
-    var node;
-    var best = null;
-    var bestLen = 0;
-    while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; } // 葉要素のみ
-      if (excludeEls.indexOf(node) !== -1) { continue; }
-      var text = (node.textContent || '').trim();
-      if (!text) { continue; }
-      if (minWidth != null && node.getBoundingClientRect().width < minWidth) { continue; } // 幅が狭すぎる
-      if (text.length > bestLen) { best = node; bestLen = text.length; }
     }
     return best;
   }
@@ -840,28 +789,8 @@
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
-      // そこから数階層まで親をたどって広げる（box が効果文の領域を
-      // 含んでいないことがあるため）。ただし2つ目の種別表示を含む範囲までは
-      // 広げない。findEffectTextEl はカード名要素の「原文（英語）」を重複
-      // 除外の基準に使うため、カード名を日本語に書き換えるより先に呼ぶ。
-      // 幅がカード枠の60%未満の要素は、縦書きのような細い帯になることを
-      // 防ぐため候補から除外する（英語の効果文は横幅いっぱいに広がっている
-      // はずなので、幅の狭い候補を弾けば正しい要素が残る）。
       var boxWidth = c.block.getBoundingClientRect().width;
       var minEffectWidth = boxWidth * 0.6;
-      var effectScope = effect
-        ? findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb)
-        : null;
-      var effectEl = effect
-        ? findEffectTextEl(effectScope, excludeEls, c.nameEl, minEffectWidth)
-        : null;
-      if (effect && !effectEl) {
-        // スコアリング条件に合う候補が無かった場合の最終フォールバック:
-        // 条件を課さず、範囲内で最も文字数の多い要素を無条件で採用する
-        // （ただし幅の条件は維持する）。
-        effectEl = findLongestTextFallback(effectScope, excludeEls, minEffectWidth);
-      }
 
       // カード名は glossary が分かっていれば効果文の有無とは無関係に常に
       // 日本語のみにする。用語置換の正規表現マッチに依存せず、既に解決済みの
@@ -884,38 +813,6 @@
 
       if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
 
-      // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
-      // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
-      // にした。対象が見つからないカードには何もしない（英語のまま残す）。
-      // ここに来る時点で c.entry・effect はどちらも見つかっている（＝照合は
-      // 成功している）ため、この先で失敗した場合は「照合ではなく挿入段階の
-      // 失敗」だと分かるよう、理由付きで rewriteFailures に記録する。
-      if (!effectEl) {
-        // box（名前照合用の狭いカード枠）が小さすぎるのか、除外条件が
-        // 厳しすぎるのかを切り分けられるよう、box自体のタグ名・クラス名・
-        // 中のテキスト要素数・textContent冒頭50文字を記録する。
-        rewriteFailures.push({
-          rawNameText: c.rawNameText || c.nameText,
-          level: c.level,
-          reason: '書き換え先の要素が見つからない（広い範囲・無条件フォールバックでも候補なし）',
-          boxTag: c.block.tagName,
-          boxClass: (c.block.className || '').toString().slice(0, 40),
-          boxTextLeafCount: countTextLeaves(c.block),
-          boxTextHead: (c.block.textContent || '').trim().slice(0, 50)
-        });
-        PROCESSED.add(c.block);
-        return;
-      }
-      if (effectEl.getAttribute('data-czn-done') === '1') {
-        rewriteFailures.push({
-          rawNameText: c.rawNameText || c.nameText,
-          level: c.level,
-          reason: '対象要素が既に書き換え済み（data-czn-done="1"）'
-        });
-        PROCESSED.add(c.block);
-        return;
-      }
-
       // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
       // 実機確認済み（ingame）の文言と一目で区別できるようにする。
       // incomplete（切り出しが不完全な可能性がある）には「(一部)」も付ける。
@@ -924,40 +821,95 @@
         (effect.source === 'gamerch' ? '※' : '') +
         (effect.incomplete ? '(一部)' : '');
 
-      // 診断用: 書き換え前のタグ名・クラス名・原文冒頭30文字・選ばれた要素の
-      // 幅とカード枠の幅を記録しておく（対象を取り違えていないか、縦書きの
-      // 細い帯になっていないかをトーストで確認できるようにするため）。
-      var beforeText = (effectEl.textContent || '').trim();
-      var effectElWidth = effectEl.getBoundingClientRect().width;
+      // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
+      // そこから数階層まで親をたどって広げる（box が効果文の領域を
+      // 含んでいないことがあるため）。ただし2つ目の種別表示を含む範囲までは
+      // 広げない。候補は実測幅の広い順に並んでいる。
+      var effectScope = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
+      var effectCandidates = collectEffectTextCandidates(effectScope, excludeEls, c.nameEl);
+
+      // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
+      // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
+      // にした。事前の条件判定（角括弧タグ・幅フィルタ等）では縦書きの
+      // 誤選択を防ぎきれなかったため、幅の広い候補から順に実際に書き換えて
+      // みて、結果を実測してから採用可否を判断する。失敗したら元に戻して
+      // 次の候補を試す。候補が尽きたら英語のまま残す。
+      var effectEl = null;
+      var attemptLog = []; // { index, width, height, ok }
+      for (var ci = 0; ci < effectCandidates.length; ci++) {
+        var cand = effectCandidates[ci];
+        if (cand.getAttribute('data-czn-done') === '1') { continue; } // 既に書き換え済み
+
+        var originalText = cand.textContent;
+        var originalCssText = cand.style.cssText;
+        var originalTitle = cand.title;
+
+        cand.title = originalText; // 元の英語をtitle属性に退避
+        cand.textContent = jaText;
+        cand.style.cssText = originalCssText +
+          ';background:#fff;color:#111;padding:4px 6px;border-radius:4px;' +
+          'white-space:normal;text-overflow:clip;overflow:visible;max-width:none;' +
+          'writing-mode:horizontal-tb;word-break:normal;width:auto;min-width:0;';
+
+        var rect = cand.getBoundingClientRect();
+        var w = Math.round(rect.width);
+        var h = Math.round(rect.height);
+        // 失敗条件: 縦書きになっている（高さが幅より大きい）、または
+        // 幅がカード枠の60%未満。
+        var ok = h <= w && w >= minEffectWidth;
+        attemptLog.push({ index: ci + 1, width: w, height: h, ok: ok });
+
+        if (!ok) {
+          cand.textContent = originalText;
+          cand.style.cssText = originalCssText;
+          cand.title = originalTitle;
+          continue;
+        }
+
+        effectEl = cand;
+        break;
+      }
+
+      var attemptsSummary = attemptLog.map(function (a) {
+        return a.index + ':' + a.width + 'x' + a.height + (a.ok ? '(採用)' : '(失敗)');
+      }).join('、');
+
+      if (!effectEl) {
+        // box（名前照合用の狭いカード枠）が小さすぎるのか、除外条件が
+        // 厳しすぎるのかを切り分けられるよう、box自体のタグ名・クラス名・
+        // 中のテキスト要素数・textContent冒頭50文字も記録する。
+        rewriteFailures.push({
+          rawNameText: c.rawNameText || c.nameText,
+          level: c.level,
+          reason: effectCandidates.length === 0
+            ? '書き換え候補が見つからない（除外条件で全て弾かれた）'
+            : ('候補' + effectCandidates.length + '件を試したが全て失敗（縦書きまたは幅不足）'),
+          triedCount: effectCandidates.length,
+          attemptsSummary: attemptsSummary,
+          boxTag: c.block.tagName,
+          boxClass: (c.block.className || '').toString().slice(0, 40),
+          boxTextLeafCount: countTextLeaves(c.block),
+          boxTextHead: (c.block.textContent || '').trim().slice(0, 50)
+        });
+        PROCESSED.add(c.block);
+        return;
+      }
+
+      effectEl.setAttribute('data-czn-done', '1');
+
+      // 診断用: 書き換え先のタグ名・クラス名・試した候補数・採用された
+      // 候補の番目・各候補の書き換え後の幅と高さを記録しておく（対象を
+      // 取り違えていないか、縦書きの細い帯になっていないかをトーストで
+      // 確認できるようにするため）。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
         targetTag: effectEl.tagName,
         targetClass: (effectEl.className || '').toString().slice(0, 40),
-        beforeText: beforeText.slice(0, 30),
-        elementWidth: Math.round(effectElWidth),
-        boxWidth: Math.round(boxWidth)
+        triedCount: effectCandidates.length,
+        adoptedIndex: attemptLog[attemptLog.length - 1].index,
+        attemptsSummary: attemptsSummary
       });
-
-      effectEl.title = effectEl.textContent; // 元の英語をtitle属性に退避
-      effectEl.textContent = jaText;
-      effectEl.style.background = '#fff';
-      effectEl.style.color = '#111';
-      effectEl.style.padding = '4px 6px';
-      effectEl.style.borderRadius = '4px';
-      // カード名の要素が幅固定・省略表示（text-overflow:ellipsis）用のCSSを
-      // 持っていることがあり、その影響を受けないよう明示的に解除する。
-      effectEl.style.whiteSpace = 'normal';
-      effectEl.style.textOverflow = 'clip';
-      effectEl.style.overflow = 'visible';
-      effectEl.style.maxWidth = 'none';
-      // 縦書き（writing-mode）や幅を極端に狭める指定を持つ要素だった場合に
-      // 備え、横書き・折り返し・幅自動を強制する。
-      effectEl.style.writingMode = 'horizontal-tb';
-      effectEl.style.wordBreak = 'normal';
-      effectEl.style.width = 'auto';
-      effectEl.style.minWidth = '0';
-      effectEl.setAttribute('data-czn-done', '1');
 
       // 効果文ブロック内に、書き換えた要素以外の英語テキストが残っている
       // ことがある（複数行・複数要素に分かれている場合）。日本語の効果文を
@@ -1155,30 +1107,32 @@
     if (result.insertedCount > 0) {
       // 書き換え先を間違えていないか（カード名要素等を誤って書き換えて
       // いないか）その場で確認できるよう、書き換えた要素のタグ名・
-      // クラス名・書き換え前のテキスト冒頭30文字・要素の幅とカード枠の幅を
-      // 出す（選ばれた要素が幅の狭い帯になっていないか確認できるように）。
+      // クラス名・試した候補数・採用された候補の番目・各候補の書き換え後の
+      // 幅と高さを出す（選ばれた要素が幅の狭い帯になっていないか確認
+      // できるように）。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
           ' / ' + d.targetTag + (d.targetClass ? '.' + d.targetClass : '') +
-          ' / 幅' + d.elementWidth + 'px(枠' + d.boxWidth + 'px)' +
-          ' / 元テキスト「' + d.beforeText + '」');
+          ' / 候補' + d.triedCount + '件中' + d.adoptedIndex + '番目を採用' +
+          ' / ' + d.attemptsSummary);
       });
     }
 
     if (result.rewriteFailures && result.rewriteFailures.length > 0) {
       // 照合（entry・effectの取得）までは成功しているのに、実際の書き換え
       // 段階で失敗したカード。「効果文あり」なのに画面が変わらないという
-      // 矛盾の原因をここで直接確認できるようにする。box情報があれば、
-      // 枠が小さすぎるのか除外条件が厳しすぎるのかを切り分けられるよう
+      // 矛盾の原因をここで直接確認できるようにする。試した候補の幅・高さと、
+      // box情報（枠が小さすぎるのか除外条件が厳しすぎるのかの切り分け）を
       // 併せて出す。
       result.rewriteFailures.forEach(function (f) {
+        var attemptsPart = f.attemptsSummary ? (' / ' + f.attemptsSummary) : '';
         var boxPart = f.boxTag
           ? (' / box:' + f.boxTag + (f.boxClass ? '.' + f.boxClass : '') +
              ' 中のテキスト要素' + f.boxTextLeafCount + '件' +
              ' / box冒頭「' + f.boxTextHead + '」')
           : '';
         lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
-          ' / ' + f.reason + boxPart);
+          ' / ' + f.reason + attemptsPart + boxPart);
       });
     }
 
