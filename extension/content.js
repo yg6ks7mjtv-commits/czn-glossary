@@ -988,6 +988,24 @@
     watchInstalledCount++;
   }
 
+  // .chaos-content の直下の子要素から、基本効果の要素をクラスで一意に
+  // 判定する（p.tags の有無で位置がずれても影響を受けない）。神ヒラメキ
+  // （"divine"）・クラス制限表記（"rules"）・別系統テキスト（"epi"）は
+  // 除外する。見つからなければ null を返す（呼び出し側で children[0] に
+  // フォールバックする）。
+  function findBaseEffectElement(effectScope) {
+    if (!effectScope.children) { return null; }
+    for (var i = 0; i < effectScope.children.length; i++) {
+      var el = effectScope.children[i];
+      var cls = (el.className || '').toString().split(/\s+/);
+      if (cls.indexOf('skill-with-coloring') !== -1 &&
+          cls.indexOf('divine') === -1 && cls.indexOf('rules') === -1 && cls.indexOf('epi') === -1) {
+        return el;
+      }
+    }
+    return null;
+  }
+
   function insertEffects(candidates, effectsIdx, charName, allTypeLabels) {
     var inserted = 0;
     var diagnostics = [];
@@ -1080,17 +1098,31 @@
       // 適用しない（効果文中の太字数字まで誤って除外していたため）。
       var excludeCostDigits = !c.effectScope;
 
-      // .chaos-content の直下は子要素に分かれており、最初の子要素が基本効果、
-      // 2つ目以降が神ヒラメキ等の追加行（例:「Reduce the cost of this card
-      // by 1.」）であることが判明した。.chaos-content 全体を対象にすると
-      // 追加行のテキストノードまで空にしてしまい、行ごと消えてしまうため、
-      // 確定セレクタ方式では書き換え対象を最初の子要素の中だけに絞る
-      // （2つ目以降の子要素には一切触れない。英語のまま残り、通常の
-      // 用語置換だけが効く）。子要素が1つしかない場合は、その1つの中身が
-      // 全てなので従来通りの動作になる。旧方式のフォールバック時は
-      // effectScope（box から広げた範囲）をそのまま使う。
+      // .chaos-content の直下は子要素に分かれており、書き換え対象は基本効果
+      // （神ヒラメキ等の追加行には触れない）だけに絞る必要がある。かつては
+      // 「最初の子要素＝基本効果」という位置ベースの前提で children[0] を
+      // 使っていたが、p.tags（[Linked]等の角括弧タグ一覧、例: Magnaの
+      // 「氷の破片」）が存在するカードでは、この p.tags 自身が
+      // .chaos-content の実際の children[0] になり、本当の基本効果は
+      // children[1] にずれる（2026-08-08、実機で確認・再現）。position
+      // ベースの前提が崩れるとこの p.tags に日本語を書き込んでしまい、
+      // 本来の英語の効果文要素には一切触れないまま残る不具合になっていた
+      // （タグの無いカードだけ偶然 children[0] が基本効果と一致するため、
+      // 正しく見えていた）。
+      //
+      // 基本効果は class に "skill-with-coloring" を含み、かつ神ヒラメキ
+      // （"divine"）・クラス制限表記（"rules"）・別系統テキスト（"epi"）の
+      // いずれでもない要素として一意に判定できる（神ヒラメキ抽出
+      // insertDivineLines の "divine" 判定と同じ考え方）ため、位置ではなく
+      // クラスで探す。見つからない場合のみ、従来通り children[0] に
+      // フォールバックする（旧方式のフォールバック時は effectScope
+      // （box から広げた範囲）をそのまま使う）。
       var childCount = effectScope.children ? effectScope.children.length : 0;
-      var writeTarget = (c.effectScope && childCount > 0) ? effectScope.children[0] : effectScope;
+      var writeTarget = effectScope;
+      if (c.effectScope && childCount > 0) {
+        var baseEffectEl = findBaseEffectElement(effectScope);
+        writeTarget = baseEffectEl || effectScope.children[0];
+      }
 
       // 「data-czn-done="1" が付いている＝処理済み」と属性だけで判定すると、
       // ページ側の再描画でテキストノードだけが英語に作り直され、要素自体
