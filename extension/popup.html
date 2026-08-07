@@ -20,6 +20,16 @@
     OFF にしても、既に置換済みのテキストは元に戻りません。
     反映にはページの再読み込みが必要です。
   </p>
+  <hr>
+  <label>
+    <input type="checkbox" id="translateToggle">
+    AI翻訳（実験的・Magnaのページのみ）
+  </label>
+  <p class="note">
+    Chrome内蔵のTranslator APIで、カード領域以外の解説文を先に翻訳してから
+    既存の用語置換を行う。既定はOFF。表示が崩れた場合の原因切り分けのため、
+    ONと比較できるようにしている。反映にはページの再読み込みが必要です。
+  </p>
 </body>
 <script src="popup.js"></script>
 </html>

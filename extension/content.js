@@ -110,6 +110,7 @@
   var GLOSSARY_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json';
   var EXTRA_LINES_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/extra-lines.json';
   var STORAGE_KEY = 'czn_enabled';
+  var TRANSLATE_STORAGE_KEY = 'czn_translate_enabled'; // AI翻訳（実験的機能）のON/OFF。既定OFF
   var CZN_DEBUG = false; // true にすると console にマッチ状況を出す
 
   function log() {
@@ -302,6 +303,17 @@
     return new Promise(function (resolve) {
       chrome.storage.local.get([STORAGE_KEY], function (result) {
         resolve(result[STORAGE_KEY] !== false); // 既定 ON
+      });
+    });
+  }
+
+  // AI翻訳（実験的機能）のON/OFF。表示崩れが起きたとき、翻訳が原因かどうかを
+  // 切り分けられるようにするため、既定はOFF（既存ユーザーへの影響回避が
+  // 目的ではない）。
+  function getTranslateEnabled() {
+    return new Promise(function (resolve) {
+      chrome.storage.local.get([TRANSLATE_STORAGE_KEY], function (result) {
+        resolve(result[TRANSLATE_STORAGE_KEY] === true); // 既定 OFF
       });
     });
   }
@@ -1588,6 +1600,272 @@
     return lines.join('\n');
   }
 
+  // ---- 実験的機能: AI翻訳（Chrome内蔵 Translator API、Magnaのページのみ） ----
+  //
+  // 目的: 「拡張機能で用語を置換→そのあとGoogle翻訳」の順だと、置換した公式
+  // 用語をGoogle翻訳が別の言い回しに書き換えてしまう。ここでは逆に「先に
+  // このAPIで翻訳→あとから既存の用語置換（カード名・効果文・extra-lines）」
+  // の順にすることで、公式用語が最後に上書きされる形にする。
+  //
+  // 適用範囲: カード名・効果文（.chaos-card-inside内、.chaos-header/
+  // .chaos-content）は既存の精密な処理に完全に任せ、このAI翻訳では一切
+  // 触れない（.chaos-card-inside配下は探索から除外）。対象はそれ以外の
+  // 一般的な解説文（レビュー文・Potential説明等）のみ。
+  //
+  // 起動タイミング: 既存のカード検出・効果文挿入・監視設置（watchEffectScope /
+  // watchDivineElement）はすべて run() の呼び出しを起点にしている。ここでは
+  // run() の呼び出し自体を翻訳完了後まで遅らせるだけにとどめ、run() や
+  // insertEffects / insertDivineLines / 監視設置ロジックには一切手を
+  // 加えない。
+  //
+  // 実機検証で判明した制約（2026-08-08、Chrome 150で確認）:
+  //   - Translator.create() は、モデル未ダウンロード（availability が
+  //     "downloadable"/"downloading"）の状態では実際のユーザー操作
+  //     （クリック等）が無いと NotAllowedError で失敗する。ページ読み込み
+  //     時の自動実行では満たせないため、ページ内にボタンを出して
+  //     クリックを起点にする。拡張機能のポップアップでのクリックは別
+  //     ドキュメントのため、ここでのジェスチャーとしては使えない。
+  //   - モデル取得済み（availability が "available"）なら、以後は
+  //     ジェスチャー無しで create() が成功する（＝2回目以降は自動で動く）。
+  //   - プレースホルダ（[[1]] 等）は翻訳後も壊れず残ることを実機で確認済み
+  //     （数値のみ・記号直後・1文中に5個等、複数パターンで確認）。
+
+  var TRANSLATE_SOURCE_LANG = 'en';
+  var TRANSLATE_TARGET_LANG = 'ja';
+  var TRANSLATE_INLINE_TAGS = { B: 1, I: 1, U: 1, STRONG: 1, EM: 1, SPAN: 1, BR: 1, SUP: 1, SUB: 1, SMALL: 1, MARK: 1, A: 1 };
+
+  // 要素の中身が「インラインタグ（A含む）とテキストだけ」かどうか。
+  // これがtrueの要素を1つの翻訳単位（ブロック）として扱う。falseなら
+  // まだ内側にP/DIV/LI等の入れ子構造が残っているとみなし、さらに内側へ
+  // 降りて探す。
+  function isInlineOnlyForTranslate(el) {
+    for (var i = 0; i < el.children.length; i++) {
+      var c = el.children[i];
+      if (!TRANSLATE_INLINE_TAGS[c.tagName]) { return false; }
+      if (!isInlineOnlyForTranslate(c)) { return false; }
+    }
+    return true;
+  }
+
+  function hasLatinLetter(s) {
+    return /[A-Za-z]/.test(s);
+  }
+
+  // document.body（.chaos-card-inside配下とSCRIPT/STYLE等を除く）から、
+  // 翻訳単位となる「まとまり」要素を再帰的に収集する。
+  function collectTranslationBlocks(root, out) {
+    var children = Array.prototype.slice.call(root.children);
+    children.forEach(function (el) {
+      if (SKIP_TAGS.test(el.tagName)) { return; }
+      if (el.classList && el.classList.contains('chaos-card-inside')) { return; } // カード領域は既存処理に任せる
+      if (el.hasAttribute('data-czn-translated')) { return; } // 処理済み
+      var text = (el.textContent || '').trim();
+      if (text && hasLatinLetter(text) && isInlineOnlyForTranslate(el)) {
+        out.push(el);
+      } else {
+        collectTranslationBlocks(el, out);
+      }
+    });
+  }
+
+  // 要素のDOMを歩いてテキストを取り出す。<a>はプレースホルダに置き換えて
+  // href・表示文字列を退避する（翻訳後にリンクとして復元するため）。
+  // <br>は改行に、その他の許可インラインタグ（B/I/U/STRONG/EM/SPAN/SUP/
+  // SUB/SMALL/MARK）は中身のテキストだけを残す（強調は失われるが、ユーザー
+  // の指示により許容する既知の制約）。
+  function extractBlockTextWithPlaceholders(el, placeholders) {
+    var parts = [];
+    Array.prototype.forEach.call(el.childNodes, function (node) {
+      if (node.nodeType === 3) {
+        parts.push(node.nodeValue);
+      } else if (node.nodeType === 1 && node.tagName === 'A') {
+        var token = '[[' + (placeholders.length + 1) + ']]';
+        placeholders.push({ token: token, kind: 'link', href: node.getAttribute('href'), text: node.textContent });
+        parts.push(token);
+      } else if (node.nodeType === 1 && node.tagName === 'BR') {
+        parts.push('\n');
+      } else if (node.nodeType === 1) {
+        parts.push(extractBlockTextWithPlaceholders(node, placeholders));
+      }
+    });
+    return parts.join('');
+  }
+
+  // glossary.json の確定語（en）をプレースホルダに置き換える。翻訳後に
+  // ここで退避した ja で復元することで、地の文中の用語も公式訳になる
+  // （既存の replaceTermsOnPage と同じ単語境界判定を使う）。
+  function substituteTermPlaceholders(text, resolved, placeholders) {
+    var alts = Object.keys(resolved).sort(function (a, b) { return b.length - a.length; }).map(rxEscape);
+    if (alts.length === 0) { return text; }
+    var re = new RegExp(alts.join('|'), 'g');
+    var result = '';
+    var last = 0;
+    var m;
+    re.lastIndex = 0;
+    while ((m = re.exec(text)) !== null) {
+      var s = m.index;
+      var e = s + m[0].length;
+      if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { re.lastIndex = e; continue; }
+      var token = '[[' + (placeholders.length + 1) + ']]';
+      placeholders.push({ token: token, kind: 'term', ja: resolved[m[0]].ja });
+      result += text.slice(last, s) + token;
+      last = e;
+      re.lastIndex = e;
+    }
+    result += text.slice(last);
+    return result;
+  }
+
+  // 翻訳後の文字列に残ったプレースホルダ（[[N]]）を、リンク要素または
+  // 公式用語のテキストに復元してDocumentFragmentを組み立てる。
+  function restorePlaceholders(translatedText, placeholders) {
+    var frag = document.createDocumentFragment();
+    var byToken = Object.create(null);
+    placeholders.forEach(function (p) { byToken[p.token] = p; });
+
+    var tokenRe = /\[\[(\d+)\]\]/g;
+    var last = 0;
+    var m;
+    while ((m = tokenRe.exec(translatedText)) !== null) {
+      if (m.index > last) {
+        frag.appendChild(document.createTextNode(translatedText.slice(last, m.index)));
+      }
+      var p = byToken[m[0]];
+      if (p && p.kind === 'link') {
+        var a = document.createElement('a');
+        if (p.href) { a.setAttribute('href', p.href); }
+        a.textContent = p.text;
+        frag.appendChild(a);
+      } else if (p && p.kind === 'term') {
+        frag.appendChild(document.createTextNode(p.ja));
+      } else {
+        frag.appendChild(document.createTextNode(m[0])); // 対応が見つからない場合はそのまま残す
+      }
+      last = tokenRe.lastIndex;
+    }
+    if (last < translatedText.length) {
+      frag.appendChild(document.createTextNode(translatedText.slice(last)));
+    }
+    return frag;
+  }
+
+  // 1ブロックを翻訳して書き換える。個別に失敗しても他のブロックへの
+  // 処理は続ける（1箇所の失敗で全体を止めないため）。
+  function translateOneBlock(el, translator, resolved) {
+    var placeholders = [];
+    var rawText = extractBlockTextWithPlaceholders(el, placeholders);
+    var withPlaceholders = substituteTermPlaceholders(rawText, resolved, placeholders);
+    if (!withPlaceholders.trim()) { return Promise.resolve(); }
+
+    return translator.translate(withPlaceholders).then(function (translated) {
+      var frag = restorePlaceholders(translated, placeholders);
+      while (el.firstChild) { el.removeChild(el.firstChild); }
+      el.appendChild(frag);
+      el.setAttribute('data-czn-translated', '1');
+    }).catch(function (err) {
+      log('block translation failed (skipped):', err.message);
+    });
+  }
+
+  // ブロックを1件ずつ順番に処理する（Translator APIの処理は元々
+  // 逐次実行のため、並列化しても速くならない）。
+  function translateBlocksSequentially(blocks, translator, resolved) {
+    var i = 0;
+    function next() {
+      if (i >= blocks.length) { return Promise.resolve(); }
+      var el = blocks[i++];
+      return translateOneBlock(el, translator, resolved).then(next);
+    }
+    return next();
+  }
+
+  function translatePage(translator, resolved) {
+    var blocks = [];
+    collectTranslationBlocks(document.body, blocks);
+    log('translation blocks found:', blocks.length);
+    return translateBlocksSequentially(blocks, translator, resolved);
+  }
+
+  // モデル未ダウンロード時にページ内に出すボタン。実際のクリック（＝
+  // ユーザージェスチャー）が無いと Translator.create() が
+  // NotAllowedError で失敗するため、これを起点にする。ダウンロード完了
+  // または失敗で必ず取り除く。Prydwenのレイアウトに影響しないよう
+  // position:fixed の小さいバッジにする。
+  function showTranslateDownloadButton() {
+    var btn = document.createElement('button');
+    btn.id = 'czn-translate-download-btn';
+    btn.textContent = 'CZN: AI翻訳モデルを取得（クリックで開始）';
+    btn.style.cssText =
+      'position:fixed;left:12px;bottom:12px;z-index:2147483647;max-width:280px;' +
+      'background:rgba(20,20,20,0.9);color:#fff;padding:8px 12px;' +
+      'border:1px solid rgba(255,255,255,0.3);border-radius:6px;cursor:pointer;' +
+      'font:12px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    document.body.appendChild(btn);
+    return btn;
+  }
+
+  function removeTranslateDownloadButton(btn) {
+    if (btn && btn.parentNode) { btn.parentNode.removeChild(btn); }
+  }
+
+  // クリックを起点に Translator.create() を呼び、ダウンロード進捗を
+  // ボタンの表示で示す。完了・失敗いずれの場合もボタンを消す。この
+  // クリックで作られたtranslatorは今回のページには適用しない（今回の
+  // run()はすでに翻訳無しで進んでいるため）。次回のページ読み込みからは
+  // availabilityが"available"になり、ジェスチャー無しで自動翻訳される。
+  function offerTranslatorDownload() {
+    var btn = showTranslateDownloadButton();
+    btn.addEventListener('click', function onClick() {
+      btn.removeEventListener('click', onClick);
+      btn.disabled = true;
+      btn.textContent = 'CZN: AI翻訳モデルを取得中…';
+      window.Translator.create({
+        sourceLanguage: TRANSLATE_SOURCE_LANG,
+        targetLanguage: TRANSLATE_TARGET_LANG,
+        monitor: function (m) {
+          m.addEventListener('downloadprogress', function (e) {
+            btn.textContent = 'CZN: AI翻訳モデルを取得中… ' + Math.round(e.loaded * 100) + '%';
+          });
+        }
+      }).then(function () {
+        removeTranslateDownloadButton(btn);
+        showStatusToast('CZN: AI翻訳モデルの取得が完了しました。次回のページ読み込みから有効になります');
+      }).catch(function (err) {
+        log('Translator.create (via button) failed:', err.message);
+        removeTranslateDownloadButton(btn);
+      });
+    });
+  }
+
+  // 翻訳フェーズ全体のエントリポイント。対象外・トグルOFF・API無し・
+  // 利用不可等はすべて null を返し、呼び出し側は「翻訳スキップ→従来通り
+  // 置換のみ」にフォールバックする（拡張機能全体は止めない）。
+  function setupTranslation(charName) {
+    if (charName !== 'Magna') { return Promise.resolve(null); } // 今回はMagnaのページのみが対象
+    return getTranslateEnabled().then(function (enabled) {
+      if (!enabled) { return null; }
+      if (typeof window.Translator === 'undefined') {
+        log('Translator API is not available in this context');
+        return null;
+      }
+      return window.Translator.availability({ sourceLanguage: TRANSLATE_SOURCE_LANG, targetLanguage: TRANSLATE_TARGET_LANG })
+        .then(function (avail) {
+          if (avail === 'available') {
+            return window.Translator.create({ sourceLanguage: TRANSLATE_SOURCE_LANG, targetLanguage: TRANSLATE_TARGET_LANG });
+          }
+          if (avail === 'downloadable' || avail === 'downloading') {
+            offerTranslatorDownload(); // 今回のページはブロックせず、ボタンだけ出す
+            return null;
+          }
+          return null; // 'unavailable' 等
+        });
+    }).catch(function (err) {
+      log('setupTranslation failed:', err.message);
+      return null;
+    });
+  }
+
   getEnabled().then(function (enabled) {
     if (!enabled) { log('disabled via popup toggle'); return; }
 
@@ -1595,25 +1873,44 @@
       var entries = results[0];
       var effects = results[1];
       var extraLines = results[2];
-      var result = run(entries, effects, extraLines);
-      var ctx = result.ctx;
+      var charName = currentCharacter();
 
-      showStatusToast(formatToastMessage(result));
+      // AI翻訳（実験的機能）は run() より前に完了させる。run() 自体が
+      // カード検出・効果文挿入・監視設置（watchEffectScope /
+      // watchDivineElement）・ページ全体監視の起点であり、run() の
+      // 呼び出しを翻訳完了後まで遅らせるだけで、既存コードを一切変更
+      // せずに「翻訳→監視開始」の順序を満たせる。翻訳が使えない・失敗
+      // した場合は setupTranslation が null を返し、そのまま従来通り
+      // 置換のみで進む。
+      setupTranslation(charName).then(function (translator) {
+        var translationPromise = translator
+          ? translatePage(translator, buildContext(entries, charName).resolved)
+          : Promise.resolve();
 
-      // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
-      // 収集→挿入→置換の3段階をまとめて再実行する（用語置換だけ除外すると、
-      // 再描画で消えた置換結果が復活しないため）。
-      var pending = false;
-      var observer = new MutationObserver(function () {
-        if (pending) { return; }
-        pending = true;
-        setTimeout(function () {
-          pending = false;
-          var freshEffectsIdx = buildEffectsIndex(effects);
-          processPage(ctx, freshEffectsIdx, currentCharacter(), extraLines);
-        }, 500);
+        translationPromise.catch(function (err) {
+          log('translation phase failed (falling back to replacement-only):', err.message);
+        }).then(function () {
+          var result = run(entries, effects, extraLines);
+          var ctx = result.ctx;
+
+          showStatusToast(formatToastMessage(result));
+
+          // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
+          // 収集→挿入→置換の3段階をまとめて再実行する（用語置換だけ除外すると、
+          // 再描画で消えた置換結果が復活しないため）。
+          var pending = false;
+          var observer = new MutationObserver(function () {
+            if (pending) { return; }
+            pending = true;
+            setTimeout(function () {
+              pending = false;
+              var freshEffectsIdx = buildEffectsIndex(effects);
+              processPage(ctx, freshEffectsIdx, currentCharacter(), extraLines);
+            }, 500);
+          });
+          observer.observe(document.body, { childList: true, subtree: true });
+        });
       });
-      observer.observe(document.body, { childList: true, subtree: true });
     }).catch(function (err) {
       console.error('[czn-ext] 初期化に失敗:', err);
       showStatusToast('CZN: 初期化に失敗しました');
