@@ -981,6 +981,12 @@
 
       effectScope.setAttribute('data-czn-done', '1');
 
+      // 診断用（一時的）: 書き込み先が実際に画面上のどれなのか目視確認
+      // できるよう、日本語を書き込んだ .chaos-content に赤枠、その
+      // カード全体（c.block）に黄緑枠を付ける。
+      effectScope.style.outline = '3px solid red';
+      if (c.block) { c.block.style.outline = '3px solid lime'; }
+
       if (reapplied) { reappliedCount++; }
 
       // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
