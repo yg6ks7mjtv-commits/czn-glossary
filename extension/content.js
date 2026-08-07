@@ -34,15 +34,20 @@
 //      （stripRomanLevel）ではこちらを読む。該当levelの効果文が手元
 //      データにあれば、カード枠内の「英語の効果文要素」そのものも書き換える。
 //      効果文の探索範囲は、名前照合用の（狭い）カード枠 box とは別に扱う。
-//      box から maxEffectSearchClimb（既定3）階層まで親をたどって範囲を
-//      広げる（box が効果文の領域を含んでいないことがあるため）。ただし
-//      2つ目の種別表示を含む範囲までは広げない（findCardBoxと同じ「複数
-//      カードをまたいだら打ち切る」歯止め）。候補（コスト数字・カード名・
-//      種別表示・ローマ数字バッジ、カード名と同一テキストの重複要素を除いた
-//      葉要素）は実測幅の広い順に並べる。事前のスコアリングや幅フィルタでは
-//      縦書きの誤選択を防ぎきれなかったため、「事前に正しそうなものを選ぶ」
-//      のではなく、幅の広い候補から順に実際に書き換えてみて結果を実測する:
-//      高さが幅より大きい（縦書きになっている）か、幅がカード枠の60%未満
+//      box から親を1階層ずつたどり、その要素の textContent が box の
+//      textContent より50文字以上多くなった時点で、そこを探索範囲として
+//      採用する（＝効果文相当のまとまった量のテキストが新たに含まれる
+//      ようになったとみなす。box が単なるヘッダー部分だけで、効果文が
+//      box とは全く別の場所にあるケースに対応するため。固定の階層数だけで
+//      判断すると届かないことがあった）。最大 maxEffectSearchClimb（既定
+//      10）階層まで許可。ただし2つ目の種別表示を含む階層に達したら、その
+//      1つ手前で打ち切る（findCardBoxと同じ「複数カードをまたいだら打ち
+//      切る」歯止め）。候補（コスト数字・カード名・種別表示・ローマ数字
+//      バッジ、カード名と同一テキストの重複要素を除いた葉要素）は実測幅の
+//      広い順に並べる。事前のスコアリングや幅フィルタでは縦書きの誤選択を
+//      防ぎきれなかったため、「事前に正しそうなものを選ぶ」のではなく、
+//      幅の広い候補から順に実際に書き換えてみて結果を実測する: 高さが幅
+//      より大きい（縦書きになっている）か、幅が探索範囲自体の幅の60%未満
 //      なら失敗と判定し、元のテキスト・スタイルに戻して次の候補を試す。
 //      候補が尽きれば英語のまま残す。採用できた要素には背景白・文字黒・
 //      角丸を付け、white-space:normal・word-break:normal・
@@ -76,9 +81,12 @@
 //      画面が変わらないという矛盾の原因をその場で確認できるようにするため）。
 //      試した候補があれば各候補の書き換え後の幅と高さも出す。書き換え先の
 //      要素が1つも見つからなかった場合は、名前照合用のカード枠（box）自体の
-//      タグ名・クラス名・中のテキスト要素数・textContent冒頭50文字も
-//      併せて出す（枠が小さすぎるのか、除外条件が厳しすぎるのかを
-//      切り分けるため）。
+//      タグ名・クラス名・中のテキスト要素数・textContent冒頭50文字に加えて、
+//      実際に探索範囲として採用した scope（box から内容の増分を基準に
+//      広げた後の要素。boxとは別に表示する）のタグ名・クラス名・登った
+//      階層数・中のテキスト要素数・textContent冒頭50文字も併せて出す
+//      （box が小さすぎるのか、scopeへの拡大が機能していないのか、除外
+//      条件が厳しすぎるのかを切り分けるため）。
 //      効果文が0件のときの内訳表示（最大10件）は、効果文が見つかったもの・
 //      glossaryで日本語化できたもの・ヒラメキ段階が付いているものを優先して
 //      並べ、実際に探索したキーと保有キー一覧（有効なもののみ）も表示する
@@ -559,27 +567,40 @@
     return candidates;
   }
 
-  // 名前照合用の（狭い）カード枠 box から、さらに数階層まで親をたどり、
-  // 効果文の探索範囲を広げる。box が効果文の領域を含んでいないことがある
-  // ため。ただし、2つ目の種別表示（Attack/Skill）を含む範囲まで広げると
-  // 別カードの領域に踏み込んでしまうため、そこで打ち切る（findCardBoxの
-  // 「複数カードをまたいだら打ち切る」と同じ考え方）。
-  function findEffectSearchScope(box, allTypeLabels, maxExtraClimb) {
+  // 名前照合用の（狭い）カード枠 box から、内容の増分を基準に効果文の探索
+  // 範囲を広げる。階層数だけで判断すると、box がカード名＋種別表示だけの
+  // ヘッダー部分で、効果文が全く別の場所にあるケースに対応できないため
+  // （box が固定の階層数では届かないほど遠いことがある）。box から親を
+  // 1階層ずつたどり、その要素の textContent が box の textContent より
+  // 50文字以上多くなった時点で、そこを探索範囲として採用する（＝効果文
+  // 相当のまとまった量のテキストが新たに含まれるようになったとみなす）。
+  // 最大 maxClimb 階層まで許可。2つ目の種別表示（Attack/Skill）を含む
+  // 階層に達したら、別カードの領域に踏み込んだとみなし、その1つ手前
+  // （登る前）の要素で打ち切る（findCardBoxの「複数カードをまたいだら
+  // 打ち切る」と同じ考え方）。内容の増分条件を満たさないまま maxClimb に
+  // 達した場合は、そこまでで登れた最も広い（安全な）要素を返す。
+  function findEffectSearchScope(box, allTypeLabels, maxClimb) {
+    var boxTextLen = (box.textContent || '').length;
     var el = box;
-    var best = box;
-    for (var depth = 0; depth < maxExtraClimb && el.parentElement; depth++) {
-      el = el.parentElement;
+    var climbed = 0;
+    for (var depth = 0; depth < maxClimb && el.parentElement; depth++) {
+      var next = el.parentElement;
+
       var labelsInScope = 0;
       for (var i = 0; i < allTypeLabels.length; i++) {
-        if (el.contains(allTypeLabels[i])) {
+        if (next.contains(allTypeLabels[i])) {
           labelsInScope++;
           if (labelsInScope > 1) { break; }
         }
       }
-      if (labelsInScope > 1) { break; } // 別カードの種別表示を含んだので打ち切る
-      best = el;
+      if (labelsInScope > 1) { break; } // 別カードの種別表示を含んだので1つ手前で打ち切る
+
+      el = next;
+      climbed = depth + 1;
+      var elTextLen = (el.textContent || '').length;
+      if (elTextLen >= boxTextLen + 50) { break; } // 内容が十分増えたのでここで採用
     }
-    return best;
+    return { scope: el, climbedLevels: climbed };
   }
 
   // scope内で、テキストを持つ葉要素の数を数える。診断用（box が小さすぎて
@@ -765,7 +786,7 @@
     var diagnostics = [];
     var rewriteDetails = []; // 書き換えた要素の内訳（診断用）
     var rewriteFailures = []; // 効果文は見つかったのに書き換えに失敗した内訳（診断用）
-    var maxExtraClimb = CZN_SELECTORS.maxEffectSearchClimb || 3;
+    var maxExtraClimb = CZN_SELECTORS.maxEffectSearchClimb || 10;
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -789,8 +810,6 @@
       var excludeEls = [c.nameEl];
       if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
       if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-      var boxWidth = c.block.getBoundingClientRect().width;
-      var minEffectWidth = boxWidth * 0.6;
 
       // カード名は glossary が分かっていれば効果文の有無とは無関係に常に
       // 日本語のみにする。用語置換の正規表現マッチに依存せず、既に解決済みの
@@ -822,10 +841,15 @@
         (effect.incomplete ? '(一部)' : '');
 
       // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
-      // そこから数階層まで親をたどって広げる（box が効果文の領域を
-      // 含んでいないことがあるため）。ただし2つ目の種別表示を含む範囲までは
-      // 広げない。候補は実測幅の広い順に並んでいる。
-      var effectScope = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
+      // 内容の増分を基準にそこから親をたどって広げる（box が単なるヘッダー
+      // 部分で、効果文が全く別の場所にあることがあるため）。ただし2つ目の
+      // 種別表示を含む範囲までは広げない。幅の判定基準（60%）は box では
+      // なく、この拡大後の探索範囲自体の幅に対して計算する。候補は実測幅の
+      // 広い順に並んでいる。
+      var scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
+      var effectScope = scopeResult.scope;
+      var scopeWidth = effectScope.getBoundingClientRect().width;
+      var minEffectWidth = scopeWidth * 0.6;
       var effectCandidates = collectEffectTextCandidates(effectScope, excludeEls, c.nameEl);
 
       // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
@@ -875,9 +899,10 @@
       }).join('、');
 
       if (!effectEl) {
-        // box（名前照合用の狭いカード枠）が小さすぎるのか、除外条件が
-        // 厳しすぎるのかを切り分けられるよう、box自体のタグ名・クラス名・
-        // 中のテキスト要素数・textContent冒頭50文字も記録する。
+        // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
+        // scope（内容の増分で広げた後の要素）を別々に記録する。box が
+        // 小さすぎるのか、scopeへの拡大が機能していないのか、除外条件が
+        // 厳しすぎるのかを切り分けられるようにするため。
         rewriteFailures.push({
           rawNameText: c.rawNameText || c.nameText,
           level: c.level,
@@ -889,7 +914,12 @@
           boxTag: c.block.tagName,
           boxClass: (c.block.className || '').toString().slice(0, 40),
           boxTextLeafCount: countTextLeaves(c.block),
-          boxTextHead: (c.block.textContent || '').trim().slice(0, 50)
+          boxTextHead: (c.block.textContent || '').trim().slice(0, 50),
+          scopeTag: effectScope.tagName,
+          scopeClass: (effectScope.className || '').toString().slice(0, 40),
+          scopeClimbedLevels: scopeResult.climbedLevels,
+          scopeTextLeafCount: countTextLeaves(effectScope),
+          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50)
         });
         PROCESSED.add(c.block);
         return;
@@ -1121,9 +1151,10 @@
     if (result.rewriteFailures && result.rewriteFailures.length > 0) {
       // 照合（entry・effectの取得）までは成功しているのに、実際の書き換え
       // 段階で失敗したカード。「効果文あり」なのに画面が変わらないという
-      // 矛盾の原因をここで直接確認できるようにする。試した候補の幅・高さと、
-      // box情報（枠が小さすぎるのか除外条件が厳しすぎるのかの切り分け）を
-      // 併せて出す。
+      // 矛盾の原因をここで直接確認できるようにする。試した候補の幅・高さ、
+      // box情報（名前照合用の狭いカード枠）、scope情報（内容の増分で広げた
+      // 後の実際の探索範囲。boxとは別に表示し、範囲拡大が機能しているか
+      // 切り分けられるようにする）を併せて出す。
       result.rewriteFailures.forEach(function (f) {
         var attemptsPart = f.attemptsSummary ? (' / ' + f.attemptsSummary) : '';
         var boxPart = f.boxTag
@@ -1131,8 +1162,14 @@
              ' 中のテキスト要素' + f.boxTextLeafCount + '件' +
              ' / box冒頭「' + f.boxTextHead + '」')
           : '';
+        var scopePart = f.scopeTag
+          ? (' / scope(' + f.scopeClimbedLevels + '階層):' + f.scopeTag +
+             (f.scopeClass ? '.' + f.scopeClass : '') +
+             ' 中のテキスト要素' + f.scopeTextLeafCount + '件' +
+             ' / scope冒頭「' + f.scopeTextHead + '」')
+          : '';
         lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
-          ' / ' + f.reason + attemptsPart + boxPart);
+          ' / ' + f.reason + attemptsPart + boxPart + scopePart);
       });
     }
 
