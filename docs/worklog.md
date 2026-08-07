@@ -137,3 +137,17 @@
   - docs/coverage.mdを再確認したが、マグナの各カードは元々「一度も記録が無い」(絶対零度)か「今回で完全に埋まった」のいずれかで、coverage.mdの対象範囲（記録が一部でもあるカード）には該当せず、差分は発生しなかった
 - 未解決: 絶対零度（Absolute Zero, level 0）の効果文が未登録のまま。これが埋まればMagnaは3条件すべてを満たす
 - コミット: (effects-ja.jsonは非公開データのためコミット対象外。リポジトリ側の変更は無し)
+
+## 2026-08-07 17:35
+- 依頼: マグナのエゴスキル「絶対零度」の効果文（ユーザーがゲーム画面から読み取ったもの）をlevel 0 / source:"ingame"で登録する。英語名はglossary.jsonのAbsolute Zero（Magna）から引く。これでマグナの不足4件が全て埋まったか確認
+- 実施:
+  - glossary.jsonでAbsolute Zero = 絶対零度（character: Magna、confirmed）を確認
+  - effects-ja.json・extension/effects-ja.jsonに絶対零度をlevel 0 / source:"ingame"で追加（既存記録は0件だったため新規追加のみ、上書きなし）
+  - 補足事項（コスト表記なし・エゴスキルという種別）について、effects-ja.jsonのスキーマにはそもそも種別・コストを記録するフィールドが存在しない（ja_card/character/level/effect/source/incompleteのみ）ため、既存データとの食い違いは発生しない旨を確認
+  - 3条件（①効果文カバレッジ、②glossary名confirmed、③ヒラメキ段階判定）を再集計するスクリプトでMagnaを再確認
+- 結果:
+  - 絶対零度を新規登録。前回報告した不足4件（Frozen Fist・Frost Shield・Storm of Bitter Cold・Absolute Zero）が全て埋まった
+  - Magnaが3条件すべてを満たす「完全な状態」になったことを確認（カード8種・レベル枠28件、名前confirmed外0件・レベル未解決0件・効果文未登録0件）。35キャラ中、3条件をすべて満たした最初のキャラ
+  - docs/coverage.mdを再生成したが差分なし（絶対零度はcoverage.mdの対象範囲外だったカードのため）
+- 未解決: なし
+- コミット: (effects-ja.jsonは非公開データのためコミット対象外。リポジトリ側の変更は無し)
