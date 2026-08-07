@@ -3,25 +3,17 @@
 //
 // やること:
 //   1. glossary.json（公開URL）と effects-ja.json（拡張に同梱・非公開）を読む
-//   2. ページ上の種別表示（"Attack" または "Skill"、完全一致の2値）を目印に、
-//      そこから親を1階層ずつたどり、「glossary.json の英語カード名（ヒラメキ
-//      段階のローマ数字は除いたベース名）と完全一致する、末尾コロンでない
-//      葉要素」が現れた時点でそこを「カード枠」として確定する（＝カード名と
-//      種別表示の両方を含む最小の共通祖先）。それより外は探索しない。
-//      "Show Effects" は効果文が短いカードには存在しないため目印にしない。
-//      単純な固定階層数や見出しタグの総当たりだと、カードのグループ見出し
-//      （「Starting Cards:」等）まで拾ってしまうため、glossary名との完全一致
-//      （ローマ数字除去後）を主な判定基準にしている。
-//      安全のための2つの歯止め:
-//        - 登った祖先に自分以外の種別表示（Attack/Skill）が複数入って
-//          しまった時点で、それは1枚のカードの枠を超えて複数カードを
-//          またぐ共通祖先（グリッド全体等）なので、それ以上は登らず打ち切る
-//          （＝別カードの名前を誤って拾うことを防ぐ）
-//        - 名前を特定できなければ、無理に近い候補を採用せず null を返す。
-//          そのカードは処理対象外（英語のまま）になる。誤った日本語や
-//          誤った効果文が表示されるより、英語のまま残るほうが安全なため
-//      候補が複数見つかったときは、種別表示からのDOM順の距離が最も近い
-//      ものを優先する
+//   2. 【既定・確定セレクタ方式】Prydwenの実際のDOM構造が判明したため、
+//      .chaos-card-inside を1枚のカードとして直接検出する（種別表示から
+//      推測で探索する旧方式は削除せず残してあり、selectors.js の
+//      useConfirmedStructure を false にすれば無効化できる）。カード内の
+//      img[alt] からカード名（ローマ数字付き）を取得し、glossary.json の
+//      英語カード名と照合する。カード名の表示先は .chaos-header 内で
+//      glossary名と一致する葉要素（ヘッダーにはコスト数字・種別表示も
+//      同居するため、ヘッダー全体ではなく該当要素だけを特定して書き換える）。
+//      見つからなければ無理に近い候補を採用せず、そのカードは処理対象外
+//      （英語のまま）にする（誤った日本語や誤った効果文が表示されるより、
+//      英語のまま残るほうが安全なため）
 //   3. カード名末尾のローマ数字（I/II/III/IV/V）をヒラメキ段階(level 1-5)、
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
@@ -32,58 +24,57 @@
 //      英語表記のままのことがあり、通常の用語置換では置き換わらないため）。
 //      元の英語は data-czn-orig-name 属性に退避し、次回のカード名解析
 //      （stripRomanLevel）ではこちらを読む。該当levelの効果文が手元
-//      データにあれば、カード枠内の「英語の効果文要素」そのものも書き換える。
-//      効果文の探索範囲は、名前照合用の（狭い）カード枠 box とは別に扱う。
-//      box から親を1階層ずつたどり、その要素の textContent が box の
-//      textContent より50文字以上多くなった時点で、そこを探索範囲として
-//      採用する（＝効果文相当のまとまった量のテキストが新たに含まれる
-//      ようになったとみなす。box が単なるヘッダー部分だけで、効果文が
-//      box とは全く別の場所にあるケースに対応するため。固定の階層数だけで
-//      判断すると届かないことがあった）。最大 maxEffectSearchClimb（既定
-//      10）階層まで許可。ただし2つ目の種別表示を含む階層に達したら、その
-//      1つ手前で打ち切る（findCardBoxと同じ「複数カードをまたいだら打ち
-//      切る」歯止め）。英語の効果文は1つの要素にまとまっておらず、複数の
-//      テキストノードに分割されていることが判明したため、「正しい1要素を
-//      選ぶ」方式は成立しない。代わりにテキストノード単位で直接操作する:
-//      探索範囲(scope)内のテキストノードを文書順に全て集め、カード名要素・
-//      種別表示・a/button要素の配下・空白のみ・コスト数字（親要素の内容が
-//      数字のみ）を除いた残りのうち、最初の1つに日本語の効果文を入れ、
-//      2つ目以降は空文字にする。要素の削除・非表示・スタイル変更は行わず、
-//      テキストの中身だけを変える。元の英文（集めたテキストノードの連結）は
-//      scope の data-czn-orig 属性に退避する。scope に
-//      data-czn-done="1" を付けて二重処理を防ぐ（既に付いていれば
-//      その回のスキャンでは何もしない）。対象のテキストノードが1つも
-//      見つからないカードや、日本語の効果文が無いカードには何もしない
-//      （英語のまま残る）
+//      データにあれば、そのカード内の .chaos-content を効果文の探索範囲に
+//      固定して書き換える（旧方式へのフォールバック時のみ、名前照合用の
+//      box から内容の増分を基準に範囲を広げる findEffectSearchScope を使う）。
+//      英語の効果文は1つの要素にまとまっておらず、複数のテキストノードに
+//      分割されているため、「正しい1要素を選ぶ」方式は成立しない。代わりに
+//      テキストノード単位で直接操作する: 探索範囲(scope)内のテキストノードを
+//      文書順に全て集め、カード名要素・種別表示・a/button要素の配下・
+//      空白のみ・コスト数字（親要素の内容が数字のみ）を除いた残りのうち、
+//      最初の1つに日本語の効果文を入れ、2つ目以降は空文字にする。要素の
+//      削除・非表示・スタイル変更は行わず、テキストの中身だけを変える。
+//      元の英文（集めたテキストノードの連結）は scope の data-czn-orig
+//      属性に退避する。scope に data-czn-done="1" を付けて二重処理を防ぐが、
+//      ページ側の再描画でテキストノードだけが英語に作り直され、要素自体と
+//      その属性は残ることがあるため、属性だけで「処理済み」と判定せず、
+//      scope の現在のテキストに書き込んだはずの日本語が実際に含まれているか
+//      を毎回確認する。含まれていなければ未処理として扱い、再度書き換える
+//      （タイマーによる自発的な再試行はせず、MutationObserverによる
+//      再スキャンに任せる）。対象のテキストノードが1つも見つからないカード
+//      や、日本語の効果文が無いカードには何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。書き換え済み（data-czn-done="1"）の
 //      要素は対象から除外する。置換した箇所への背景ハイライトは付けない
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
 //      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
-//      効果文データ◯件 / 名前特定スキップ◯件」の内訳を表示する。カード枠は
-//      種別表示から検出を試みた件数、名前取得はそのうちカード名まで特定できた
-//      件数、ユニークはベース名（ローマ数字を除いた名前、レベル違いは1件に
-//      まとめる）の種類数、効果文データは effects-ja.json から読めた件数
-//      （ファイル全体の件数。source:"gamerch" は buildEffectsIndex で除外
-//      されるため、実際に索引に使われた件数は「(有効◯件)」として別途
-//      括弧内に示す）、名前特定スキップは無理に近い候補を採用せず処理対象外
-//      にした件数（別カードへの誤爆を防ぐための安全装置が働いた件数）。
-//      同名でもカード枠ごとに別カードとして処理し、名前による集約・
+//      効果文データ◯件 / 名前特定スキップ◯件 / content検出◯件 / 再適用◯件」の
+//      内訳を表示する。カード枠は検出を試みたカードの件数、名前取得はそのうち
+//      カード名まで特定できた件数、ユニークはベース名（ローマ数字を除いた
+//      名前、レベル違いは1件にまとめる）の種類数、効果文データは
+//      effects-ja.json から読めた件数（ファイル全体の件数。source:"gamerch"
+//      は buildEffectsIndex で除外されるため、実際に索引に使われた件数は
+//      「(有効◯件)」として別途括弧内に示す）、名前特定スキップは無理に近い
+//      候補を採用せず処理対象外にした件数（別カードへの誤爆を防ぐための安全
+//      装置が働いた件数）、content検出は .chaos-content が見つかったカードの
+//      件数、再適用はページ側の再描画で英語に戻っているのを検知して再書換
+//      した件数。同名でもカードごとに別カードとして処理し、名前による集約・
 //      重複排除は一切行わない。スキップが1件以上あるときは、スキップした
 //      カードの推定テキスト（診断専用、実際の照合には使わない）を最大5件
-//      表示する。照合（entry・effectの取得）まで成功したのに実際の書き換え
-//      段階で失敗したカードがあれば（全体の挿入件数が0件でなくても）、
-//      「挿入失敗: 原文 / level / 理由」を必ず表示する（「効果文あり」なのに
-//      画面が変わらないという矛盾の原因をその場で確認できるようにするため）。
-//      試した候補があれば各候補の書き換え後の幅と高さも出す。書き換え先の
-//      要素が1つも見つからなかった場合は、名前照合用のカード枠（box）自体の
-//      タグ名・クラス名・中のテキスト要素数・textContent冒頭50文字に加えて、
-//      実際に探索範囲として採用した scope（box から内容の増分を基準に
-//      広げた後の要素。boxとは別に表示する）のタグ名・クラス名・登った
-//      階層数・中のテキスト要素数・textContent冒頭50文字も併せて出す
-//      （box が小さすぎるのか、scopeへの拡大が機能していないのか、除外
-//      条件が厳しすぎるのかを切り分けるため）。
+//      表示する。効果文を書き換えられたときは「原文 / level / (再適用) /
+//      ノード数 / 親要素タグ名 / 書換前の連結英文先頭30文字 / 書換後の
+//      scope先頭30文字」を最大10件表示する。照合（entry・effectの取得）まで
+//      成功したのに実際の書き換え段階で失敗したカードがあれば（全体の挿入
+//      件数が0件でなくても）、「挿入失敗: 原文 / level / 理由」を必ず表示
+//      する（「効果文あり」なのに画面が変わらないという矛盾の原因をその場で
+//      確認できるようにするため）。書き換え先が1つも見つからなかった場合は、
+//      名前照合用のカード枠（box）自体のタグ名・クラス名・中のテキスト要素数・
+//      textContent冒頭50文字に加えて、実際に探索範囲として採用した scope
+//      （確定方式なら.chaos-content、旧方式ならboxから広げた要素。boxとは
+//      別に表示する）のタグ名・クラス名・登った階層数・中のテキスト要素数・
+//      textContent冒頭50文字も併せて出す（box が小さすぎるのか、scopeへの
+//      拡大が機能していないのか、除外条件が厳しすぎるのかを切り分けるため）。
 //      効果文が0件のときの内訳表示（最大10件）は、効果文が見つかったもの・
 //      glossaryで日本語化できたもの・ヒラメキ段階が付いているものを優先して
 //      並べ、実際に探索したキーと保有キー一覧（有効なもののみ）も表示する
@@ -293,8 +284,6 @@
   }
 
   // ---- 4. カード名 -> 効果文 挿入 ----
-
-  var PROCESSED = new WeakSet(); // 挿入済みの説明ブロック
 
   // effects-ja.json は { ja_card, character, level, effect } の配列。
   // 同じ ja_card + character で level（ヒラメキ段階、0=無印）違いを複数持てる。
@@ -740,7 +729,90 @@
     };
   }
 
+  // 【確定セレクタ方式・既定】Prydwenの実際のDOM構造が判明したため、種別表示
+  // からの探索に代えて、確定したクラス名から直接カードを検出する。
+  //   .chaos-card-inside … 1枚のカード
+  //     img[alt]          … カード名（ローマ数字付き。level判定もここから）
+  //     .chaos-header      … カード名の表示先（コスト数字・種別表示も同居する
+  //                           ため、ヘッダー全体ではなく中の該当葉要素だけを
+  //                           findGlossaryNameLeaf で特定して書き換える）
+  //     .chaos-content     … 効果文の探索範囲に固定する（テキストノード方式は
+  //                           従来通り collectEffectTextNodes を使う）
+  // 種別表示ベースの探索（findCardBox等）は削除せず、selectors.js の
+  // useConfirmedStructure を false にすれば無効化して従来経路に戻せる。
+  function collectCardCandidatesByConfirmedStructure(ctx) {
+    var knownEnNames = new Set(Object.keys(ctx.resolved));
+    var cardSel = CZN_SELECTORS.confirmedCard || '.chaos-card-inside';
+    var headerSel = CZN_SELECTORS.confirmedHeader || '.chaos-header';
+    var contentSel = CZN_SELECTORS.confirmedContent || '.chaos-content';
+
+    var cards = Array.prototype.slice.call(document.querySelectorAll(cardSel));
+    log('confirmed card containers found:', cards.length);
+    var candidates = [];
+    var skippedCount = 0;
+    var skippedNames = []; // 最大5件（診断用）
+    var contentFoundCount = 0; // .chaos-content が見つかったカードの件数（診断用）
+
+    cards.forEach(function (cardEl) {
+      var img = cardEl.querySelector('img[alt]');
+      var rawNameText = img && img.alt ? img.alt.trim() : '';
+      if (!rawNameText) {
+        skippedCount++;
+        if (skippedNames.length < 5) { skippedNames.push('(img altなし)'); }
+        return;
+      }
+
+      var headerEl = cardEl.querySelector(headerSel);
+      var contentEl = cardEl.querySelector(contentSel);
+      if (contentEl) { contentFoundCount++; }
+
+      var parsed = stripRomanLevel(rawNameText);
+      var entry = ctx.resolved[parsed.base] || null;
+
+      if (!entry || !headerEl) {
+        skippedCount++;
+        if (skippedNames.length < 5) { skippedNames.push(rawNameText); }
+        return;
+      }
+
+      // .chaos-header にはコスト数字・種別表示も同居するため、ヘッダー全体を
+      // 書き換えるのではなく、glossary名と一致する葉要素だけを特定する。
+      var nameEl = findGlossaryNameLeaf(headerEl, null, knownEnNames);
+      if (!nameEl) {
+        skippedCount++;
+        if (skippedNames.length < 5) { skippedNames.push(rawNameText); }
+        return;
+      }
+
+      candidates.push({
+        block: cardEl, // 二重処理防止のキーはカード全体（.chaos-content単体は
+                        // ページ側の再描画で作り直されることがあるため）
+        nameEl: nameEl,
+        typeLabelEl: null,
+        levelBadgeEl: null,
+        effectScope: contentEl || null, // 確定: 効果文の探索範囲を.chaos-contentに固定
+        rawNameText: rawNameText,
+        nameText: rawNameText,
+        baseName: parsed.base,
+        level: parsed.level,
+        entry: entry
+      });
+    });
+
+    return {
+      candidates: candidates,
+      attemptedCount: cards.length,
+      skippedCount: skippedCount,
+      skippedNames: skippedNames,
+      typeLabels: [],
+      contentFoundCount: contentFoundCount
+    };
+  }
+
   function collectCardCandidates(ctx) {
+    if (CZN_SELECTORS.useConfirmedStructure) {
+      return collectCardCandidatesByConfirmedStructure(ctx);
+    }
     return CZN_SELECTORS.useMarkerStrategy === false
       ? collectCardCandidatesBySelectors(ctx)
       : collectCardCandidatesByMarker(ctx);
@@ -773,9 +845,9 @@
     var rewriteFailures = []; // 効果文は見つかったのに書き換えに失敗した内訳（診断用）
     var maxExtraClimb = CZN_SELECTORS.maxEffectSearchClimb || 10;
 
-    candidates.forEach(function (c) {
-      if (PROCESSED.has(c.block)) { return; }
+    var reappliedCount = 0; // マーカーはあるが中身が英語に戻っていて再書換した件数
 
+    candidates.forEach(function (c) {
       var lookupChar = c.entry ? (c.entry.character || charName) : null;
       var effect = c.entry
         ? lookupEffect(effectsIdx, c.entry.ja, lookupChar, c.level)
@@ -790,7 +862,7 @@
         triedKeyDisplay: c.entry ? displayKey(c.entry.ja, lookupChar, c.level) : null
       });
 
-      if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
+      if (!c.entry) { return; } // glossaryに無いカード名
 
       // カード名は glossary が分かっていれば効果文の有無とは無関係に常に
       // 日本語のみにする。用語置換の正規表現マッチに依存せず、既に解決済みの
@@ -811,7 +883,7 @@
         c.nameEl.setAttribute('data-czn-done', '1');
       }
 
-      if (!effect) { PROCESSED.add(c.block); return; } // 該当levelの効果文が無い
+      if (!effect) { return; } // 該当levelの効果文が無い
 
       // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
       // 実機確認済み（ingame）の文言と一目で区別できるようにする。
@@ -821,17 +893,33 @@
         (effect.source === 'gamerch' ? '※' : '') +
         (effect.incomplete ? '(一部)' : '');
 
-      // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
-      // 内容の増分を基準にそこから親をたどって広げる（box が単なるヘッダー
-      // 部分で、効果文が全く別の場所にあることがあるため）。ただし2つ目の
-      // 種別表示を含む範囲までは広げない。
-      var scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
-      var effectScope = scopeResult.scope;
+      // c.effectScope が確定していれば（確定セレクタ方式）そこに固定する。
+      // 無ければ（旧方式へのフォールバック時）名前照合用の（狭い）カード枠
+      // box から、内容の増分を基準に親をたどって範囲を広げる従来の方式を使う。
+      var scopeResult;
+      var effectScope;
+      if (c.effectScope) {
+        effectScope = c.effectScope;
+        scopeResult = { scope: effectScope, climbedLevels: 0 };
+      } else {
+        scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
+        effectScope = scopeResult.scope;
+      }
 
+      // 「data-czn-done="1" が付いている＝処理済み」と属性だけで判定すると、
+      // ページ側の再描画でテキストノードだけが英語に作り直され、要素自体
+      // （と付けておいた属性）は残るケースを見逃す（＝英語のまま放置される）。
+      // そのため、マーカーがあっても実際の現在のテキストに日本語の効果文が
+      // 含まれているかを確認し、含まれていなければ「未処理」として扱って
+      // 再度書き換える。タイマー等での自発的な再試行は行わず、この確認は
+      // MutationObserver 経由の再スキャン時に自然に行われる。
+      var reapplied = false;
       if (effectScope.getAttribute('data-czn-done') === '1') {
-        // 既にこのscopeへ書き換え済み（再スキャンによる二重処理防止）。
-        PROCESSED.add(c.block);
-        return;
+        var currentText = effectScope.textContent || '';
+        if (currentText.indexOf(jaText) !== -1) {
+          return; // 既に正しく反映されている
+        }
+        reapplied = true;
       }
 
       // 英語の効果文は1つの要素にまとまっておらず、複数のテキスト断片に
@@ -841,9 +929,9 @@
 
       if (textNodes.length === 0) {
         // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
-        // scope（内容の増分で広げた後の要素）を別々に記録する。box が
-        // 小さすぎるのか、scopeへの拡大が機能していないのか、除外条件が
-        // 厳しすぎるのかを切り分けられるようにするため。
+        // scope（内容の増分で広げた後の要素、または確定した .chaos-content）
+        // を別々に記録する。box が小さすぎるのか、scopeへの拡大が機能して
+        // いないのか、除外条件が厳しすぎるのかを切り分けられるようにするため。
         rewriteFailures.push({
           rawNameText: c.rawNameText || c.nameText,
           level: c.level,
@@ -858,7 +946,6 @@
           scopeTextLeafCount: countTextLeaves(effectScope),
           scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50)
         });
-        PROCESSED.add(c.block);
         return;
       }
 
@@ -874,19 +961,23 @@
 
       effectScope.setAttribute('data-czn-done', '1');
 
+      if (reapplied) { reappliedCount++; }
+
       // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
-      // 日本語を入れたノードの親要素のタグ名を記録しておく。
+      // 日本語を入れたノードの親要素のタグ名・書き換え後のscope先頭30文字・
+      // 再適用かどうかを記録しておく。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
         nodeCount: textNodes.length,
         originalHead: originalConcat.trim().slice(0, 30),
-        parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)'
+        parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)',
+        afterHead: (effectScope.textContent || '').trim().slice(0, 30),
+        reapplied: reapplied
       });
 
-      PROCESSED.add(c.block);
       inserted++;
-      log('rewrote effect text for', c.nameText, 'level', c.level);
+      log('rewrote effect text for', c.nameText, 'level', c.level, reapplied ? '(reapplied)' : '');
     });
 
     diagnostics.sort(function (a, b) { return diagnosticScore(b) - diagnosticScore(a); });
@@ -894,6 +985,7 @@
 
     return {
       insertedCount: inserted,
+      reappliedCount: reappliedCount,
       diagnostics: diagnostics,
       rewriteDetails: rewriteDetails.slice(0, 10),
       rewriteFailures: rewriteFailures.slice(0, 10),
@@ -992,11 +1084,15 @@
   // 用語置換を先にやると見出しが「Sword Rain(剣の雨)」のように化けて
   // glossary 照合に失敗するため、この順序を崩さないこと。
   //
-  // 初回表示後もSPA側の再描画でDOMが丸ごと差し替えられ、挿入済みの効果文や
-  // 用語置換のspanが消えることがある（PROCESSEDはWeakSetなのでboxごと
-  // 差し替えられれば自然に「未処理」扱いに戻り、replaceTermsOnPage側も
-  // czn-replaced クラスの有無で判定しているため、差し替え後のテキストは
-  // 単に「まだ置換されていない新しいテキスト」として再度拾われる）。そのため
+  // 初回表示後もSPA側の再描画で挿入済みの効果文や用語置換のspanが消える
+  // ことがある。カード枠（.chaos-card-inside）やカード名要素・効果文の
+  // scope（.chaos-content）自体は同じ要素が使い回され、data-czn-done等の
+  // 属性は残ったまま中のテキストノードだけが英語に作り直されることがある
+  // ため、insertEffects側は属性の有無だけでなく実際のテキストに日本語が
+  // 含まれているかを確認してから「処理済みか」を判定する（詳細は
+  // insertEffects内のコメント）。replaceTermsOnPage側は czn-replaced
+  // クラスの有無で判定しているため、差し替え後のテキストは単に「まだ置換
+  // されていない新しいテキスト」として再度拾われる。そのため
   // MutationObserver からもこの3段階をまとめて再実行する。
 
   function processPage(ctx, effectsIdx, charName) {
@@ -1020,6 +1116,8 @@
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
       skippedCount: collected.skippedCount, // 名前を特定できず処理対象外にした件数
       skippedNames: collected.skippedNames, // そのうち最大5件の診断用テキスト
+      contentFoundCount: collected.contentFoundCount || 0, // .chaos-content が見つかったカードの件数
+      reappliedCount: insertResult.reappliedCount || 0, // ページ側の再描画で英語に戻り、再書換した件数
       replacedCount: replacedCount
     };
   }
@@ -1060,7 +1158,8 @@
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件 / 効果文データ' + result.effectsCount +
       '件(有効' + result.effectsIndexedCount + '件) / 名前特定スキップ' +
-      result.skippedCount + '件'];
+      result.skippedCount + '件 / content検出' + result.contentFoundCount +
+      '件 / 再適用' + result.reappliedCount + '件'];
 
     if (result.skippedCount > 0) {
       // 名前を特定できず処理対象外にしたカード（無理に近い候補を採用せず
@@ -1074,11 +1173,14 @@
     if (result.insertedCount > 0) {
       // 取り違えていないかその場で確認できるよう、集めたテキストノードの
       // 数・書き換え前の連結英文の先頭30文字・日本語を入れたノードの
-      // 親要素のタグ名を出す。
+      // 親要素のタグ名・書き換え後のscope先頭30文字を出す。ページ側の
+      // 再描画で英語に戻っていたのを検知して再書換した場合は「(再適用)」を
+      // 付ける。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
+          (d.reapplied ? '(再適用)' : '') +
           ' / ノード' + d.nodeCount + '件 / 親要素' + d.parentTag +
-          ' / 書換前「' + d.originalHead + '」');
+          ' / 書換前「' + d.originalHead + '」/ 書換後「' + d.afterHead + '」');
       });
     }
 

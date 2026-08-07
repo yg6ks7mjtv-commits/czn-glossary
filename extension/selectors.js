@@ -1,32 +1,47 @@
 // prydwen.gg の実際のカード構造（ユーザーが実画面で確認）に合わせた設定。
 //
-// 1枚のカードの構成:
-//   左上にコストの数字 / カード名（例: "Sword Rain III"） / 種別表示
-//   （"Attack" または "Skill"） / カード画像 / 画像下部に重なる効果文 /
-//   効果文が長いときだけ「Show Effects」リンク。
+// 1枚のカードの実際のDOM構造（確認済み）:
+//   <div class="chaos-card-inside">
+//     <div class="left-border ..."></div>
+//     <div class="chaos-image"><img alt="Sword Rain III"></div>   ← カード名はここ（alt属性）
+//     <div class="chaos-header">...</div>                         ← カード名の表示先（コスト数字・種別表示も同居）
+//     <div class="chaos-content">...</div>                        ← 効果文の探索範囲
+//   </div>
 //
-// カード枠の特定方法（既定・useMarkerStrategy: true）:
-//   「Show Effects」は効果文が短いカードには存在しないため使わない。
-//   代わりに「種別表示（Attack/Skill）」と「カード名」の両方を含む、最も
-//   小さい共通の祖先要素をカード枠とみなす。種別表示は "Attack"/"Skill" の
-//   どちらか2値しかなく、カードには必ず付いているため確実な足がかりになる。
-//   カード名候補は glossary.json の英語名（ヒラメキ段階のローマ数字は除いた
-//   ベース名）と完全一致することを条件にする。末尾がコロンの文字列
-//   （"Starting Cards:" 等のグループ見出し）は候補から除外する。
+// カード枠の特定方法（既定・useConfirmedStructure: true）:
+//   confirmedCard（既定 .chaos-card-inside）を1枚のカードとする。カード名は
+//   その中の img[alt] から取得し（表示用テキストの揺れやレイアウト変化に
+//   依存しない）、ローマ数字（ヒラメキ段階）の判定もこの alt テキストに対して
+//   行う。日本語名の表示先は confirmedHeader（既定 .chaos-header）内で
+//   glossary名と一致する葉要素、効果文の書き換え範囲は confirmedContent
+//   （既定 .chaos-content）に固定する（テキストノード単位の書き換え方式は
+//   従来通り）。
 //
-// 使い方:
-//   - useMarkerStrategy: true の間は typeLabelText を使った検出が主経路になる。
-//     cardContainer / cardName / effectSlot は「正確なセレクタが分かったら
-//     ここに書けば、そちらを先に試す」ための任意の速い経路として残してある
-//     （分からないうちは空配列のままでよい。中身が無ければ自動的にスキップされる）。
-//   - 実際の構造に合わせて増減・調整してよい。content.js 側の変更は不要な設計。
+// 旧方式（種別表示ベースの探索・useMarkerStrategy）は削除せず残してある。
+// useConfirmedStructure: false にすれば、useMarkerStrategy の設定に従って
+// 従来の探索経路にフォールバックする。
 //
 // デバッグ: content.js の CZN_DEBUG を true にすると、マッチ状況を
 // console に出す。
 
 var CZN_SELECTORS = {
-  // true: 種別表示(Attack/Skill) + glossary名一致でカード枠とカード名を探す
-  //       （現状の既定・推奨）。
+  // true: 確定済みの .chaos-card-inside 構造から直接カードを検出する
+  //       （現状の既定・推奨）。useMarkerStrategy の設定より優先される。
+  // false: 下の useMarkerStrategy の設定に従う（旧方式へのフォールバック用。
+  //        コードは削除していないので、確定セレクタが崩れた場合の保険として
+  //        いつでも戻せる）。
+  useConfirmedStructure: true,
+
+  // 1枚のカードのコンテナ。
+  confirmedCard: '.chaos-card-inside',
+  // カード名の表示先（この中で glossary名と一致する葉要素を書き換える）。
+  confirmedHeader: '.chaos-header',
+  // 効果文の書き換え範囲（テキストノード方式で直接操作する）。
+  confirmedContent: '.chaos-content',
+
+  // ---- 以下は useConfirmedStructure: false のときだけ使う旧方式の設定 ----
+
+  // true: 種別表示(Attack/Skill) + glossary名一致でカード枠とカード名を探す。
   // false: 下の cardContainer / cardName / effectSlot セレクタだけで探す
   //        （正確なセレクタが判明してから切り替える用）。
   useMarkerStrategy: true,
@@ -42,7 +57,8 @@ var CZN_SELECTORS = {
   // 効果文の検索範囲を広げるか（上限）。実際に何階層登るかは階層数固定では
   // なく内容の増分（textContentがbox比+50文字以上になった時点）で決まる。
   // ただし2つ目の種別表示（Attack/Skill）を含む範囲までは広げない
-  // （別カードの領域に踏み込まないため）。
+  // （別カードの領域に踏み込まないため）。useConfirmedStructure: true の
+  // ときは使われない（効果文の範囲は confirmedContent に固定されるため）。
   maxEffectSearchClimb: 10,
 
   // カード名候補として扱わない文字列の条件。既定は「末尾がコロン」
