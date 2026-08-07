@@ -96,3 +96,17 @@
   - Rare Card・Mythic Cardは根拠不十分のため未登録のまま維持
 - 未解決: なし
 - コミット: 4ec2a10
+
+## 2026-08-07 16:50
+- 依頼: 「完全なキャラ」の定義（①全カードの効果文がingame/aosns由来で登録済み、②全カード名がglossary.jsonでconfirmed、③ヒラメキ段階が全て判定できる）で35キャラを集計し、3条件を満たすキャラがいれば報告、いなければ最も近い1キャラと不足内容を報告する。報告のみで修正はしない
+- 実施:
+  - Prydwen全35キャラページ（curl取得済み）を、拡張機能と同じ確定セレクタ＋stripLevelSuffix（ローマ数字/星/CARD_LEVEL_NAMES括弧）ロジックのPython移植で解析し、キャラごとに「カード名の集合」と「(カード, レベル)の集合」を再構築
+  - glossary.jsonと突き合わせて②（confirmed外のカード名数）、selectors.jsのcardLevelNamesと突き合わせて③（括弧付き未解決レベル数）を判定
+  - effects-ja.json（非公開データ、内容は見ずに件数のみ利用）と突き合わせて①（source が ingame/aosns の効果文が無いカード×レベルの数）を判定。同一カードがページ内に複数回出現するケース（デッキ例セクション等での再掲）は重複除去済み
+  - 参考として docs/coverage.md も確認したが、aosnsの全35キャラ展開より前の状態のままで古く（docs/coverage.md自体はcommit 4c837d0時点のまま更新されていない）、今回の集計には使わず effects-ja.json を直接参照した
+- 結果:
+  - 3条件すべてを満たすキャラは0件（該当なし）
+  - 最も近いキャラ: Magna（カード8種・レベル枠28件）。②confirmed外0件、③レベル未解決0件、①効果文未登録4件（Frozen Fist・Frost Shield・Storm of Bitter Cold・Absolute Zero、いずれもlevel 0＝ヒラメキ段階を持たない単一形態カードで、effects-ja.jsonに記録が一件も無い＝gamerchすら無い状態）
+  - 2位以下（参考、①+②+③の合計が少ない順）: Tiphera（②3・①7）、Khalipe（②4・①11）、Tenebria（②0・①17）、Lucas（②4・①16）
+- 未解決: docs/coverage.md が古いまま（aosns全35キャラ展開後に未更新）。Magnaの4件を含む効果文の追加作業はまだ未着手（今回は報告のみの依頼のため）
+- コミット: (このworklog追記のみ。コード変更は無し)
