@@ -838,6 +838,27 @@
     return s;
   }
 
+  // c.effectScope はカード検出時点（querySelectorAllの1回のスキャン）で
+  // 取得した要素の参照。ページ側が表示を作り直す際、その古い要素が画面から
+  // 切り離され、こちらは切り離された要素への参照を持ち続けてしまうことが
+  // ある（切り離された要素への書き込みは成功したように見えるが、画面には
+  // 反映されない）。そのため書き込み・検証の直前に document.contains で
+  // 生存確認し、切り離されていればカード名（img[alt]）を手がかりに
+  // .chaos-card-inside を document から取得し直し、その中の .chaos-content
+  // を新しく取り直す。
+  function refetchConfirmedContent(rawNameText) {
+    var cardSel = CZN_SELECTORS.confirmedCard || '.chaos-card-inside';
+    var contentSel = CZN_SELECTORS.confirmedContent || '.chaos-content';
+    var cards = document.querySelectorAll(cardSel);
+    for (var i = 0; i < cards.length; i++) {
+      var img = cards[i].querySelector('img[alt]');
+      if (img && img.alt && img.alt.trim() === rawNameText) {
+        return cards[i].querySelector(contentSel);
+      }
+    }
+    return null;
+  }
+
   function insertEffects(candidates, effectsIdx, charName, allTypeLabels) {
     var inserted = 0;
     var diagnostics = [];
@@ -846,6 +867,8 @@
     var maxExtraClimb = CZN_SELECTORS.maxEffectSearchClimb || 10;
 
     var reappliedCount = 0; // マーカーはあるが中身が英語に戻っていて再書換した件数
+    var staleCount = 0; // document.contains が false だった件数（切り離された古い要素）
+    var staleRefetchedRewriteCount = 0; // 取得し直した後に再度書き換えた件数
 
     candidates.forEach(function (c) {
       var lookupChar = c.entry ? (c.entry.character || charName) : null;
@@ -898,8 +921,20 @@
       // box から、内容の増分を基準に親をたどって範囲を広げる従来の方式を使う。
       var scopeResult;
       var effectScope;
+      var staleRefetched = false;
       if (c.effectScope) {
-        effectScope = c.effectScope;
+        if (document.contains(c.effectScope)) {
+          effectScope = c.effectScope;
+        } else {
+          // 保持していた参照は既に画面から切り離されている。書き込んでも
+          // 画面には反映されないため、カード名を手がかりに生きている
+          // 要素を取得し直す。
+          staleCount++;
+          var refetched = refetchConfirmedContent(c.rawNameText);
+          if (!refetched) { return; } // 生きている要素が見つからない。何もしない
+          effectScope = refetched;
+          staleRefetched = true;
+        }
         scopeResult = { scope: effectScope, climbedLevels: 0 };
       } else {
         scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
@@ -962,10 +997,11 @@
       effectScope.setAttribute('data-czn-done', '1');
 
       if (reapplied) { reappliedCount++; }
+      if (staleRefetched) { staleRefetchedRewriteCount++; }
 
       // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
       // 日本語を入れたノードの親要素のタグ名・書き換え後のscope先頭30文字・
-      // 再適用かどうかを記録しておく。
+      // 再適用かどうか・取得し直したものかどうかを記録しておく。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
@@ -973,7 +1009,8 @@
         originalHead: originalConcat.trim().slice(0, 30),
         parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)',
         afterHead: (effectScope.textContent || '').trim().slice(0, 30),
-        reapplied: reapplied
+        reapplied: reapplied,
+        staleRefetched: staleRefetched
       });
 
       inserted++;
@@ -986,6 +1023,8 @@
     return {
       insertedCount: inserted,
       reappliedCount: reappliedCount,
+      staleCount: staleCount,
+      staleRefetchedRewriteCount: staleRefetchedRewriteCount,
       diagnostics: diagnostics,
       rewriteDetails: rewriteDetails.slice(0, 10),
       rewriteFailures: rewriteFailures.slice(0, 10),
@@ -1118,6 +1157,8 @@
       skippedNames: collected.skippedNames, // そのうち最大5件の診断用テキスト
       contentFoundCount: collected.contentFoundCount || 0, // .chaos-content が見つかったカードの件数
       reappliedCount: insertResult.reappliedCount || 0, // ページ側の再描画で英語に戻り、再書換した件数
+      staleCount: insertResult.staleCount || 0, // document.contains が false だった件数
+      staleRefetchedRewriteCount: insertResult.staleRefetchedRewriteCount || 0, // 取得し直した後に再度書き換えた件数
       replacedCount: replacedCount
     };
   }
@@ -1159,7 +1200,8 @@
       result.insertedCount + '件 / 効果文データ' + result.effectsCount +
       '件(有効' + result.effectsIndexedCount + '件) / 名前特定スキップ' +
       result.skippedCount + '件 / content検出' + result.contentFoundCount +
-      '件 / 再適用' + result.reappliedCount + '件'];
+      '件 / 再適用' + result.reappliedCount + '件 / 切り離し検知' +
+      result.staleCount + '件(再取得後書換' + result.staleRefetchedRewriteCount + '件)'];
 
     if (result.skippedCount > 0) {
       // 名前を特定できず処理対象外にしたカード（無理に近い候補を採用せず
@@ -1178,7 +1220,7 @@
       // 付ける。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          (d.reapplied ? '(再適用)' : '') +
+          (d.reapplied ? '(再適用)' : '') + (d.staleRefetched ? '(切り離し検知→再取得)' : '') +
           ' / ノード' + d.nodeCount + '件 / 親要素' + d.parentTag +
           ' / 書換前「' + d.originalHead + '」/ 書換後「' + d.afterHead + '」');
       });
