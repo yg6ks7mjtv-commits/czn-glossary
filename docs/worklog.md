@@ -41,3 +41,18 @@
   - docs/log/2026-08-07-1327.md, docs/log/2026-08-07-1342.md の2ファイルを作成
 - 未解決: なし
 - コミット: 31a84e8
+
+## 2026-08-07 14:16
+- 依頼: glossary.jsonのunmatched 109件を、カード名の類似ではなく効果文中の数値・タグの突き合わせで解決する。まずHeidemarie・Tenebriaの2キャラで検証し、精度確認後に残りのキャラへ展開する
+- 実施:
+  - Prydwenのキャラページをcurlで直接取得し、カードごと・レベルごとのタグ・数値を抽出するスクリプトを作成（一時ファイル、リポジトリには未追加）
+  - Tenebriaはunmatchedのカードが0件だったため、判断としてNineに差し替えて検証（guess1件の「All Eyes On You」はカードではなくデバフ用語のため対象外）
+  - Heidemarie・Nineで検証後、精度を確認できたためaosnsデータのある他キャラ（Luke, Khalipe, Magna, Rin, Rei, Fei, Tiphera, Lucas）にも展開
+  - 判定基準通り、1段階でも数値・タグが食い違うものはguess、全段階一致のみconfirmed、比較対象データが無いものはunmatchedのまま維持
+- 結果:
+  - confirmed化: 4件（Nine「会心の一撃」「逆転の刃」、Khalipe「威圧」、Lucas「S.S.S」。全段階で数値・タグが完全一致）
+  - guess化: 6件（Heidemarie「一筋の光」「極光展開」、Luke「機会捕捉」「魔眼の乱舞」、Khalipe「再集結」、Rei「おやつの時間」。いずれも一部の段階で数値差異あり）
+  - unmatchedのまま: 99件（うち、名前の類似から候補はあったが数値検証で不一致が大きく確認を見送ったもの1件: Rin「黒雲の心法」）
+  - glossary.jsonのcoverage: confirmed 341→345 / guess 3→9 / unmatched 109→99
+- 未解決: Rin「黒雲の心法」は候補（Dark Mist Inner Art）はあるが数値の食い違いが大きく判定不能。Magna・Tenebriaはunmatchedカードが無く対象外。それ以外の24キャラはaosnsの数値データが無いため今回の方式では検証不能
+- コミット: 5a0cdfc
