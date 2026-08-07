@@ -1683,8 +1683,34 @@
     return /[A-Za-z]/.test(s);
   }
 
+  // 単語数がこれ未満のブロックはTranslator APIに渡さない（文脈の無い単独の
+  // 単語・略語・表の見出しを誤訳させないため）。Magnaのページの実データ
+  // （翻訳単位846件の単語数分布）で判断: 1〜5語が574件（68%）を占め、その
+  // 中身は "DEF"/"ATK"/"HP"（STATS欄の見出し）、"Potential 1"、"基本カード
+  // Proficiency"（Potential名。基本カードは既存確定語）、"CRIT Rate > CRIT
+  // DMG"（比較式）、ナビゲーションメニュー項目、装備・カード名の一覧など、
+  // 単語・略語・見出しの類がほとんどだった。6語以上になると急激に件数が
+  // 減り（6〜7語は846件中8件のみ）、8語以上から一貫して文章（主語・動詞・
+  // 句読点を伴う説明文）になる。この境目から6語未満を「短い」とした。
+  // 既知のトレードオフ: "Increase Health by 1.6/8%."（Potentialの説明文、
+  // 4語）のように、閾値未満でも実際には完結した文になっているブロックも
+  // 少数存在し、これも除外対象になる（英語のまま残る）。単語数だけでは
+  // 文か見出しかを完全には判定できないため、個別の例外を作らずこの
+  // トレードオフを許容する。
+  var TRANSLATE_MIN_WORDS = 6;
+
+  function isTooShortForTranslate(text) {
+    return text.split(/\s+/).filter(Boolean).length < TRANSLATE_MIN_WORDS;
+  }
+
   // document.body（.chaos-card-inside配下とSCRIPT/STYLE等を除く）から、
-  // 翻訳単位となる「まとまり」要素を再帰的に収集する。
+  // 翻訳単位となる「まとまり」要素を再帰的に収集する。単語数が
+  // TRANSLATE_MIN_WORDS未満の短いブロックはTranslator APIに渡さず収集
+  // 対象から外す（これ以上細かい単位には分解しないため、ここで打ち切り、
+  // 再帰もしない）。除いたブロックは元の英語のまま残り、run()内で従来通り
+  // 実行される用語置換（replaceTermsOnPage、glossary.jsonベース）だけが
+  // 適用される。数値のみ・記号のみ等アルファベットを含まないブロックは
+  // hasLatinLetter でそもそも対象にしない（Translator APIには一切渡らない）。
   function collectTranslationBlocks(root, out) {
     var children = Array.prototype.slice.call(root.children);
     children.forEach(function (el) {
@@ -1693,7 +1719,9 @@
       if (el.hasAttribute('data-czn-translated')) { return; } // 処理済み
       var text = (el.textContent || '').trim();
       if (text && hasLatinLetter(text) && isInlineOnlyForTranslate(el)) {
-        out.push(el);
+        if (!isTooShortForTranslate(text)) {
+          out.push(el);
+        }
       } else {
         collectTranslationBlocks(el, out);
       }
