@@ -530,8 +530,14 @@
   //   - 種別表示（typeLabelEl）の配下
   //   - a / button 要素の配下（「Show Effects」の展開トグルを壊さないため）
   //   - 空白のみのテキストノード
-  //   - 直近の親要素の textContent が数字のみ（コスト数字）のテキストノード
-  function collectEffectTextNodes(scope, nameEl, typeLabelEl) {
+  //   - excludeCostDigits が true のとき: 直近の親要素の textContent が
+  //     数字のみ（コスト数字）のテキストノード。この判定はコスト数字が
+  //     scope内に混在する旧方式（.chaos-headerを含む広い範囲）向けで、
+  //     確定セレクタ方式の .chaos-content ではコスト数字は
+  //     .chaos-header側にあり scope内に混在しないため false で呼ぶ
+  //     （effect文中の太字数字（例:「by 1」の1）まで誤って除外してしまう
+  //     ことが分かったため）。
+  function collectEffectTextNodes(scope, nameEl, typeLabelEl, excludeCostDigits) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
     var node;
     var nodes = [];
@@ -552,9 +558,11 @@
       }
       if (excluded) { continue; }
 
-      var parentEl = node.parentElement;
-      if (parentEl && /^[0-9]+$/.test((parentEl.textContent || '').trim())) {
-        continue; // コスト数字
+      if (excludeCostDigits) {
+        var parentEl = node.parentElement;
+        if (parentEl && /^[0-9]+$/.test((parentEl.textContent || '').trim())) {
+          continue; // コスト数字
+        }
       }
 
       nodes.push(node);
@@ -858,7 +866,7 @@
   var watchInstalledCount = 0;
   var watchAutoRewriteCount = 0;
 
-  function watchEffectScope(effectScope, c, jaText) {
+  function watchEffectScope(effectScope, c, jaText, excludeCostDigits) {
     var retries = 0;
     var mo = new MutationObserver(function () {
       var currentText = effectScope.textContent || '';
@@ -870,7 +878,7 @@
         return;
       }
 
-      var freshNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl);
+      var freshNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl, excludeCostDigits);
       if (freshNodes.length === 0) { return; } // 書き直す先が見つからない
 
       mo.disconnect(); // 自分の書き込みで再発火しないよう一時停止
@@ -970,6 +978,11 @@
         effectScope = scopeResult.scope;
       }
 
+      // コスト数字除外は旧方式（.chaos-headerを含む広い範囲）向け。確定
+      // セレクタ方式の .chaos-content にはコスト数字が混在しないため
+      // 適用しない（効果文中の太字数字まで誤って除外していたため）。
+      var excludeCostDigits = !c.effectScope;
+
       // 「data-czn-done="1" が付いている＝処理済み」と属性だけで判定すると、
       // ページ側の再描画でテキストノードだけが英語に作り直され、要素自体
       // （と付けておいた属性）は残るケースを見逃す（＝英語のまま放置される）。
@@ -986,10 +999,19 @@
         reapplied = true;
       }
 
+      // 調査用（一時的）: 神ヒラメキ等で基本効果の下に追加行（例:「Reduce the
+      // cost of this card by 1.」）が別に表示されるケースがあり、現状は
+      // 最初のテキストノード以外を空にするためこの行ごと消えてしまう。
+      // 対処方針を決める前に、.chaos-content 内で基本効果と追加行がどう
+      // 分かれているか（別タグか改行か）を確認するため、書き換え前の
+      // textContent先頭100文字とHTML構造（outerHTML先頭100文字）を記録する。
+      var contentTextHead = (effectScope.textContent || '').trim().slice(0, 100);
+      var contentStructureHead = (effectScope.outerHTML || '').slice(0, 100);
+
       // 英語の効果文は1つの要素にまとまっておらず、複数のテキスト断片に
       // 分割されている（＝「正しい1要素」が存在しない）ことが判明したため、
       // 要素単位の選択・書き換えはやめ、テキストノード単位で直接操作する。
-      var textNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl);
+      var textNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl, excludeCostDigits);
 
       if (textNodes.length === 0) {
         // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
@@ -1035,14 +1057,15 @@
       // （reapply等で同じ要素へ複数回来ても二重に設置しないための目印）。
       if (!effectScope.hasAttribute('data-czn-watched')) {
         effectScope.setAttribute('data-czn-watched', '1');
-        watchEffectScope(effectScope, c, jaText);
+        watchEffectScope(effectScope, c, jaText, excludeCostDigits);
       }
 
       if (reapplied) { reappliedCount++; }
 
       // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
       // 日本語を入れたノードの親要素のタグ名・書き換え後のscope先頭30文字・
-      // 再適用かどうかを記録しておく。
+      // 再適用かどうか・（調査用・一時的）書き換え前のcontentTextHead/
+      // contentStructureHeadを記録しておく。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
@@ -1050,7 +1073,9 @@
         originalHead: originalConcat.trim().slice(0, 30),
         parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)',
         afterHead: (effectScope.textContent || '').trim().slice(0, 30),
-        reapplied: reapplied
+        reapplied: reapplied,
+        contentTextHead: contentTextHead,
+        contentStructureHead: contentStructureHead
       });
 
       inserted++;
@@ -1264,12 +1289,16 @@
       // 数・書き換え前の連結英文の先頭30文字・日本語を入れたノードの
       // 親要素のタグ名・書き換え後のscope先頭30文字を出す。ページ側の
       // 再描画で英語に戻っていたのを検知して再書換した場合は「(再適用)」を
-      // 付ける。
+      // 付ける。（調査用・一時的）追加行の消失問題の切り分けのため、
+      // 書き換え前の .chaos-content の textContent先頭100文字と
+      // HTML構造（outerHTML先頭100文字）も併せて出す。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
           (d.reapplied ? '(再適用)' : '') +
           ' / ノード' + d.nodeCount + '件 / 親要素' + d.parentTag +
           ' / 書換前「' + d.originalHead + '」/ 書換後「' + d.afterHead + '」');
+        lines.push('  content文頭100「' + d.contentTextHead + '」');
+        lines.push('  content構造100「' + d.contentStructureHead + '」');
       });
     }
 
