@@ -32,24 +32,26 @@ def validate(data):
     errors = []
     entries = data["entries"]
 
-    # en/ja の重複は、両方のエントリに character が付いていて値が異なる場合のみ許可する
+    # en の重複は、両方のエントリに character が付いていて値が異なる場合のみ許可する
     # （同名カードが複数キャラに存在するケース。例: Luke と Veronica の Rapid Fire）。
-    for field in ("en", "ja"):
-        groups = {}
-        for i, e in enumerate(entries):
-            v = e.get(field)
-            if not v:
-                continue
-            groups.setdefault(v, []).append(i)
-        for v, idxs in groups.items():
-            if len(idxs) < 2:
-                continue
-            chars = [entries[i].get("character") for i in idxs]
-            if all(chars) and len(set(chars)) == len(chars):
-                continue
-            idx_list = ", ".join(f"#{i}" for i in idxs)
-            errors.append(f"{field} が重複: {v!r} ({idx_list})。"
-                          f"character が全エントリで異なる場合のみ重複を許可")
+    # ja の重複は許可する（置換は en -> ja の一方向のみで、複数の英語表記が同じ
+    # 日本語に対応しても取り違えは起きない。例: Neutral Card と Common Card は
+    # Prydwen上で同じ概念の2表記であり、どちらも ja は「共用カード」）。
+    groups = {}
+    for i, e in enumerate(entries):
+        v = e.get("en")
+        if not v:
+            continue
+        groups.setdefault(v, []).append(i)
+    for v, idxs in groups.items():
+        if len(idxs) < 2:
+            continue
+        chars = [entries[i].get("character") for i in idxs]
+        if all(chars) and len(set(chars)) == len(chars):
+            continue
+        idx_list = ", ".join(f"#{i}" for i in idxs)
+        errors.append(f"en が重複: {v!r} ({idx_list})。"
+                      f"character が全エントリで異なる場合のみ重複を許可")
 
     for i, e in enumerate(entries):
         tag = f"#{i} {e.get('ja') or e.get('en') or '???'}"
