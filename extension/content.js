@@ -1067,12 +1067,6 @@
 
       writeTarget.setAttribute('data-czn-done', '1');
 
-      // 診断用（一時的）: 書き込み先が実際に画面上のどれなのか目視確認
-      // できるよう、日本語を書き込んだ writeTarget に赤枠、その
-      // カード全体（c.block）に黄緑枠を付ける。
-      writeTarget.style.outline = '3px solid red';
-      if (c.block) { c.block.style.outline = '3px solid lime'; }
-
       // この writeTarget にはまだ監視を付けていなければ設置する
       // （reapply等で同じ要素へ複数回来ても二重に設置しないための目印）。
       // 監視・再書き換えの範囲も writeTarget（最初の子要素）の中だけに
