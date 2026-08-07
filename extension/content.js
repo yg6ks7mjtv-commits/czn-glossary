@@ -42,22 +42,20 @@
 //      判断すると届かないことがあった）。最大 maxEffectSearchClimb（既定
 //      10）階層まで許可。ただし2つ目の種別表示を含む階層に達したら、その
 //      1つ手前で打ち切る（findCardBoxと同じ「複数カードをまたいだら打ち
-//      切る」歯止め）。候補（コスト数字・カード名・種別表示・ローマ数字
-//      バッジ、カード名と同一テキストの重複要素を除いた葉要素）は実測幅の
-//      広い順に並べる。事前のスコアリングや幅フィルタでは縦書きの誤選択を
-//      防ぎきれなかったため、「事前に正しそうなものを選ぶ」のではなく、
-//      幅の広い候補から順に実際に書き換えてみて結果を実測する: 高さが幅
-//      より大きい（縦書きになっている）か、幅が探索範囲自体の幅の60%未満
-//      なら失敗と判定し、元のテキスト・スタイルに戻して次の候補を試す。
-//      候補が尽きれば英語のまま残す。採用できた要素には背景白・文字黒・
-//      角丸を付け、white-space:normal・word-break:normal・
-//      writing-mode:horizontal-tb・width:auto・min-width:0を強制して
-//      カード名側の省略表示CSSや縦書き指定の影響を打ち消す。元の英語は
-//      title 属性に退避する（消さずに保持するが表示はしない）。同じ効果文
-//      ブロック内に残る他の英語テキスト（複数行に分かれている場合）は
-//      display:none で隠す（「Show Effects」の展開トグルは除く）。それでも
-//      対象要素が見つからないカードや日本語の効果文が無いカードには何も
-//      しない（英語のまま残る）
+//      切る」歯止め）。このサイト上では候補要素の getBoundingClientRect()
+//      が画面上に表示されていても常に0x0を返すため、幅・高さの実測による
+//      選択や書き換え後の検証・ロールバックはできない（過去のバージョンは
+//      これに依存していたが機能しなかった）。そのためサイズに基づく判定は
+//      全廃し、除外条件（カード名要素・書き換え済み・textContentが10文字
+//      未満）を満たさない葉要素の中で textContent の文字数が最も多いものを
+//      無条件で1つ採用する。採用できた要素には背景白・文字黒・角丸を付け、
+//      white-space:normal・word-break:normal・writing-mode:horizontal-tb・
+//      width:auto・min-width:0を強制してカード名側の省略表示CSSや縦書き
+//      指定の影響を打ち消す。元の英語は title 属性に退避する（消さずに
+//      保持するが表示はしない）。同じ効果文ブロック内に残る他の英語テキスト
+//      （複数行に分かれている場合）は display:none で隠す（「Show Effects」
+//      の展開トグルは除く）。それでも対象要素が見つからないカードや日本語
+//      の効果文が無いカードには何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。書き換え済み（data-czn-done="1"）の
@@ -536,57 +534,33 @@
     return null;
   }
 
-  // box 内で、カード画像下部にある「英語の効果文」の要素の候補を全て集め、
-  // 実測幅の広い順に並べて返す。除外するのはカード名要素（c.nameEl）・
-  // 既に書き換え済み（data-czn-done="1"）・textContentが空の3種類のみ。
-  // 種別表示・コスト数字・ローマ数字バッジ・Show Effects等はあえて除外せず
-  // 候補に含める（幅の狭さで自然と後回しになり、実測検証で弾かれる）。
-  // 以前はテキスト内容による事前除外（カード名重複・"Attack"/"Skill"文字列
-  // 一致・数字・ローマ数字表記）を行っていたが、これが効果文要素まで
-  // 巻き込んで候補0件（除外条件で全て弾かれた）を引き起こすことがあったため
-  // 撤廃した。どれが正しいかは、実際に書き換えてみて結果（幅・高さ）を
-  // 測定してから判断する（呼び出し側）。
-  //
-  // diagLog を渡すと、走査した葉要素を最大8件まで診断用に記録する
-  // （タグ名・クラス名・幅・高さ・textContent先頭20文字・除外理由）。
-  function collectEffectTextCandidates(box, nameEl, diagLog) {
-    var walker = document.createTreeWalker(box, NodeFilter.SHOW_ELEMENT);
+  // scope 内で、カード画像下部にある「英語の効果文」の要素を選ぶ。
+  // このサイト上では getBoundingClientRect() が候補要素に対して常に
+  // 0x0 を返すことが判明し（画面上には表示されているにもかかわらず）、
+  // 実測による幅・高さ検証が機能しないため、サイズに基づく判定は全廃した。
+  // 代わりに、除外条件を満たさない葉要素の中で textContent の文字数が
+  // 最も多いものを1つ選ぶ（効果文は他のUI文言より明らかに長いため）。
+  // 除外するのはカード名要素（c.nameEl）・既に書き換え済み
+  // （data-czn-done="1"）・textContentが10文字未満の3種類のみ。
+  function selectEffectTextElement(scope, nameEl) {
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
-    var candidates = [];
+    var best = null;
+    var bestLen = 0;
 
     while ((node = walker.nextNode())) {
       if (node.children.length > 0) { continue; } // 葉要素のみ
+      if (node === nameEl) { continue; }
+      if (node.getAttribute('data-czn-done') === '1') { continue; }
       var text = (node.textContent || '').trim();
-
-      var reason = null;
-      if (node === nameEl) {
-        reason = 'カード名';
-      } else if (node.getAttribute('data-czn-done') === '1') {
-        reason = '処理済み';
-      } else if (!text) {
-        reason = 'その他（空）';
+      if (text.length < 10) { continue; }
+      if (text.length > bestLen) {
+        best = node;
+        bestLen = text.length;
       }
-
-      if (diagLog && diagLog.length < 8) {
-        var rect = node.getBoundingClientRect();
-        diagLog.push({
-          tag: node.tagName,
-          cls: (node.className || '').toString().slice(0, 30),
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
-          textHead: text.slice(0, 20),
-          reason: reason || '(候補)'
-        });
-      }
-
-      if (reason) { continue; }
-      candidates.push(node);
     }
 
-    candidates.sort(function (a, b) {
-      return b.getBoundingClientRect().width - a.getBoundingClientRect().width;
-    });
-    return candidates;
+    return best;
   }
 
   // 名前照合用の（狭い）カード枠 box から、内容の増分を基準に効果文の探索
@@ -865,62 +839,16 @@
       // 名前照合用の（狭い）カード枠 box とは別に、効果文の探索範囲は
       // 内容の増分を基準にそこから親をたどって広げる（box が単なるヘッダー
       // 部分で、効果文が全く別の場所にあることがあるため）。ただし2つ目の
-      // 種別表示を含む範囲までは広げない。候補は実測幅の広い順に並んでいる。
-      // candDiag には走査した葉要素を最大8件まで（タグ・クラス・幅高さ・
-      // 先頭20文字・除外理由）記録し、除外条件で候補が0件になった場合の
-      // 切り分けに使う。
+      // 種別表示を含む範囲までは広げない。
       var scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
       var effectScope = scopeResult.scope;
-      var candDiag = [];
-      var effectCandidates = collectEffectTextCandidates(effectScope, c.nameEl, candDiag);
 
-      // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
-      // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
-      // にした。事前の条件判定（角括弧タグ・幅フィルタ等）では縦書きの
-      // 誤選択を防ぎきれなかったため、幅の広い候補から順に実際に書き換えて
-      // みて、結果を実測してから採用可否を判断する。判定は「縦書きになって
-      // いないか（高さが幅以下）」「幅が0でないか」のみで、カード枠に対する
-      // 相対幅（60%等）による事前の足切りはしない。失敗したら元に戻して
-      // 次の候補を試す。候補が尽きたら英語のまま残す。
-      var effectEl = null;
-      var attemptLog = []; // { index, width, height, ok }
-      for (var ci = 0; ci < effectCandidates.length; ci++) {
-        var cand = effectCandidates[ci];
-        if (cand.getAttribute('data-czn-done') === '1') { continue; } // 既に書き換え済み
-
-        var originalText = cand.textContent;
-        var originalCssText = cand.style.cssText;
-        var originalTitle = cand.title;
-
-        cand.title = originalText; // 元の英語をtitle属性に退避
-        cand.textContent = jaText;
-        cand.style.cssText = originalCssText +
-          ';background:#fff;color:#111;padding:4px 6px;border-radius:4px;' +
-          'white-space:normal;text-overflow:clip;overflow:visible;max-width:none;' +
-          'writing-mode:horizontal-tb;word-break:normal;width:auto;min-width:0;';
-
-        var rect = cand.getBoundingClientRect();
-        var w = Math.round(rect.width);
-        var h = Math.round(rect.height);
-        // 失敗条件: 縦書きになっている（高さが幅より大きい）、または幅が0
-        // （非表示要素）。
-        var ok = w > 0 && h <= w;
-        attemptLog.push({ index: ci + 1, width: w, height: h, ok: ok });
-
-        if (!ok) {
-          cand.textContent = originalText;
-          cand.style.cssText = originalCssText;
-          cand.title = originalTitle;
-          continue;
-        }
-
-        effectEl = cand;
-        break;
-      }
-
-      var attemptsSummary = attemptLog.map(function (a) {
-        return a.index + ':' + a.width + 'x' + a.height + (a.ok ? '(採用)' : '(失敗)');
-      }).join('、');
+      // このサイト上では getBoundingClientRect() が候補要素に対して常に
+      // 0x0 を返すことが判明し（画面上には表示されているにもかかわらず）、
+      // 幅・高さの実測による選択・検証は機能しない。そのためサイズに基づく
+      // 判定は全廃し、textContent の文字数が最も多い葉要素を無条件で採用する
+      // 方式にした（書き換え後の再測定・ロールバックも行わない）。
+      var effectEl = selectEffectTextElement(effectScope, c.nameEl);
 
       if (!effectEl) {
         // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
@@ -930,11 +858,7 @@
         rewriteFailures.push({
           rawNameText: c.rawNameText || c.nameText,
           level: c.level,
-          reason: effectCandidates.length === 0
-            ? '書き換え候補が見つからない（除外条件で全て弾かれた）'
-            : ('候補' + effectCandidates.length + '件を試したが全て失敗（縦書きまたは幅0）'),
-          triedCount: effectCandidates.length,
-          attemptsSummary: attemptsSummary,
+          reason: '条件を満たす候補が見つからない（10文字以上のテキスト要素なし）',
           boxTag: c.block.tagName,
           boxClass: (c.block.className || '').toString().slice(0, 40),
           boxTextLeafCount: countTextLeaves(c.block),
@@ -943,27 +867,32 @@
           scopeClass: (effectScope.className || '').toString().slice(0, 40),
           scopeClimbedLevels: scopeResult.climbedLevels,
           scopeTextLeafCount: countTextLeaves(effectScope),
-          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50),
-          candDiag: candDiag
+          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50)
         });
         PROCESSED.add(c.block);
         return;
       }
 
+      var originalText = effectEl.textContent;
+      effectEl.title = originalText; // 元の英語をtitle属性に退避
+      effectEl.textContent = jaText;
+      // 縦書き・折り返し崩れを防ぐためのスタイル強制（サイズ判定は行わない
+      // が、レイアウト崩れ自体を防ぐためこれらは引き続き適用する）。
+      effectEl.style.cssText = effectEl.style.cssText +
+        ';background:#fff;color:#111;padding:4px 6px;border-radius:4px;' +
+        'white-space:normal;text-overflow:clip;overflow:visible;max-width:none;' +
+        'writing-mode:horizontal-tb;word-break:normal;width:auto;min-width:0;';
       effectEl.setAttribute('data-czn-done', '1');
 
-      // 診断用: 書き換え先のタグ名・クラス名・試した候補数・採用された
-      // 候補の番目・各候補の書き換え後の幅と高さを記録しておく（対象を
-      // 取り違えていないか、縦書きの細い帯になっていないかをトーストで
+      // 診断用: 書き換え先のタグ名・クラス名と、書き換え前のテキスト先頭
+      // 30文字を記録しておく（対象を取り違えていないかトーストで
       // 確認できるようにするため）。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
         targetTag: effectEl.tagName,
         targetClass: (effectEl.className || '').toString().slice(0, 40),
-        triedCount: effectCandidates.length,
-        adoptedIndex: attemptLog[attemptLog.length - 1].index,
-        attemptsSummary: attemptsSummary
+        originalTextHead: originalText.trim().slice(0, 30)
       });
 
       // 効果文ブロック内に、書き換えた要素以外の英語テキストが残っている
@@ -1162,26 +1091,22 @@
     if (result.insertedCount > 0) {
       // 書き換え先を間違えていないか（カード名要素等を誤って書き換えて
       // いないか）その場で確認できるよう、書き換えた要素のタグ名・
-      // クラス名・試した候補数・採用された候補の番目・各候補の書き換え後の
-      // 幅と高さを出す（選ばれた要素が幅の狭い帯になっていないか確認
-      // できるように）。
+      // クラス名と、書き換え前のテキスト先頭30文字を出す。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
           ' / ' + d.targetTag + (d.targetClass ? '.' + d.targetClass : '') +
-          ' / 候補' + d.triedCount + '件中' + d.adoptedIndex + '番目を採用' +
-          ' / ' + d.attemptsSummary);
+          ' / 書換前「' + d.originalTextHead + '」');
       });
     }
 
     if (result.rewriteFailures && result.rewriteFailures.length > 0) {
       // 照合（entry・effectの取得）までは成功しているのに、実際の書き換え
       // 段階で失敗したカード。「効果文あり」なのに画面が変わらないという
-      // 矛盾の原因をここで直接確認できるようにする。試した候補の幅・高さ、
-      // box情報（名前照合用の狭いカード枠）、scope情報（内容の増分で広げた
-      // 後の実際の探索範囲。boxとは別に表示し、範囲拡大が機能しているか
-      // 切り分けられるようにする）を併せて出す。
+      // 矛盾の原因をここで直接確認できるようにする。box情報（名前照合用の
+      // 狭いカード枠）、scope情報（内容の増分で広げた後の実際の探索範囲。
+      // boxとは別に表示し、範囲拡大が機能しているか切り分けられるように
+      // する）を併せて出す。
       result.rewriteFailures.forEach(function (f) {
-        var attemptsPart = f.attemptsSummary ? (' / ' + f.attemptsSummary) : '';
         var boxPart = f.boxTag
           ? (' / box:' + f.boxTag + (f.boxClass ? '.' + f.boxClass : '') +
              ' 中のテキスト要素' + f.boxTextLeafCount + '件' +
@@ -1194,18 +1119,7 @@
              ' / scope冒頭「' + f.scopeTextHead + '」')
           : '';
         lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
-          ' / ' + f.reason + attemptsPart + boxPart + scopePart);
-
-        // scope内の葉要素それぞれの内訳（最大8件）。除外条件で候補が0件に
-        // なった場合、何が・なぜ除外されたか（またはされていないか）を
-        // その場で確認できるようにする。
-        if (f.candDiag && f.candDiag.length > 0) {
-          f.candDiag.forEach(function (cd, i) {
-            lines.push('  候補' + (i + 1) + ': ' + cd.tag +
-              (cd.cls ? '.' + cd.cls : '') + ' ' + cd.width + 'x' + cd.height +
-              ' 「' + cd.textHead + '」→ ' + cd.reason);
-          });
-        }
+          ' / ' + f.reason + boxPart + scopePart);
       });
     }
 
