@@ -24,25 +24,34 @@
 //      英語表記のままのことがあり、通常の用語置換では置き換わらないため）。
 //      元の英語は data-czn-orig-name 属性に退避し、次回のカード名解析
 //      （stripRomanLevel）ではこちらを読む。該当levelの効果文が手元
-//      データにあれば、そのカード内の .chaos-content を効果文の探索範囲に
-//      固定して書き換える（旧方式へのフォールバック時のみ、名前照合用の
-//      box から内容の増分を基準に範囲を広げる findEffectSearchScope を使う）。
+//      データにあれば、そのカード内の .chaos-content の直下の最初の子要素
+//      （writeTarget）だけを書き換え対象にする（.chaos-content 直下は
+//      子要素に分かれており、最初の子要素が基本効果、2つ目以降が神ヒラメキ
+//      等の追加行のため、.chaos-content 全体を対象にすると追加行のテキスト
+//      ごと消えてしまうことが分かった。子要素が1つしかなければ結果的に
+//      従来通りの範囲になる。旧方式へのフォールバック時のみ、名前照合用の
+//      box から内容の増分を基準に範囲を広げる findEffectSearchScope の
+//      結果をそのまま使う）。
 //      英語の効果文は1つの要素にまとまっておらず、複数のテキストノードに
 //      分割されているため、「正しい1要素を選ぶ」方式は成立しない。代わりに
-//      テキストノード単位で直接操作する: 探索範囲(scope)内のテキストノードを
+//      テキストノード単位で直接操作する: writeTarget内のテキストノードを
 //      文書順に全て集め、カード名要素・種別表示・a/button要素の配下・
-//      空白のみ・コスト数字（親要素の内容が数字のみ）を除いた残りのうち、
-//      最初の1つに日本語の効果文を入れ、2つ目以降は空文字にする。要素の
-//      削除・非表示・スタイル変更は行わず、テキストの中身だけを変える。
-//      元の英文（集めたテキストノードの連結）は scope の data-czn-orig
-//      属性に退避する。scope に data-czn-done="1" を付けて二重処理を防ぐが、
-//      ページ側の再描画でテキストノードだけが英語に作り直され、要素自体と
-//      その属性は残ることがあるため、属性だけで「処理済み」と判定せず、
-//      scope の現在のテキストに書き込んだはずの日本語が実際に含まれているか
-//      を毎回確認する。含まれていなければ未処理として扱い、再度書き換える
+//      空白のみ・（旧方式のみ）コスト数字（親要素の内容が数字のみ）を
+//      除いた残りのうち、最初の1つに日本語の効果文を入れ、2つ目以降は
+//      空文字にする。要素の削除・非表示・スタイル変更は行わず、テキストの
+//      中身だけを変える。元の英文（集めたテキストノードの連結）は
+//      writeTarget の data-czn-orig 属性に退避する。writeTarget に
+//      data-czn-done="1" を付けて二重処理を防ぐが、ページ側の再描画で
+//      テキストノードだけが英語に作り直され、要素自体とその属性は残る
+//      ことがあるため、属性だけで「処理済み」と判定せず、writeTarget の
+//      現在のテキストに書き込んだはずの日本語が実際に含まれているかを
+//      毎回確認する。含まれていなければ未処理として扱い、再度書き換える
 //      （タイマーによる自発的な再試行はせず、MutationObserverによる
-//      再スキャンに任せる）。対象のテキストノードが1つも見つからないカード
-//      や、日本語の効果文が無いカードには何もしない（英語のまま残る）
+//      再スキャン、および writeTarget ごとに個別設置した MutationObserver
+//      による自動修復に任せる。後者は書き込み直後にページ側が上書きする
+//      ケース向けで、同一要素への書き直しは最大10回まで）。対象のテキスト
+//      ノードが1つも見つからないカードや、日本語の効果文が無いカードには
+//      何もしない（英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。書き換え済み（data-czn-done="1"）の
@@ -854,11 +863,12 @@
     return s;
   }
 
-  // 書き込み直後の .chaos-content が、既存の間引き済み（500ms）全体再スキャン
-  // より先にページ側の再描画で上書きされ、日本語が失われることがあると
-  // 分かった（赤枠は正しい位置に出るが中身だけ英語に戻る）。そのため、
-  // 書き込んだ .chaos-content ごとに個別の MutationObserver を設置し、
-  // 中身から日本語（jaText）が消えていたら書き直す。自分自身の書き込みで
+  // 書き込み直後の要素が、既存の間引き済み（500ms）全体再スキャンより先に
+  // ページ側の再描画で上書きされ、日本語が失われることがあると分かった
+  // （赤枠は正しい位置に出るが中身だけ英語に戻る）。そのため、書き込んだ
+  // 要素（writeTarget。確定セレクタ方式では .chaos-content の最初の子要素）
+  // ごとに個別の MutationObserver を設置し、中身から日本語（jaText）が
+  // 消えていたら書き直す。自分自身の書き込みで
   // 再発火しないよう、書き直す前に監視を止め、書き直した後に再度監視する。
   // 同一要素への書き直しは最大 WATCH_MAX_RETRIES 回までとし、超えたら
   // 監視を解除する（無限ループ防止）。
@@ -866,10 +876,10 @@
   var watchInstalledCount = 0;
   var watchAutoRewriteCount = 0;
 
-  function watchEffectScope(effectScope, c, jaText, excludeCostDigits) {
+  function watchEffectScope(scope, c, jaText, excludeCostDigits) {
     var retries = 0;
     var mo = new MutationObserver(function () {
-      var currentText = effectScope.textContent || '';
+      var currentText = scope.textContent || '';
       if (currentText.indexOf(jaText) !== -1) { return; } // まだ正しい
 
       retries++;
@@ -878,7 +888,7 @@
         return;
       }
 
-      var freshNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl, excludeCostDigits);
+      var freshNodes = collectEffectTextNodes(scope, c.nameEl, c.typeLabelEl, excludeCostDigits);
       if (freshNodes.length === 0) { return; } // 書き直す先が見つからない
 
       mo.disconnect(); // 自分の書き込みで再発火しないよう一時停止
@@ -886,15 +896,15 @@
       for (var ti = 1; ti < freshNodes.length; ti++) {
         freshNodes[ti].nodeValue = '';
       }
-      effectScope.setAttribute('data-czn-done', '1');
-      mo.observe(effectScope, { childList: true, subtree: true, characterData: true });
+      scope.setAttribute('data-czn-done', '1');
+      mo.observe(scope, { childList: true, subtree: true, characterData: true });
 
       watchAutoRewriteCount++;
       log('overwrite detected, auto-rewrote effect text for', c.nameText, 'retry', retries);
       showStatusToast('CZN: 上書き検知→自動再書換「' + (c.rawNameText || c.nameText) +
         '」/ 監視' + watchInstalledCount + '件 / 自動再書換' + watchAutoRewriteCount + '件');
     });
-    mo.observe(effectScope, { childList: true, subtree: true, characterData: true });
+    mo.observe(scope, { childList: true, subtree: true, characterData: true });
     watchInstalledCount++;
   }
 
@@ -983,6 +993,18 @@
       // 適用しない（効果文中の太字数字まで誤って除外していたため）。
       var excludeCostDigits = !c.effectScope;
 
+      // .chaos-content の直下は子要素に分かれており、最初の子要素が基本効果、
+      // 2つ目以降が神ヒラメキ等の追加行（例:「Reduce the cost of this card
+      // by 1.」）であることが判明した。.chaos-content 全体を対象にすると
+      // 追加行のテキストノードまで空にしてしまい、行ごと消えてしまうため、
+      // 確定セレクタ方式では書き換え対象を最初の子要素の中だけに絞る
+      // （2つ目以降の子要素には一切触れない。英語のまま残り、通常の
+      // 用語置換だけが効く）。子要素が1つしかない場合は、その1つの中身が
+      // 全てなので従来通りの動作になる。旧方式のフォールバック時は
+      // effectScope（box から広げた範囲）をそのまま使う。
+      var childCount = effectScope.children ? effectScope.children.length : 0;
+      var writeTarget = (c.effectScope && childCount > 0) ? effectScope.children[0] : effectScope;
+
       // 「data-czn-done="1" が付いている＝処理済み」と属性だけで判定すると、
       // ページ側の再描画でテキストノードだけが英語に作り直され、要素自体
       // （と付けておいた属性）は残るケースを見逃す（＝英語のまま放置される）。
@@ -991,33 +1013,30 @@
       // 再度書き換える。タイマー等での自発的な再試行は行わず、この確認は
       // MutationObserver 経由の再スキャン時に自然に行われる。
       var reapplied = false;
-      if (effectScope.getAttribute('data-czn-done') === '1') {
-        var currentText = effectScope.textContent || '';
+      if (writeTarget.getAttribute('data-czn-done') === '1') {
+        var currentText = writeTarget.textContent || '';
         if (currentText.indexOf(jaText) !== -1) {
           return; // 既に正しく反映されている
         }
         reapplied = true;
       }
 
-      // 調査用（一時的）: 神ヒラメキ等で基本効果の下に追加行（例:「Reduce the
-      // cost of this card by 1.」）が別に表示されるケースがあり、現状は
-      // 最初のテキストノード以外を空にするためこの行ごと消えてしまう。
-      // 対処方針を決める前に、.chaos-content 内で基本効果と追加行がどう
-      // 分かれているか（別タグか改行か）を確認するため、書き換え前の
-      // textContent先頭100文字とHTML構造（outerHTML先頭100文字）を記録する。
-      var contentTextHead = (effectScope.textContent || '').trim().slice(0, 100);
-      var contentStructureHead = (effectScope.outerHTML || '').slice(0, 100);
+      // 診断用: .chaos-content 直下の子要素の数と、最初の子要素（＝実際の
+      // 書き換え対象 writeTarget）の書き換え前の先頭30文字を記録する。
+      var firstChildHead = (writeTarget.textContent || '').trim().slice(0, 30);
 
       // 英語の効果文は1つの要素にまとまっておらず、複数のテキスト断片に
       // 分割されている（＝「正しい1要素」が存在しない）ことが判明したため、
       // 要素単位の選択・書き換えはやめ、テキストノード単位で直接操作する。
-      var textNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl, excludeCostDigits);
+      // 対象は writeTarget（.chaos-content の最初の子要素）の中だけに限定する。
+      var textNodes = collectEffectTextNodes(writeTarget, c.nameEl, c.typeLabelEl, excludeCostDigits);
 
       if (textNodes.length === 0) {
-        // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
-        // scope（内容の増分で広げた後の要素、または確定した .chaos-content）
-        // を別々に記録する。box が小さすぎるのか、scopeへの拡大が機能して
-        // いないのか、除外条件が厳しすぎるのかを切り分けられるようにするため。
+        // box（名前照合用の狭いカード枠）と、実際に書き換え対象とした scope
+        // （writeTarget。確定方式なら.chaos-contentの最初の子要素、旧方式なら
+        // boxから広げた要素）を別々に記録する。box が小さすぎるのか、scopeへの
+        // 拡大が機能していないのか、除外条件が厳しすぎるのかを切り分けられる
+        // ようにするため。
         rewriteFailures.push({
           rawNameText: c.rawNameText || c.nameText,
           level: c.level,
@@ -1026,11 +1045,12 @@
           boxClass: (c.block.className || '').toString().slice(0, 40),
           boxTextLeafCount: countTextLeaves(c.block),
           boxTextHead: (c.block.textContent || '').trim().slice(0, 50),
-          scopeTag: effectScope.tagName,
-          scopeClass: (effectScope.className || '').toString().slice(0, 40),
+          scopeTag: writeTarget.tagName,
+          scopeClass: (writeTarget.className || '').toString().slice(0, 40),
           scopeClimbedLevels: scopeResult.climbedLevels,
-          scopeTextLeafCount: countTextLeaves(effectScope),
-          scopeTextHead: (effectScope.textContent || '').trim().slice(0, 50)
+          scopeTextLeafCount: countTextLeaves(writeTarget),
+          scopeTextHead: (writeTarget.textContent || '').trim().slice(0, 50),
+          childCount: childCount
         });
         return;
       }
@@ -1038,44 +1058,46 @@
       // 元の英文（集めたテキストノードの連結）を退避する。要素の削除・
       // 非表示・スタイル変更は行わず、テキストの中身だけを変える。
       var originalConcat = textNodes.map(function (n) { return n.nodeValue; }).join('');
-      effectScope.setAttribute('data-czn-orig', originalConcat);
+      writeTarget.setAttribute('data-czn-orig', originalConcat);
 
       textNodes[0].nodeValue = jaText;
       for (var ti = 1; ti < textNodes.length; ti++) {
         textNodes[ti].nodeValue = '';
       }
 
-      effectScope.setAttribute('data-czn-done', '1');
+      writeTarget.setAttribute('data-czn-done', '1');
 
       // 診断用（一時的）: 書き込み先が実際に画面上のどれなのか目視確認
-      // できるよう、日本語を書き込んだ .chaos-content に赤枠、その
+      // できるよう、日本語を書き込んだ writeTarget に赤枠、その
       // カード全体（c.block）に黄緑枠を付ける。
-      effectScope.style.outline = '3px solid red';
+      writeTarget.style.outline = '3px solid red';
       if (c.block) { c.block.style.outline = '3px solid lime'; }
 
-      // この .chaos-content にはまだ監視を付けていなければ設置する
+      // この writeTarget にはまだ監視を付けていなければ設置する
       // （reapply等で同じ要素へ複数回来ても二重に設置しないための目印）。
-      if (!effectScope.hasAttribute('data-czn-watched')) {
-        effectScope.setAttribute('data-czn-watched', '1');
-        watchEffectScope(effectScope, c, jaText, excludeCostDigits);
+      // 監視・再書き換えの範囲も writeTarget（最初の子要素）の中だけに
+      // 限定し、2つ目以降の子要素（追加行）には触れない。
+      if (!writeTarget.hasAttribute('data-czn-watched')) {
+        writeTarget.setAttribute('data-czn-watched', '1');
+        watchEffectScope(writeTarget, c, jaText, excludeCostDigits);
       }
 
       if (reapplied) { reappliedCount++; }
 
       // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
-      // 日本語を入れたノードの親要素のタグ名・書き換え後のscope先頭30文字・
-      // 再適用かどうか・（調査用・一時的）書き換え前のcontentTextHead/
-      // contentStructureHeadを記録しておく。
+      // 日本語を入れたノードの親要素のタグ名・書き換え後のwriteTarget先頭
+      // 30文字・再適用かどうか・.chaos-content直下の子要素の数・最初の
+      // 子要素（writeTarget）の書き換え前の先頭30文字を記録しておく。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
         nodeCount: textNodes.length,
         originalHead: originalConcat.trim().slice(0, 30),
         parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)',
-        afterHead: (effectScope.textContent || '').trim().slice(0, 30),
+        afterHead: (writeTarget.textContent || '').trim().slice(0, 30),
         reapplied: reapplied,
-        contentTextHead: contentTextHead,
-        contentStructureHead: contentStructureHead
+        childCount: childCount,
+        firstChildHead: firstChildHead
       });
 
       inserted++;
@@ -1287,18 +1309,17 @@
     if (result.insertedCount > 0) {
       // 取り違えていないかその場で確認できるよう、集めたテキストノードの
       // 数・書き換え前の連結英文の先頭30文字・日本語を入れたノードの
-      // 親要素のタグ名・書き換え後のscope先頭30文字を出す。ページ側の
+      // 親要素のタグ名・書き換え後のwriteTarget先頭30文字を出す。ページ側の
       // 再描画で英語に戻っていたのを検知して再書換した場合は「(再適用)」を
-      // 付ける。（調査用・一時的）追加行の消失問題の切り分けのため、
-      // 書き換え前の .chaos-content の textContent先頭100文字と
-      // HTML構造（outerHTML先頭100文字）も併せて出す。
+      // 付ける。.chaos-content直下の子要素の数と、最初の子要素
+      // （writeTarget）の書き換え前の先頭30文字も併せて出す（2つ目以降の
+      // 子要素＝追加行に触れていないか確認できるように）。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
           (d.reapplied ? '(再適用)' : '') +
           ' / ノード' + d.nodeCount + '件 / 親要素' + d.parentTag +
           ' / 書換前「' + d.originalHead + '」/ 書換後「' + d.afterHead + '」');
-        lines.push('  content文頭100「' + d.contentTextHead + '」');
-        lines.push('  content構造100「' + d.contentStructureHead + '」');
+        lines.push('  子要素' + d.childCount + '件 / 最初の子要素「' + d.firstChildHead + '」');
       });
     }
 
@@ -1321,8 +1342,9 @@
              ' 中のテキスト要素' + f.scopeTextLeafCount + '件' +
              ' / scope冒頭「' + f.scopeTextHead + '」')
           : '';
+        var childCountPart = f.childCount !== undefined ? (' / 子要素' + f.childCount + '件') : '';
         lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
-          ' / ' + f.reason + boxPart + scopePart);
+          ' / ' + f.reason + boxPart + scopePart + childCountPart);
       });
     }
 
