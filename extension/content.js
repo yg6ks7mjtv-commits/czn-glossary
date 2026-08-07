@@ -11,7 +11,17 @@
 //      "Show Effects" は効果文が短いカードには存在しないため目印にしない。
 //      単純な固定階層数や見出しタグの総当たりだと、カードのグループ見出し
 //      （「Starting Cards:」等）まで拾ってしまうため、glossary名との完全一致
-//      （ローマ数字除去後）を主な判定基準にしている
+//      （ローマ数字除去後）を主な判定基準にしている。
+//      安全のための2つの歯止め:
+//        - 登った祖先に自分以外の種別表示（Attack/Skill）が複数入って
+//          しまった時点で、それは1枚のカードの枠を超えて複数カードを
+//          またぐ共通祖先（グリッド全体等）なので、それ以上は登らず打ち切る
+//          （＝別カードの名前を誤って拾うことを防ぐ）
+//        - 名前を特定できなければ、無理に近い候補を採用せず null を返す。
+//          そのカードは処理対象外（英語のまま）になる。誤った日本語や
+//          誤った効果文が表示されるより、英語のまま残るほうが安全なため
+//      候補が複数見つかったときは、種別表示からのDOM順の距離が最も近い
+//      ものを優先する
 //   3. カード名末尾のローマ数字（I/II/III/IV/V）をヒラメキ段階(level 1-5)、
 //      無ければ level 0 として扱い、effects-ja.json を
 //      (character, ja_card, level) で引く。character は大文字小文字・前後
@@ -43,15 +53,19 @@
 //      要素は対象から除外する。置換した箇所への背景ハイライトは付けない
 //   5. 起動時に画面右下へ簡易トーストを出し、動いているかを目視確認できるようにする。
 //      「◯件を置換 / カード枠◯件 / 名前取得◯件 / ユニーク◯件 / 効果文◯件 /
-//      効果文データ◯件」の内訳を表示する。カード枠は種別表示から検出を試みた
-//      件数、名前取得はそのうちカード名まで特定できた件数、ユニークはベース名
-//      （ローマ数字を除いた名前、レベル違いは1件にまとめる）の種類数、
-//      効果文データは effects-ja.json から読めた件数（0ならファイル未配置か
-//      読み込み失敗）。同名でもカード枠ごとに別カードとして処理し、名前による
-//      集約・重複排除は一切行わない。効果文が0件のときの内訳表示（最大10件）
-//      は、効果文が見つかったもの・glossaryで日本語化できたもの・ヒラメキ
-//      段階が付いているものを優先して並べ、実際に探索したキーと保有キー一覧
-//      も表示する（DOM順のキャップで手がかりの多いカードが漏れないように
+//      効果文データ◯件 / 名前特定スキップ◯件」の内訳を表示する。カード枠は
+//      種別表示から検出を試みた件数、名前取得はそのうちカード名まで特定できた
+//      件数、ユニークはベース名（ローマ数字を除いた名前、レベル違いは1件に
+//      まとめる）の種類数、効果文データは effects-ja.json から読めた件数
+//      （0ならファイル未配置か読み込み失敗）、名前特定スキップは無理に近い
+//      候補を採用せず処理対象外にした件数（別カードへの誤爆を防ぐための
+//      安全装置が働いた件数）。同名でもカード枠ごとに別カードとして処理し、
+//      名前による集約・重複排除は一切行わない。スキップが1件以上あるときは、
+//      スキップしたカードの推定テキスト（診断専用、実際の照合には使わない）
+//      を最大5件表示する。効果文が0件のときの内訳表示（最大10件）は、効果文
+//      が見つかったもの・glossaryで日本語化できたもの・ヒラメキ段階が
+//      付いているものを優先して並べ、実際に探索したキーと保有キー一覧も
+//      表示する（DOM順のキャップで手がかりの多いカードが漏れないように
 //      するため、また照合ミスの原因を切り分けやすくするため）。1件以上
 //      書き換えられたときは、書き換えた要素のタグ名・クラス名・書き換え前の
 //      テキスト冒頭30文字も出す（対象を取り違えていないか確認するため）
@@ -394,33 +408,89 @@
   // 完全一致するものを探す。「Starting Cards:」のようなグループ見出しは、
   // コロン除外・glossary不一致の両方で弾かれる。excludeRoot（種別表示要素自身）
   // の内側は見ない。
+  //
+  // scope 内に複数の候補が見つかることがある（例: 効果文中に別カード名への
+  // 言及がある場合）。単純に「最初に見つかった候補」を採用すると、
+  // excludeRoot（種別表示要素）から実際には遠い、無関係な候補を拾って
+  // しまうことがあるため、DOM順の走査位置が excludeRoot に最も近い候補を
+  // 優先する。
   function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
+    var index = 0;
+    var excludeIndex = -1;
+    var matches = []; // { node, index }
     while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; } // 葉要素のみ
-      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { continue; }
+      if (node === excludeRoot) { excludeIndex = index; }
+      if (node.children.length > 0) { index++; continue; } // 葉要素のみ
+      if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { index++; continue; }
       var text = (node.textContent || '').trim();
-      if (!text || hasExcludedSuffix(text)) { continue; }
-      if (knownEnNames.has(stripRomanLevel(text).base)) { return node; }
+      if (text && !hasExcludedSuffix(text) && knownEnNames.has(stripRomanLevel(text).base)) {
+        matches.push({ node: node, index: index });
+      }
+      index++;
     }
-    return null;
+    if (matches.length === 0) { return null; }
+    if (matches.length === 1 || excludeIndex === -1) { return matches[0].node; }
+    matches.sort(function (a, b) {
+      return Math.abs(a.index - excludeIndex) - Math.abs(b.index - excludeIndex);
+    });
+    return matches[0].node;
   }
 
   // 種別表示要素（"Attack"/"Skill"）から親を1階層ずつたどり、「カード名候補
   // （glossaryと完全一致、かつコロン終わりでない）を含む最小の祖先」を
-  // カード枠として返す。それより外は探索しない。見つからなければ null。
-  function findCardBox(typeLabelEl, knownEnNames) {
+  // カード枠として返す。それより外は探索しない。
+  //
+  // 重要: 登った先の祖先要素に、自分以外の種別表示（Attack/Skill）が
+  // 複数含まれてしまった時点で、それはもう「1枚のカードの枠」を超えて
+  // 複数カードをまたぐ共通の祖先（カードグリッド全体等）になっている。
+  // そこから見つかる「既知の名前」は無関係な別カードのものである危険が
+  // 高いため、これ以上は登らずに探索を打ち切る（＝そのカードは名前を
+  // 特定できないものとして null を返し、呼び出し側で処理対象外にする）。
+  // 見つからなければ、無理に候補を採用せず null を返す。
+  function findCardBox(typeLabelEl, knownEnNames, allTypeLabels) {
     var maxClimb = CZN_SELECTORS.maxAncestorClimb || 10;
     var el = typeLabelEl;
     for (var depth = 0; depth < maxClimb && el.parentElement; depth++) {
       el = el.parentElement;
+
+      var labelsInScope = 0;
+      for (var i = 0; i < allTypeLabels.length; i++) {
+        if (el.contains(allTypeLabels[i])) {
+          labelsInScope++;
+          if (labelsInScope > 1) { break; }
+        }
+      }
+      if (labelsInScope > 1) { break; } // 複数カードをまたいだので打ち切る
+
       var nameEl = findGlossaryNameLeaf(el, typeLabelEl, knownEnNames);
       if (nameEl) {
         return { box: el, nameEl: nameEl };
       }
     }
     return null;
+  }
+
+  // findCardBox が失敗したときの診断表示用。実際の照合には使わない
+  // （既知のカード名かどうかを問わず、種別表示の近くにある何らかの
+  // テキストを best-effort で拾うだけ）。
+  function guessNearbyTextForDiagnostics(typeLabelEl) {
+    var el = typeLabelEl.parentElement;
+    for (var depth = 0; depth < 3 && el; depth++) {
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT);
+      var node;
+      while ((node = walker.nextNode())) {
+        if (node.children.length > 0) { continue; }
+        if (node === typeLabelEl) { continue; }
+        var text = (node.textContent || '').trim();
+        if (text && text !== 'Attack' && text !== 'Skill' && !/^[0-9]+$/.test(text)) {
+          return text;
+        }
+      }
+      el = el.parentElement;
+    }
+    return '(不明)';
   }
 
   // box 内で、カード名要素そのものとは別に、ローマ数字（I/II/III/IV/V）
@@ -527,10 +597,19 @@
     log('type label elements found:', typeLabels.length);
     var knownEnNames = new Set(Object.keys(ctx.resolved));
     var candidates = [];
+    var skippedCount = 0;
+    var skippedNames = []; // 名前を特定できずスキップしたカードの診断用（最大5件）
 
     typeLabels.forEach(function (label) {
-      var found = findCardBox(label, knownEnNames);
-      if (!found) { log('card box (name + type label) not found for a label'); return; }
+      var found = findCardBox(label, knownEnNames, typeLabels);
+      if (!found) {
+        log('card box (name + type label) not found for a label');
+        skippedCount++;
+        if (skippedNames.length < 5) {
+          skippedNames.push(guessNearbyTextForDiagnostics(label));
+        }
+        return;
+      }
 
       var nameText = readNameText(found.nameEl);
       var parsed = stripRomanLevel(nameText);
@@ -563,7 +642,14 @@
     // 試行件数）。candidates.length はそのうちカード名まで特定できた件数。
     // 同名カード（例: Sword Rain I〜V）も1件ずつ別の candidate として積む
     // （box ごとに処理するため、名前で集約・重複排除はしない）。
-    return { candidates: candidates, attemptedCount: typeLabels.length };
+    // skippedCount/skippedNames: 名前を特定できず処理対象外にしたカード
+    // （無理に近い候補を採用せず null を返した結果、英語のまま残るカード）。
+    return {
+      candidates: candidates,
+      attemptedCount: typeLabels.length,
+      skippedCount: skippedCount,
+      skippedNames: skippedNames
+    };
   }
 
   // useMarkerStrategy: false のときだけ使う、セレクタ直指定の経路。
@@ -604,7 +690,7 @@
       });
     });
 
-    return { candidates: candidates, attemptedCount: containers.length };
+    return { candidates: candidates, attemptedCount: containers.length, skippedCount: 0, skippedNames: [] };
   }
 
   function collectCardCandidates(ctx) {
@@ -862,6 +948,8 @@
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
+      skippedCount: collected.skippedCount, // 名前を特定できず処理対象外にした件数
+      skippedNames: collected.skippedNames, // そのうち最大5件の診断用テキスト
       replacedCount: replacedCount
     };
   }
@@ -892,7 +980,17 @@
     var lines = ['CZN: ' + result.replacedCount + '件を置換 / カード枠' +
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
-      result.insertedCount + '件 / 効果文データ' + result.effectsCount + '件'];
+      result.insertedCount + '件 / 効果文データ' + result.effectsCount +
+      '件 / 名前特定スキップ' + result.skippedCount + '件'];
+
+    if (result.skippedCount > 0) {
+      // 名前を特定できず処理対象外にしたカード（無理に近い候補を採用せず
+      // 英語のまま残したもの）。別カードへの誤爆が起きていないか、
+      // どのカードがスキップされているかをその場で確認できるようにする。
+      result.skippedNames.forEach(function (t) {
+        lines.push('スキップ: 「' + t + '」');
+      });
+    }
 
     if (result.insertedCount > 0) {
       // 書き換え先を間違えていないか（カード名要素等を誤って書き換えて
