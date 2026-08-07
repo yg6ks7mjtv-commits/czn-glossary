@@ -42,20 +42,19 @@
 //      判断すると届かないことがあった）。最大 maxEffectSearchClimb（既定
 //      10）階層まで許可。ただし2つ目の種別表示を含む階層に達したら、その
 //      1つ手前で打ち切る（findCardBoxと同じ「複数カードをまたいだら打ち
-//      切る」歯止め）。このサイト上では候補要素の getBoundingClientRect()
-//      が画面上に表示されていても常に0x0を返すため、幅・高さの実測による
-//      選択や書き換え後の検証・ロールバックはできない（過去のバージョンは
-//      これに依存していたが機能しなかった）。そのためサイズに基づく判定は
-//      全廃し、除外条件（カード名要素・書き換え済み・textContentが10文字
-//      未満）を満たさない葉要素の中で textContent の文字数が最も多いものを
-//      無条件で1つ採用する。採用できた要素には背景白・文字黒・角丸を付け、
-//      white-space:normal・word-break:normal・writing-mode:horizontal-tb・
-//      width:auto・min-width:0を強制してカード名側の省略表示CSSや縦書き
-//      指定の影響を打ち消す。元の英語は title 属性に退避する（消さずに
-//      保持するが表示はしない）。同じ効果文ブロック内に残る他の英語テキスト
-//      （複数行に分かれている場合）は display:none で隠す（「Show Effects」
-//      の展開トグルは除く）。それでも対象要素が見つからないカードや日本語
-//      の効果文が無いカードには何もしない（英語のまま残る）
+//      切る」歯止め）。英語の効果文は1つの要素にまとまっておらず、複数の
+//      テキストノードに分割されていることが判明したため、「正しい1要素を
+//      選ぶ」方式は成立しない。代わりにテキストノード単位で直接操作する:
+//      探索範囲(scope)内のテキストノードを文書順に全て集め、カード名要素・
+//      種別表示・a/button要素の配下・空白のみ・コスト数字（親要素の内容が
+//      数字のみ）を除いた残りのうち、最初の1つに日本語の効果文を入れ、
+//      2つ目以降は空文字にする。要素の削除・非表示・スタイル変更は行わず、
+//      テキストの中身だけを変える。元の英文（集めたテキストノードの連結）は
+//      scope の data-czn-orig 属性に退避する。scope に
+//      data-czn-done="1" を付けて二重処理を防ぐ（既に付いていれば
+//      その回のスキャンでは何もしない）。対象のテキストノードが1つも
+//      見つからないカードや、日本語の効果文が無いカードには何もしない
+//      （英語のまま残る）
 //   4. ブックマークレットと同じロジックで、カード以外のテキストの用語置換も
 //      行う。ローマ数字が続く場合は「Sword Rain III(剣の雨 III)」のように
 //      まとめて1つの用語として扱う。書き換え済み（data-czn-done="1"）の
@@ -534,33 +533,45 @@
     return null;
   }
 
-  // scope 内で、カード画像下部にある「英語の効果文」の要素を選ぶ。
-  // このサイト上では getBoundingClientRect() が候補要素に対して常に
-  // 0x0 を返すことが判明し（画面上には表示されているにもかかわらず）、
-  // 実測による幅・高さ検証が機能しないため、サイズに基づく判定は全廃した。
-  // 代わりに、除外条件を満たさない葉要素の中で textContent の文字数が
-  // 最も多いものを1つ選ぶ（効果文は他のUI文言より明らかに長いため）。
-  // 除外するのはカード名要素（c.nameEl）・既に書き換え済み
-  // （data-czn-done="1"）・textContentが10文字未満の3種類のみ。
-  function selectEffectTextElement(scope, nameEl) {
-    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
+  // scope 内の「英語の効果文」は1つの要素にまとまっておらず、複数のテキスト
+  // ノードに分割されていることが分かった（＝「正しい1要素を選ぶ」方式では
+  // 原理的に解決できない）。そのため要素単位の選択はやめ、テキストノード単位
+  // で直接操作する。scope内のテキストノードを文書順に全て集め、以下を除外:
+  //   - カード名要素（nameEl）の配下
+  //   - 種別表示（typeLabelEl）の配下
+  //   - a / button 要素の配下（「Show Effects」の展開トグルを壊さないため）
+  //   - 空白のみのテキストノード
+  //   - 直近の親要素の textContent が数字のみ（コスト数字）のテキストノード
+  function collectEffectTextNodes(scope, nameEl, typeLabelEl) {
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
     var node;
-    var best = null;
-    var bestLen = 0;
+    var nodes = [];
 
     while ((node = walker.nextNode())) {
-      if (node.children.length > 0) { continue; } // 葉要素のみ
-      if (node === nameEl) { continue; }
-      if (node.getAttribute('data-czn-done') === '1') { continue; }
-      var text = (node.textContent || '').trim();
-      if (text.length < 10) { continue; }
-      if (text.length > bestLen) {
-        best = node;
-        bestLen = text.length;
+      if (!node.nodeValue || !node.nodeValue.trim()) { continue; } // 空白のみ
+
+      var excluded = false;
+      var p = node.parentElement;
+      while (p) {
+        if (p === nameEl || p === typeLabelEl ||
+            p.tagName === 'A' || p.tagName === 'BUTTON') {
+          excluded = true;
+          break;
+        }
+        if (p === scope) { break; }
+        p = p.parentElement;
       }
+      if (excluded) { continue; }
+
+      var parentEl = node.parentElement;
+      if (parentEl && /^[0-9]+$/.test((parentEl.textContent || '').trim())) {
+        continue; // コスト数字
+      }
+
+      nodes.push(node);
     }
 
-    return best;
+    return nodes;
   }
 
   // 名前照合用の（狭い）カード枠 box から、内容の増分を基準に効果文の探索
@@ -611,28 +622,6 @@
       if ((node.textContent || '').trim()) { count++; }
     }
     return count;
-  }
-
-  // effectEl の直近の親要素の中に残っている、他の英語テキスト（effectEl
-  // 自身とその子孫は除く）を display:none で隠す。日本語の効果文を実際に
-  // 適用できたカードに限って呼ぶ（適用できなかったカードは英語のまま
-  // 残すため、この関数自体を呼ばない）。excludeEls（カード名・種別表示・
-  // レベルバッジ）は誤って隠さないよう対象から外す。「Show Effects」は
-  // 展開トグルの機能を持つことがあるため、テキストとして隠さない。
-  function hideSiblingEffectText(effectEl, excludeEls) {
-    var parent = effectEl.parentElement;
-    if (!parent) { return; }
-    var walker = document.createTreeWalker(parent, NodeFilter.SHOW_ELEMENT);
-    var node;
-    while ((node = walker.nextNode())) {
-      if (node === effectEl || effectEl.contains(node)) { continue; }
-      if (excludeEls.indexOf(node) !== -1) { continue; }
-      if (node.children.length > 0) { continue; } // 葉要素のみ
-      var text = (node.textContent || '').trim();
-      if (!text) { continue; }
-      if (text.indexOf('Show Effects') !== -1) { continue; }
-      node.style.display = 'none';
-    }
   }
 
   // ---- フェーズ1: カード名の収集（原文のまま。ここでは一切DOMを書き換えない） ----
@@ -803,10 +792,6 @@
 
       if (!c.entry) { PROCESSED.add(c.block); return; } // glossaryに無いカード名
 
-      var excludeEls = [c.nameEl];
-      if (c.typeLabelEl) { excludeEls.push(c.typeLabelEl); }
-      if (c.levelBadgeEl) { excludeEls.push(c.levelBadgeEl); }
-
       // カード名は glossary が分かっていれば効果文の有無とは無関係に常に
       // 日本語のみにする。用語置換の正規表現マッチに依存せず、既に解決済みの
       // c.entry.ja を直接書き込むことで確実に反映する（一部のカード名は
@@ -843,14 +828,18 @@
       var scopeResult = findEffectSearchScope(c.block, allTypeLabels || [], maxExtraClimb);
       var effectScope = scopeResult.scope;
 
-      // このサイト上では getBoundingClientRect() が候補要素に対して常に
-      // 0x0 を返すことが判明し（画面上には表示されているにもかかわらず）、
-      // 幅・高さの実測による選択・検証は機能しない。そのためサイズに基づく
-      // 判定は全廃し、textContent の文字数が最も多い葉要素を無条件で採用する
-      // 方式にした（書き換え後の再測定・ロールバックも行わない）。
-      var effectEl = selectEffectTextElement(effectScope, c.nameEl);
+      if (effectScope.getAttribute('data-czn-done') === '1') {
+        // 既にこのscopeへ書き換え済み（再スキャンによる二重処理防止）。
+        PROCESSED.add(c.block);
+        return;
+      }
 
-      if (!effectEl) {
+      // 英語の効果文は1つの要素にまとまっておらず、複数のテキスト断片に
+      // 分割されている（＝「正しい1要素」が存在しない）ことが判明したため、
+      // 要素単位の選択・書き換えはやめ、テキストノード単位で直接操作する。
+      var textNodes = collectEffectTextNodes(effectScope, c.nameEl, c.typeLabelEl);
+
+      if (textNodes.length === 0) {
         // box（名前照合用の狭いカード枠）と、探索範囲として実際に採用した
         // scope（内容の増分で広げた後の要素）を別々に記録する。box が
         // 小さすぎるのか、scopeへの拡大が機能していないのか、除外条件が
@@ -858,7 +847,7 @@
         rewriteFailures.push({
           rawNameText: c.rawNameText || c.nameText,
           level: c.level,
-          reason: '条件を満たす候補が見つからない（10文字以上のテキスト要素なし）',
+          reason: '対象のテキストノードが見つからない',
           boxTag: c.block.tagName,
           boxClass: (c.block.className || '').toString().slice(0, 40),
           boxTextLeafCount: countTextLeaves(c.block),
@@ -873,33 +862,27 @@
         return;
       }
 
-      var originalText = effectEl.textContent;
-      effectEl.title = originalText; // 元の英語をtitle属性に退避
-      effectEl.textContent = jaText;
-      // 縦書き・折り返し崩れを防ぐためのスタイル強制（サイズ判定は行わない
-      // が、レイアウト崩れ自体を防ぐためこれらは引き続き適用する）。
-      effectEl.style.cssText = effectEl.style.cssText +
-        ';background:#fff;color:#111;padding:4px 6px;border-radius:4px;' +
-        'white-space:normal;text-overflow:clip;overflow:visible;max-width:none;' +
-        'writing-mode:horizontal-tb;word-break:normal;width:auto;min-width:0;';
-      effectEl.setAttribute('data-czn-done', '1');
+      // 元の英文（集めたテキストノードの連結）を退避する。要素の削除・
+      // 非表示・スタイル変更は行わず、テキストの中身だけを変える。
+      var originalConcat = textNodes.map(function (n) { return n.nodeValue; }).join('');
+      effectScope.setAttribute('data-czn-orig', originalConcat);
 
-      // 診断用: 書き換え先のタグ名・クラス名と、書き換え前のテキスト先頭
-      // 30文字を記録しておく（対象を取り違えていないかトーストで
-      // 確認できるようにするため）。
+      textNodes[0].nodeValue = jaText;
+      for (var ti = 1; ti < textNodes.length; ti++) {
+        textNodes[ti].nodeValue = '';
+      }
+
+      effectScope.setAttribute('data-czn-done', '1');
+
+      // 診断用: 集めたテキストノードの数・連結した英文の先頭30文字・
+      // 日本語を入れたノードの親要素のタグ名を記録しておく。
       rewriteDetails.push({
         rawNameText: c.rawNameText || c.nameText,
         level: c.level,
-        targetTag: effectEl.tagName,
-        targetClass: (effectEl.className || '').toString().slice(0, 40),
-        originalTextHead: originalText.trim().slice(0, 30)
+        nodeCount: textNodes.length,
+        originalHead: originalConcat.trim().slice(0, 30),
+        parentTag: textNodes[0].parentElement ? textNodes[0].parentElement.tagName : '(なし)'
       });
-
-      // 効果文ブロック内に、書き換えた要素以外の英語テキストが残っている
-      // ことがある（複数行・複数要素に分かれている場合）。日本語の効果文を
-      // 適用できたカードに限り、それらも隠す。カード名・種別表示・レベル
-      // バッジは巻き込まないよう除外する。
-      hideSiblingEffectText(effectEl, excludeEls);
 
       PROCESSED.add(c.block);
       inserted++;
@@ -1089,13 +1072,13 @@
     }
 
     if (result.insertedCount > 0) {
-      // 書き換え先を間違えていないか（カード名要素等を誤って書き換えて
-      // いないか）その場で確認できるよう、書き換えた要素のタグ名・
-      // クラス名と、書き換え前のテキスト先頭30文字を出す。
+      // 取り違えていないかその場で確認できるよう、集めたテキストノードの
+      // 数・書き換え前の連結英文の先頭30文字・日本語を入れたノードの
+      // 親要素のタグ名を出す。
       result.rewriteDetails.forEach(function (d) {
         lines.push('書換: 原文「' + d.rawNameText + '」/ level ' + d.level +
-          ' / ' + d.targetTag + (d.targetClass ? '.' + d.targetClass : '') +
-          ' / 書換前「' + d.originalTextHead + '」');
+          ' / ノード' + d.nodeCount + '件 / 親要素' + d.parentTag +
+          ' / 書換前「' + d.originalHead + '」');
       });
     }
 
