@@ -39,6 +39,35 @@ var CZN_SELECTORS = {
   // 効果文の書き換え範囲（テキストノード方式で直接操作する）。
   confirmedContent: '.chaos-content',
 
+  // 一部のキャラは、ヒラメキ段階をローマ数字ではなく括弧付きの固有名で区別する
+  // （例: Nine「Hew (Ironclad)」「Hew (Extreme)」...）。この対応関係は
+  // カードごとに異なり機械的に推測できないため、根拠（aosnsの効果文に
+  // 埋め込まれた日本語の括弧名とPrydwenの英語括弧名の対応）を確認できた
+  // ものだけをここに事前登録する。未登録の組み合わせは変換されず、
+  // glossaryの英語名（括弧無し）と一致しないため処理対象外のまま
+  // （無理に推測しないため。詳細はREADMEの該当項目参照）。
+  //
+  // 形式: { キャラ名(Prydwen表記): { カードのベース名: { 括弧内の語: level } } }
+  //
+  // 対応が取れなかったもの（未登録・要根拠確認）:
+  //   - Hilde「Homing Arrow (Fracture)」「Homing Arrow (Grand)」
+  //     クイバーロードが生成する専用カードで、aosns側に「カード評価」相当の
+  //     レベル別効果文が存在しない（生成カードのため対象外セクション）。
+  //   - Chizuru「Moonslash (Gen)」
+  //     aosnsの「真月」は評価コメントのみでレベル別効果文が無い
+  //     （段落形式、Hilde等と同じパターン）。
+  cardLevelNames: {
+    Nine: {
+      Hew: {
+        Ironclad: 1, // aosns効果文: 破砕(鉄甲)
+        Extreme: 2,  // aosns効果文: 破砕(極強)
+        Flash: 3,    // aosns効果文: 破砕(閃光)
+        Massacre: 4, // aosns効果文: 破砕(根絶)
+        Ambush: 5    // aosns効果文: 破砕(奇襲)
+      }
+    }
+  },
+
   // ---- 以下は useConfirmedStructure: false のときだけ使う旧方式の設定 ----
 
   // true: 種別表示(Attack/Skill) + glossary名一致でカード枠とカード名を探す。

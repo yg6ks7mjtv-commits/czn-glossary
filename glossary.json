@@ -2506,12 +2506,12 @@
       "note": "レノアの固有カード。Prydwen: 「'Ballad of Pitch Black'...a multi-hit attack...scales dramatically with the number of Dirge Bullets in hand」。gamerch(942026): 「漆黒の頌詩：複数ヒット攻撃。手札の鎮魂の弾丸数に応じてダメージ量アップ」と完全一致。語形も直訳一致。"
     },
     {
-      "en": "Flower of Devoured",
+      "en": "Flower of Devoured Fate",
       "ja": "運命を飲み込んだ花",
       "confidence": "confirmed",
       "character": "Renoa",
       "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/renoa",
-      "note": "レノアの固有カード。Prydwen: 「'Flower of Devoured' allows you to discard 3 Dirge Bullets to get 3 extra attacks, then make 3 Dirge Bullets from its additional effect」。gamerch(942026): 「運命を飲み込んだ花：手札を破棄して、破棄数に応じて鎮魂の弾丸を生成」と破棄→弾丸生成という点が一致。"
+      "note": "レノアの固有カード。旧登録は末尾の\"Fate\"を欠いた\"Flower of Devoured\"だったため、ページ上のローマ数字付き表記（\"Flower of Devoured Fate I\"〜\"V\"）と一致せずlevel判定に失敗していた。正しい英語名は\"Flower of Devoured Fate\"（Prydwenのimg alt属性で確認）。Prydwen: 「'Flower of Devoured' allows you to discard 3 Dirge Bullets to get 3 extra attacks, then make 3 Dirge Bullets from its additional effect」。gamerch(942026): 「運命を飲み込んだ花：手札を破棄して、破棄数に応じて鎮魂の弾丸を生成」と破棄→弾丸生成という点が一致。"
     },
     {
       "en": "Echo of Sorrow",

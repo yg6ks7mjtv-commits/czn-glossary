@@ -196,6 +196,45 @@
     return { base: text, level: 0 };
   }
 
+  // stripRomanLevel を拡張し、ローマ数字以外の2種類のヒラメキ段階表記にも
+  // 対応する。
+  //   1. 星（"Softie ★★" -> base "Softie", level 2）。末尾の★の数がlevel。
+  //   2. 括弧付きの固有名（"Hew (Ironclad)" -> base "Hew", level 1）。
+  //      カードごとに対応が異なり機械的に推測できないため、
+  //      selectors.js の CARD_LEVEL_NAMES に事前登録された組み合わせだけを
+  //      変換する。未登録なら（無理に推測せず）テキスト全体を base とし
+  //      level 0 のまま返す。＝ glossaryの英語名と一致せず処理対象外になる。
+  // 戻り値の suffixText は、カード名を日本語化する際に付け直す元の表記
+  // （ローマ数字は別途 ROMAN_BY_LEVEL で日本語ローマ数字に変換するため
+  // ここでは付与しない。星・括弧はそのまま流用する）。
+  function stripLevelSuffix(text, characterName) {
+    var romanParsed = stripRomanLevel(text);
+    if (romanParsed.level > 0) {
+      return { base: romanParsed.base, level: romanParsed.level, suffixType: 'roman', suffixText: null };
+    }
+
+    var starMatch = /^(.*) (★+)$/.exec(text);
+    if (starMatch) {
+      return { base: starMatch[1], level: starMatch[2].length, suffixType: 'star', suffixText: starMatch[2] };
+    }
+
+    var parenMatch = /^(.*) \(([^()]+)\)$/.exec(text);
+    if (parenMatch) {
+      var base = parenMatch[1];
+      var name = parenMatch[2];
+      var charMap = characterName && CZN_SELECTORS.cardLevelNames
+        ? CZN_SELECTORS.cardLevelNames[characterName]
+        : null;
+      var cardMap = charMap ? charMap[base] : null;
+      var level = cardMap && Object.prototype.hasOwnProperty.call(cardMap, name) ? cardMap[name] : 0;
+      if (level > 0) {
+        return { base: base, level: level, suffixType: 'paren', suffixText: '(' + name + ')' };
+      }
+    }
+
+    return { base: text, level: 0, suffixType: 'none', suffixText: null };
+  }
+
   // カード名要素の原文を読む。日本語に書き換え済み（data-czn-orig-name
   // 属性を保持している）なら、書き換え前に退避しておいた原文（英語）を
   // 返す。書き換え後の textContent（日本語）をそのまま読むと、次の
@@ -439,7 +478,7 @@
   // excludeRoot（種別表示要素）から実際には遠い、無関係な候補を拾って
   // しまうことがあるため、DOM順の走査位置が excludeRoot に最も近い候補を
   // 優先する。
-  function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames) {
+  function findGlossaryNameLeaf(scope, excludeRoot, knownEnNames, characterName) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT);
     var node;
     var index = 0;
@@ -450,7 +489,7 @@
       if (node.children.length > 0) { index++; continue; } // 葉要素のみ
       if (excludeRoot && (node === excludeRoot || excludeRoot.contains(node))) { index++; continue; }
       var text = (node.textContent || '').trim();
-      if (text && !hasExcludedSuffix(text) && knownEnNames.has(stripRomanLevel(text).base)) {
+      if (text && !hasExcludedSuffix(text) && knownEnNames.has(stripLevelSuffix(text, characterName).base)) {
         matches.push({ node: node, index: index });
       }
       index++;
@@ -760,7 +799,7 @@
   //                           従来通り collectEffectTextNodes を使う）
   // 種別表示ベースの探索（findCardBox等）は削除せず、selectors.js の
   // useConfirmedStructure を false にすれば無効化して従来経路に戻せる。
-  function collectCardCandidatesByConfirmedStructure(ctx) {
+  function collectCardCandidatesByConfirmedStructure(ctx, characterName) {
     var knownEnNames = new Set(Object.keys(ctx.resolved));
     var cardSel = CZN_SELECTORS.confirmedCard || '.chaos-card-inside';
     var headerSel = CZN_SELECTORS.confirmedHeader || '.chaos-header';
@@ -789,7 +828,7 @@
       var contentEl = cardEl.querySelector(contentSel);
       if (contentEl) { contentFoundCount++; }
 
-      var parsed = stripRomanLevel(rawNameText);
+      var parsed = stripLevelSuffix(rawNameText, characterName);
       var entry = ctx.resolved[parsed.base] || null;
 
       if (!entry || !headerEl) {
@@ -800,7 +839,7 @@
 
       // .chaos-header にはコスト数字・種別表示も同居するため、ヘッダー全体を
       // 書き換えるのではなく、glossary名と一致する葉要素だけを特定する。
-      var nameEl = findGlossaryNameLeaf(headerEl, null, knownEnNames);
+      var nameEl = findGlossaryNameLeaf(headerEl, null, knownEnNames, characterName);
       if (!nameEl) {
         skippedCount++;
         if (skippedNames.length < 5) { skippedNames.push(rawNameText); }
@@ -818,6 +857,8 @@
         nameText: rawNameText,
         baseName: parsed.base,
         level: parsed.level,
+        levelSuffixType: parsed.suffixType,
+        levelSuffixText: parsed.suffixText,
         entry: entry
       });
     });
@@ -837,9 +878,9 @@
     };
   }
 
-  function collectCardCandidates(ctx) {
+  function collectCardCandidates(ctx, characterName) {
     if (CZN_SELECTORS.useConfirmedStructure) {
-      return collectCardCandidatesByConfirmedStructure(ctx);
+      return collectCardCandidatesByConfirmedStructure(ctx, characterName);
     }
     return CZN_SELECTORS.useMarkerStrategy === false
       ? collectCardCandidatesBySelectors(ctx)
@@ -948,10 +989,17 @@
           c.nameEl.setAttribute('data-czn-orig-name', (c.nameEl.textContent || '').trim());
         }
         var jaName = c.entry.ja;
-        // ローマ数字がカード名要素自身に含まれていた場合（levelBadgeElを
-        // 使っていない場合）のみ、日本語名にも同じローマ数字を付け直す。
-        if (!c.levelBadgeEl && c.level > 0 && ROMAN_BY_LEVEL[c.level]) {
-          jaName += ' ' + ROMAN_BY_LEVEL[c.level];
+        // レベル表記がカード名要素自身に含まれていた場合（levelBadgeElを
+        // 使っていない場合）のみ、日本語名にも同じレベル表記を付け直す。
+        // ローマ数字由来なら日本語のローマ数字表記に、星・括弧付き固有名
+        // 由来なら元の表記（★の数・(Ironclad)等）をそのまま流用する
+        // （星や括弧付き固有名を無理にローマ数字表記へ変換しないため）。
+        if (!c.levelBadgeEl && c.level > 0) {
+          if (c.levelSuffixType === 'star' || c.levelSuffixType === 'paren') {
+            jaName += ' ' + c.levelSuffixText;
+          } else if (ROMAN_BY_LEVEL[c.level]) {
+            jaName += ' ' + ROMAN_BY_LEVEL[c.level];
+          }
         }
         c.nameEl.textContent = jaName;
         c.nameEl.setAttribute('data-czn-done', '1');
@@ -1218,7 +1266,7 @@
   // MutationObserver からもこの3段階をまとめて再実行する。
 
   function processPage(ctx, effectsIdx, charName) {
-    var collected = collectCardCandidates(ctx);             // 1. カード名（原文）
+    var collected = collectCardCandidates(ctx, charName);   // 1. カード名（原文）
     var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName, collected.typeLabels); // 2. 効果文挿入
     var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
