@@ -27,10 +27,10 @@
     },
     "coverage": {
       "total": 453,
-      "confirmed": 341,
-      "guess": 3,
-      "unmatched": 109,
-      "unmatched_ja_only": 104,
+      "confirmed": 345,
+      "guess": 9,
+      "unmatched": 99,
+      "unmatched_ja_only": 94,
       "unmatched_en_only": 5
     },
     "known_gaps": [
@@ -770,20 +770,20 @@
       "note": "ルークの開始カード（基本シールド）。Prydwen: 「'Shadow Concealment' which is removed in basically any Luke deck」。gamerch(942020): 「影隠れ：シールド獲得カード。基本構成の定番シールドカード」と一致（基本構成では外れる定番カード）。"
     },
     {
-      "en": "",
+      "en": "Seize the Opportunity",
       "ja": "機会捕捉",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Luke",
-      "source": "https://gamerch.com/chaoszeronightmare/942020",
-      "note": "ルークの固有カード（主導、シールドと弾丸に加算バフ付与）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの6段階中5段階（無印/I/II/III/V）でタグ[主導]=[Lead]・数値の並びが完全一致（例: 無印は100・120、IIは100・2・120）。ヒラメキIVのみ、aosns側「ダメージ量+120％」に対しPrydwen側は「+100% Damage Amount」で数値が食い違う。この1段階の不一致により、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
-      "en": "",
+      "en": "Dance of the Demon",
       "ja": "魔眼の乱舞",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Luke",
-      "source": "https://gamerch.com/chaoszeronightmare/942020",
-      "note": "ルークの固有カード（使用済み弾丸カード数に応じてヒット数追加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/luke",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの6段階中5段階（無印/I/II/III/IV）でタグ（両側ともタグ無し）・数値の並びが完全一致（例: 無印は50・1、IVは50・50・1・50）。ヒラメキVのみ、aosns側「ダメージ50％×6」に対しPrydwen側は「50% Damage x 5」でヒット数が食い違う。この1段階の不一致により、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
       "en": "",
@@ -1138,20 +1138,20 @@
       "note": "ハイデマリの固有カード。Prydwen: 「'Effulgent Release' card receives +200% Damage Amount, and the added Damage Amount for each Effulgent Blade in Graveyard becomes +120%」。gamerch(983591): 「極光解放：墓地にある極光剣を全て消滅させてその数分だけバフが加算される単体攻撃」と機構が一致。"
     },
     {
-      "en": "",
+      "en": "Thread of Light",
       "ja": "一筋の光",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Heidemarie",
-      "source": "https://gamerch.com/chaoszeronightmare/983591",
-      "note": "ハイデマリの固有カード（1コストの単体攻撃。手札の連結数に応じて倍率が上がる）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。ヒラメキI/III/IV/Vの4/5段階でタグ構成・数値の並びが完全一致（例: IではLinked1個+180・180、IIIではLinked/Quietus2個+100・80、Vでは350・2・300）。ヒラメキIIのみ数値表現に差異あり（Prydwen「triple the Damage」＝語で3倍、aosns「ダメージ3倍」＝数字の3。同じ値だが表記が異なるため数値列としては不一致）。この1段階の不一致により、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
-      "en": "",
+      "en": "Effulgent Expansion",
       "ja": "極光展開",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Heidemarie",
-      "source": "https://gamerch.com/chaoszeronightmare/983591",
-      "note": "ハイデマリの固有カード（2コストで極光剣2枚生成。1ターンの間、極光剣に加算バフも入る）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/heidemarie",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。ヒラメキIII/IV/Vの3/5段階でタグ構成・数値の並びが完全一致（例: IVはLinked/Quietus2個+6、VはQuietus/Unique2個+2・50）。ヒラメキI/IIは数値は一致する（I: 2・70・1、II: 2・200・2）が、Prydwen側にタグ表示が無く、aosns側にはそれぞれ[安息][連結/安息]相当のタグがあり、タグ構成が食い違う。この不一致により、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
       "en": "",
@@ -1522,20 +1522,20 @@
       "note": "ナインの固有カード。Prydwen: 「Experienced Strike, is a 1-cost single-target attack card that deals Defense-Based damage and provides 20% of the damage dealt as shield」。gamerch(958782): 「熟練の一撃：防御依存ダメージ+シールド付与。また1ターンの間、消滅カードのダメージを乗算20%バフ」と一致。語形も直訳一致。"
     },
     {
-      "en": "",
+      "en": "Fatal Strike",
       "ja": "会心の一撃",
-      "confidence": "unmatched",
+      "confidence": "confirmed",
       "character": "Nine",
-      "source": "https://gamerch.com/chaoszeronightmare/958782",
-      "note": "ナインの固有カード（防御依存ダメージ、手札の消滅カードを消滅しコストに応じてダメージ増加）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nine",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの全6段階で数値の並びが完全一致（140・20 / 210・30 / 260・20 / (数値なし) / 2・30 / 210・80）。タグは無印〜IIと4は両側とも無し、IIIは[唯一/点火/保存]対[Unique][Ignition][Retain]、Vは[保存]対[Retain]で一致。唯一=Unique・保存=Retainは既存confirmed語と一致。点火=Ignitionはこの照合で新たに判明した対応で、glossary未登録のため今回は追加していない。"
     },
     {
-      "en": "",
+      "en": "Counterblade",
       "ja": "逆転の刃",
-      "confidence": "unmatched",
+      "confidence": "confirmed",
       "character": "Nine",
-      "source": "https://gamerch.com/chaoszeronightmare/958782",
-      "note": "ナインの固有カード（シールド獲得時に刃研ぎを付与できる強化カード）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/nine",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの全6段階でタグ構成・数値の並びが完全一致（例: IIは[唯一]対[Unique]+15・1、IIIは[開戦/唯一]対[Initiation][Unique]+1）。唯一=Unique・開戦=Initiationはいずれも既存confirmed語と一致。"
     },
     {
       "en": "",
@@ -2034,20 +2034,20 @@
       "note": "カリーペの開始時基本攻撃カード。Prydwenの検索結果に「Upward Slash」の言及あり。gamerch(942021): 「斬り上げ：2コスト攻撃カード。潜在力で全体攻撃に変化」と一致。語形も直訳一致。"
     },
     {
-      "en": "",
+      "en": "Overpower",
       "ja": "威圧",
-      "confidence": "unmatched",
+      "confidence": "confirmed",
       "character": "Khalipe",
-      "source": "https://gamerch.com/chaoszeronightmare/942021",
-      "note": "カリーペの固有カード（コスト2で高倍率のシールド付与と敵全体に強靭度ダメージ1）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/khalipe",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの全6段階で数値の並びが完全一致（250・1 / 300・1・1 / 300・1・2・2 / 300・2 / 250・1・40 / 300・1・5）。タグは両側とも全段階でタグ無しで一致。"
     },
     {
-      "en": "",
+      "en": "Rally",
       "ja": "再集結",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Khalipe",
-      "source": "https://gamerch.com/chaoszeronightmare/942021",
-      "note": "カリーペの固有カード（シールド付与と最高コストカードを1枚ドロー。バルチャー射出をサーチ可能）。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/khalipe",
+      "note": "site:prydwen.gg クエリでは対応する英語名を特定できなかったが、curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。無印〜ヒラメキVの6段階中5段階（無印/I/II/III/IV）で数値の並びが完全一致し、IIIは両側とも[天上]=[Celestial]タグが一致。ヒラメキVのみ、aosns側「シールド150％」の記載がPrydwen側の英文には見当たらない（Prydwen側の文言が他レベルより短く、シールドへの言及自体が無い）。この1段階の不一致により、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
       "en": "",
@@ -2994,12 +2994,12 @@
       "note": "レイの固有カード。Prydwenの検索結果に「Predator's Blade」の言及あり。gamerch(942031): 「捕食者の刃：1コストの高倍率攻撃カード。1ターン士気4を獲得」と一致。語形も直訳一致。"
     },
     {
-      "en": "",
+      "en": "Snack Time",
       "ja": "おやつの時間",
-      "confidence": "unmatched",
+      "confidence": "guess",
       "character": "Rei",
-      "source": "https://gamerch.com/chaoszeronightmare/942031",
-      "note": "レイの固有カード（高い治癒量とドロー効果。使用時は消滅する使い切りカード）。WebSearchの利用上限到達によりPrydwen側の確認ができなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/rei",
+      "note": "curlでPrydwenページを直接取得しaosns（日本語効果文）と数値・タグで突き合わせて特定。タグ構成（[消滅]=[Exhaust]系、IIは[保存/消滅]=[Retain][Exhaust]）は全段階で一致し、消滅/治癒/ドローという効果の骨格も一致するが、数値に複数の食い違いがある（無印: aosns治癒100%対Prydwen Heal 200%。Iも同様に150%対200%。IIIはaosns側に治癒の記載が無いがPrydwen側はHeal 150%を含む）。効果の構造とタグは一致するが数値が複数段階で食い違うため、判定基準（全段階で数値・タグが完全一致した場合のみconfirmed）に従いguess扱いとした。"
     },
     {
       "en": "",
@@ -3170,12 +3170,12 @@
       "note": "ルーカスの開始時基本シールドカード。site:prydwen.gg での複数クエリで対応する英語名を特定できなかった。"
     },
     {
-      "en": "",
+      "en": "S.S.S",
       "ja": "S.S.S",
-      "confidence": "unmatched",
+      "confidence": "confirmed",
       "character": "Lucas",
-      "source": "https://gamerch.com/chaoszeronightmare/942033",
-      "note": "ルーカスの固有カード（単体攻撃と弾丸バフを付与。単体攻撃は倍率も低く1ターン付与される弾丸バフが本体）。英数字の略称のためsite:prydwen.gg 検索で有効な結果が得られなかった。"
+      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/lucas",
+      "note": "英数字の略称のためsite:prydwen.gg 検索で有効な結果が得られなかったが、curlでPrydwenページを直接取得したところ英語表記も\"S.S.S\"とそのままの表記だった。aosns（日本語効果文）と数値で突き合わせたところ、無印〜ヒラメキVの全6段階で数値の並びが完全一致（100・1・40 / 200・1・40 / 2・40 / 150・60 / 150・120 / 100・1・50）。タグは両側とも全段階でタグ無しで一致。"
     },
     {
       "en": "",
