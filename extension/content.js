@@ -57,18 +57,24 @@
 //      種別表示から検出を試みた件数、名前取得はそのうちカード名まで特定できた
 //      件数、ユニークはベース名（ローマ数字を除いた名前、レベル違いは1件に
 //      まとめる）の種類数、効果文データは effects-ja.json から読めた件数
-//      （0ならファイル未配置か読み込み失敗）、名前特定スキップは無理に近い
-//      候補を採用せず処理対象外にした件数（別カードへの誤爆を防ぐための
-//      安全装置が働いた件数）。同名でもカード枠ごとに別カードとして処理し、
-//      名前による集約・重複排除は一切行わない。スキップが1件以上あるときは、
-//      スキップしたカードの推定テキスト（診断専用、実際の照合には使わない）
-//      を最大5件表示する。効果文が0件のときの内訳表示（最大10件）は、効果文
-//      が見つかったもの・glossaryで日本語化できたもの・ヒラメキ段階が
-//      付いているものを優先して並べ、実際に探索したキーと保有キー一覧も
-//      表示する（DOM順のキャップで手がかりの多いカードが漏れないように
-//      するため、また照合ミスの原因を切り分けやすくするため）。1件以上
-//      書き換えられたときは、書き換えた要素のタグ名・クラス名・書き換え前の
-//      テキスト冒頭30文字も出す（対象を取り違えていないか確認するため）
+//      （ファイル全体の件数。source:"gamerch" は buildEffectsIndex で除外
+//      されるため、実際に索引に使われた件数は「(有効◯件)」として別途
+//      括弧内に示す）、名前特定スキップは無理に近い候補を採用せず処理対象外
+//      にした件数（別カードへの誤爆を防ぐための安全装置が働いた件数）。
+//      同名でもカード枠ごとに別カードとして処理し、名前による集約・
+//      重複排除は一切行わない。スキップが1件以上あるときは、スキップした
+//      カードの推定テキスト（診断専用、実際の照合には使わない）を最大5件
+//      表示する。照合（entry・effectの取得）まで成功したのに実際の書き換え
+//      段階で失敗したカードがあれば（全体の挿入件数が0件でなくても）、
+//      「挿入失敗: 原文 / level / 理由」を必ず表示する（「効果文あり」なのに
+//      画面が変わらないという矛盾の原因をその場で確認できるようにするため）。
+//      効果文が0件のときの内訳表示（最大10件）は、効果文が見つかったもの・
+//      glossaryで日本語化できたもの・ヒラメキ段階が付いているものを優先して
+//      並べ、実際に探索したキーと保有キー一覧（有効なもののみ）も表示する
+//      （DOM順のキャップで手がかりの多いカードが漏れないようにするため、
+//      また照合ミスの原因を切り分けやすくするため）。1件以上書き換えられた
+//      ときは、書き換えた要素のタグ名・クラス名・書き換え前のテキスト冒頭
+//      30文字も出す（対象を取り違えていないか確認するため）
 //   6. SPA側の再描画でDOMが差し替わっても追従できるよう、MutationObserver で
 //      1〜4の全段階（カード名収集・効果文挿入・用語置換）をまとめて再実行する
 //
@@ -723,6 +729,7 @@
     var inserted = 0;
     var diagnostics = [];
     var rewriteDetails = []; // 書き換えた要素の内訳（診断用）
+    var rewriteFailures = []; // 効果文は見つかったのに書き換えに失敗した内訳（診断用）
 
     candidates.forEach(function (c) {
       if (PROCESSED.has(c.block)) { return; }
@@ -774,8 +781,27 @@
       // 新しい要素を挿入する方式は幅・高さが0に潰れて表示に失敗したため、
       // 既に確実に表示されている「英語の効果文の要素」自体を書き換える方式
       // にした。対象が見つからないカードには何もしない（英語のまま残す）。
-      if (!effectEl) { PROCESSED.add(c.block); return; }
-      if (effectEl.getAttribute('data-czn-done') === '1') { PROCESSED.add(c.block); return; }
+      // ここに来る時点で c.entry・effect はどちらも見つかっている（＝照合は
+      // 成功している）ため、この先で失敗した場合は「照合ではなく挿入段階の
+      // 失敗」だと分かるよう、理由付きで rewriteFailures に記録する。
+      if (!effectEl) {
+        rewriteFailures.push({
+          rawNameText: c.rawNameText || c.nameText,
+          level: c.level,
+          reason: '書き換え先の要素が見つからない（findEffectTextElが候補なし）'
+        });
+        PROCESSED.add(c.block);
+        return;
+      }
+      if (effectEl.getAttribute('data-czn-done') === '1') {
+        rewriteFailures.push({
+          rawNameText: c.rawNameText || c.nameText,
+          level: c.level,
+          reason: '対象要素が既に書き換え済み（data-czn-done="1"）'
+        });
+        PROCESSED.add(c.block);
+        return;
+      }
 
       // gamerch由来（非公式・自動収集の文言）には末尾に「※」を付けて、
       // 実機確認済み（ingame）の文言と一目で区別できるようにする。
@@ -828,6 +854,7 @@
       insertedCount: inserted,
       diagnostics: diagnostics,
       rewriteDetails: rewriteDetails.slice(0, 10),
+      rewriteFailures: rewriteFailures.slice(0, 10),
       candidateCount: candidates.length
     };
   }
@@ -945,6 +972,7 @@
       insertedCount: insertResult.insertedCount,
       diagnostics: insertResult.diagnostics,
       rewriteDetails: insertResult.rewriteDetails,
+      rewriteFailures: insertResult.rewriteFailures,
       attemptedCount: collected.attemptedCount, // カード枠: 種別表示から検出を試みた件数
       resolvedCount: insertResult.candidateCount, // 名前取得: カード名まで特定できた件数
       uniqueCount: uniqueNames.size, // ユニーク: ベース名（レベル違いをまとめた）の種類数
@@ -964,10 +992,18 @@
     result.ctx = ctx;
     // effects-ja.json が読めているかの診断用。0件なら未配置か読み込み失敗
     // （拡張の web_accessible_resources 未設定などでブロックされている場合も
-    // ここに現れる）。保有キーは元の表記のまま最大20件だけトーストに出す。
+    // ここに現れる）。effectsCount はファイル全体の件数（source:"gamerch" も
+    // 含む）。indexedCount は実際に索引に載り、照合に使われる件数
+    // （buildEffectsIndex が source:"gamerch" を除外するため、両者は現在
+    // 一致しない）。保有キーも indexedCount 側（実際に使われるキー）だけを
+    // 元の表記のまま最大20件だけトーストに出す。
     result.effectsCount = effects.length;
-    result.effectsSummary = effects.slice(0, 20).map(function (e) {
-      return displayKey(e && e.ja_card, e && e.character, e ? normLevel(e.level) : 0);
+    var usableEffects = effects.filter(function (e) {
+      return e && e.ja_card && e.effect && effectSource(e) !== 'gamerch';
+    });
+    result.effectsIndexedCount = usableEffects.length;
+    result.effectsSummary = usableEffects.slice(0, 20).map(function (e) {
+      return displayKey(e.ja_card, e.character, normLevel(e.level));
     });
     return result;
   }
@@ -981,7 +1017,8 @@
       result.attemptedCount + '件 / 名前取得' + result.resolvedCount +
       '件 / ユニーク' + result.uniqueCount + '件 / 効果文' +
       result.insertedCount + '件 / 効果文データ' + result.effectsCount +
-      '件 / 名前特定スキップ' + result.skippedCount + '件'];
+      '件(有効' + result.effectsIndexedCount + '件) / 名前特定スキップ' +
+      result.skippedCount + '件'];
 
     if (result.skippedCount > 0) {
       // 名前を特定できず処理対象外にしたカード（無理に近い候補を採用せず
@@ -1003,14 +1040,26 @@
       });
     }
 
+    if (result.rewriteFailures && result.rewriteFailures.length > 0) {
+      // 照合（entry・effectの取得）までは成功しているのに、実際の書き換え
+      // 段階で失敗したカード。「効果文あり」なのに画面が変わらないという
+      // 矛盾の原因をここで直接確認できるようにする。
+      result.rewriteFailures.forEach(function (f) {
+        lines.push('挿入失敗: 原文「' + f.rawNameText + '」/ level ' + f.level +
+          ' / ' + f.reason);
+      });
+    }
+
     if (result.insertedCount === 0) {
       if (result.resolvedCount === 0) {
         lines.push('→ カード枠（カード名+種別表示の最小共通祖先）を検出できません');
       } else {
-        if (result.effectsCount === 0) {
-          lines.push('→ 効果文データが0件です（effects-ja.jsonの読み込みに失敗している可能性）');
+        if (result.effectsIndexedCount === 0) {
+          lines.push('→ 有効な効果文データが0件です（未配置・読み込み失敗、または' +
+            '全件がsource:"gamerch"で除外されている可能性）');
         } else {
-          lines.push('保有キー(' + result.effectsCount + '件): ' + result.effectsSummary.join('、'));
+          lines.push('保有キー(有効' + result.effectsIndexedCount + '件): ' +
+            result.effectsSummary.join('、'));
         }
         result.diagnostics.forEach(function (d) {
           var jaPart = d.entry ? d.entry.ja : '日本語化NG';
