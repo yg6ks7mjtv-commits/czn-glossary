@@ -62,11 +62,10 @@
 //      内訳を表示する。カード枠は検出を試みたカードの件数、名前取得はそのうち
 //      カード名まで特定できた件数、ユニークはベース名（ローマ数字を除いた
 //      名前、レベル違いは1件にまとめる）の種類数、効果文データは
-//      effects-ja.json から読めた件数（ファイル全体の件数。source:"gamerch"
-//      は buildEffectsIndex で除外されるため、実際に索引に使われた件数は
-//      「(有効◯件)」として別途括弧内に示す）、名前特定スキップは無理に近い
-//      候補を採用せず処理対象外にした件数（別カードへの誤爆を防ぐための安全
-//      装置が働いた件数）、content検出は .chaos-content が見つかったカードの
+//      effects-ja.json から読めた件数（ファイル全体の件数。実際に索引に
+//      使われた件数は「(有効◯件)」として別途括弧内に示す）、名前特定スキップ
+//      は無理に近い候補を採用せず処理対象外にした件数（別カードへの誤爆を
+//      防ぐための安全装置が働いた件数）、content検出は .chaos-content が見つかったカードの
 //      件数、再適用はページ側の再描画で英語に戻っているのを検知して再書換
 //      した件数。同名でもカードごとに別カードとして処理し、名前による集約・
 //      重複排除は一切行わない。スキップが1件以上あるときは、スキップした
@@ -322,11 +321,14 @@
   // source は "ingame"（実機で確認した文言）「aosns"（nightmare.aosns.com
   // から取得した文言）「gamerch"（gamerchから自動収集した文言）のいずれか。
   //
-  // 【緊急】gamerch由来の828件について、無関係な別カードの効果文を誤って
-  // 表示してしまうケースが見つかったため、信頼性を再評価するまで
-  // buildEffectsIndex で source:"gamerch" のエントリを一切索引に載せない
-  // （＝常に「効果文なし」扱いとなり英語のまま残る。誤った効果文を出す
-  // ほうが英語のまま残すより有害なため）。
+  // 以前、gamerch由来のエントリについて無関係な別カードの効果文を誤って
+  // 表示してしまう事故があったが、原因はデータそのものではなく確定セレクタ
+  // 方式（img[alt]からのカード名照合）導入前のカード名照合バグだったため、
+  // 索引への計上を再開する。優先順位は ingame > aosns > gamerch とし、
+  // 同じキーに複数のsourceが存在する場合は優先順位の高い方を残す
+  // （setEffectIfAllowed）。
+  var SOURCE_PRIORITY = { ingame: 3, aosns: 2, gamerch: 1 };
+
   function effectSource(e) {
     if (e.source === 'ingame') { return 'ingame'; }
     if (e.source === 'aosns') { return 'aosns'; }
@@ -335,7 +337,7 @@
 
   function setEffectIfAllowed(idx, key, value) {
     var existing = idx[key];
-    if (existing && existing.source === 'ingame' && value.source !== 'ingame') { return; }
+    if (existing && SOURCE_PRIORITY[existing.source] > SOURCE_PRIORITY[value.source]) { return; }
     idx[key] = value;
   }
 
@@ -344,7 +346,6 @@
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
       var source = effectSource(e);
-      if (source === 'gamerch') { return; } // 信頼性の問題により一時停止中
       var level = normLevel(e.level);
       // incomplete: 自動収集時に「評価コメントとの境界が曖昧で、安全側
       // （先頭の一文だけ）に切り出した」ことを示すフラグ。末尾の効果節を
@@ -1253,14 +1254,13 @@
     result.ctx = ctx;
     // effects-ja.json が読めているかの診断用。0件なら未配置か読み込み失敗
     // （拡張の web_accessible_resources 未設定などでブロックされている場合も
-    // ここに現れる）。effectsCount はファイル全体の件数（source:"gamerch" も
-    // 含む）。indexedCount は実際に索引に載り、照合に使われる件数
-    // （buildEffectsIndex が source:"gamerch" を除外するため、両者は現在
-    // 一致しない）。保有キーも indexedCount 側（実際に使われるキー）だけを
-    // 元の表記のまま最大20件だけトーストに出す。
+    // ここに現れる）。effectsCount はファイル全体の件数。indexedCount は
+    // ja_card・effect を持つ（＝buildEffectsIndexが実際に索引に載せうる）
+    // 件数。source:"gamerch" も含む（優先順位 ingame > aosns > gamerch で
+    // 索引に載る）。保有キーも同じ条件で最大20件だけトーストに出す。
     result.effectsCount = effects.length;
     var usableEffects = effects.filter(function (e) {
-      return e && e.ja_card && e.effect && effectSource(e) !== 'gamerch';
+      return e && e.ja_card && e.effect;
     });
     result.effectsIndexedCount = usableEffects.length;
     result.effectsSummary = usableEffects.slice(0, 20).map(function (e) {
@@ -1347,8 +1347,7 @@
         lines.push('→ カード枠（カード名+種別表示の最小共通祖先）を検出できません');
       } else {
         if (result.effectsIndexedCount === 0) {
-          lines.push('→ 有効な効果文データが0件です（未配置・読み込み失敗、または' +
-            '全件がsource:"gamerch"で除外されている可能性）');
+          lines.push('→ 有効な効果文データが0件です（未配置・読み込み失敗の可能性）');
         } else {
           lines.push('保有キー(有効' + result.effectsIndexedCount + '件): ' +
             result.effectsSummary.join('、'));
