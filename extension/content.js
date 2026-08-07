@@ -108,6 +108,7 @@
   'use strict';
 
   var GLOSSARY_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json';
+  var EXTRA_LINES_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/extra-lines.json';
   var STORAGE_KEY = 'czn_enabled';
   var CZN_DEBUG = false; // true にすると console にマッチ状況を出す
 
@@ -270,6 +271,29 @@
       })
       .catch(function (err) {
         log('effects-ja.json を読めなかった（未配置なら正常）:', err.message);
+        return [];
+      });
+  }
+
+  // 神ヒラメキ等の追加行（.chaos-content内でclassに"divine"を含む要素）の
+  // 対訳表。glossary.json同様に公開URLから取得する（effects-ja.jsonと違い
+  // 非公開データを含まないため）。ページへの自動適用は confidence:
+  // "confirmed" のもののみとし、"guess" は対訳表としては保持するが
+  // 適用しない（glossary.jsonのfetchGlossaryが confirmed のみを用語置換に
+  // 使うのと同じ基準）。
+  function fetchExtraLines() {
+    return fetch(EXTRA_LINES_URL, { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('extra-lines.json HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        return (data.entries || [])
+          .filter(function (e) { return e.confidence === 'confirmed' && e.en && e.ja; })
+          .map(function (e) { return { en: e.en, ja: e.ja, re: buildExtraLineMatcher(e.en) }; });
+      })
+      .catch(function (err) {
+        log('extra-lines.json を読めなかった:', err.message);
         return [];
       });
   }
@@ -1163,6 +1187,116 @@
     };
   }
 
+  // ---- 神ヒラメキ等の追加行の日本語化（基本効果の書き換えとは別処理） ----
+  //
+  // .chaos-content 直下には、基本効果（最初の子要素 = writeTarget、
+  // insertEffects が担当）とは別に、classに"divine"を含む要素として
+  // 神ヒラメキボーナス行が存在することがある（class="rules"のクラス制限
+  // 表記や class="epi"の別系統テキストとは異なる）。これらはキャラ固有では
+  // なく共通の定型文が少数（docs/extra-lines.json）のみのため、
+  // effects-ja.json（非公開・キャラ固有）とは完全に独立した仕組みとして
+  // ここで扱う。insertEffects の writeTarget（最初の子要素）には一切触れず、
+  // c.effectScope（.chaos-content全体）から"divine"要素だけを別途探して
+  // 処理する。
+
+  // 空白の連続を1つに正規化し、句読点直前の空白を除去する。DOM抽出時の
+  // 要素境界（<b>数値</b>等）に起因する空白の揺れを吸収するため
+  // （docs/extra-lines.jsonの_readme参照）。改行は行の区切りとして保持する
+  // （複数文からなるテンプレート用）。
+  function normalizeExtraLineText(text) {
+    return text.split('\n').map(function (line) {
+      return line.replace(/\s+/g, ' ').replace(/\s+([.,;:!?])/g, '$1').trim();
+    }).join('\n').trim();
+  }
+
+  // テンプレート文字列（{N}を数値プレースホルダとして含む）から、実際の
+  // 数値を捕捉するための正規表現を作る。
+  function buildExtraLineMatcher(enTemplate) {
+    var escaped = rxEscape(normalizeExtraLineText(enTemplate));
+    var pattern = escaped.replace(/\\\{N\\\}/g, '(\\d+(?:\\.\\d+)?%?)');
+    return new RegExp('^' + pattern + '$');
+  }
+
+  // 要素の子ノードを順に読み、<br>を改行として扱う（textContentは<br>を
+  // 無視して連結してしまうため、"Treated as a Common Card\nDraw {N}
+  // Common Card(s)"のような複数文テンプレートが一致しなくなる）。
+  function extractDivineText(el) {
+    var parts = [];
+    Array.prototype.forEach.call(el.childNodes, function (node) {
+      if (node.nodeType === 3) {
+        parts.push(node.nodeValue);
+      } else if (node.nodeName === 'BR') {
+        parts.push('\n');
+      } else {
+        parts.push(node.textContent || '');
+      }
+    });
+    return parts.join('');
+  }
+
+  // 対訳表（confirmedのみ）と照合し、一致すれば{N}を実際の数値に置き換えた
+  // 日本語文を返す。一致しなければnull（＝英語のまま残す。対訳表に無い
+  // ものを推測で書き換えない）。
+  function matchExtraLineTemplate(rawText, extraLines) {
+    var normalized = normalizeExtraLineText(rawText);
+    for (var i = 0; i < extraLines.length; i++) {
+      var entry = extraLines[i];
+      var m = entry.re.exec(normalized);
+      if (m) {
+        var ja = entry.ja;
+        for (var j = 1; j < m.length; j++) {
+          ja = ja.replace('{N}', m[j]);
+        }
+        return ja;
+      }
+    }
+    return null;
+  }
+
+  // candidates（glossaryでカード名が解決できたもの）ごとに、
+  // effectScope（.chaos-content全体）内の"divine"要素を探して日本語化する。
+  // effects-ja.jsonの有無・内容とは無関係に、candidateさえあれば実行する
+  // （神ヒラメキ行の対訳表は公開データであり、効果文データに依存しない）。
+  function insertDivineLines(candidates, extraLines) {
+    var inserted = 0;
+    if (!extraLines || extraLines.length === 0) {
+      return { insertedCount: 0 };
+    }
+
+    candidates.forEach(function (c) {
+      if (!c.effectScope || !c.effectScope.querySelectorAll) { return; }
+      var divineEls = c.effectScope.querySelectorAll('[class*="divine"]');
+      for (var i = 0; i < divineEls.length; i++) {
+        var el = divineEls[i];
+        if (!document.contains(el)) { continue; }
+
+        // マーカーはあっても、ページ側の再描画で中身だけ英語に戻っている
+        // ことがあるため、属性だけでなく実際のテキストも確認する
+        // （insertEffectsと同じ考え方）。
+        if (el.getAttribute('data-czn-divine-done') === '1') {
+          var storedJa = el.getAttribute('data-czn-divine-ja') || '';
+          if (storedJa && (el.textContent || '').indexOf(storedJa) !== -1) { continue; }
+        }
+
+        var origText = el.getAttribute('data-czn-divine-orig');
+        if (origText === null) {
+          origText = extractDivineText(el);
+          el.setAttribute('data-czn-divine-orig', origText);
+        }
+
+        var jaText = matchExtraLineTemplate(origText, extraLines);
+        if (jaText === null) { continue; } // 対訳表に無い＝英語のまま残す
+
+        el.textContent = jaText;
+        el.setAttribute('data-czn-divine-done', '1');
+        el.setAttribute('data-czn-divine-ja', jaText);
+        inserted++;
+      }
+    });
+
+    return { insertedCount: inserted };
+  }
+
   // ---- 3/6. 用語置換（ブックマークレットと同じアルゴリズム） ----
 
   var REPLACED_CLS = 'czn-replaced';
@@ -1265,10 +1399,11 @@
   // されていない新しいテキスト」として再度拾われる。そのため
   // MutationObserver からもこの3段階をまとめて再実行する。
 
-  function processPage(ctx, effectsIdx, charName) {
+  function processPage(ctx, effectsIdx, charName, extraLines) {
     var collected = collectCardCandidates(ctx, charName);   // 1. カード名（原文）
     var candidates = collected.candidates;
     var insertResult = insertEffects(candidates, effectsIdx, charName, collected.typeLabels); // 2. 効果文挿入
+    var divineResult = insertDivineLines(candidates, extraLines || []); // 2b. 神ヒラメキ等の追加行（別処理）
     var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
 
     // ユニーク件数はカード枠（box）単位ではなく、ベース名（ローマ数字除去後）
@@ -1290,17 +1425,18 @@
       reappliedCount: insertResult.reappliedCount || 0, // ページ側の再描画で英語に戻り、再書換した件数
       staleCount: insertResult.staleCount || 0, // document.contains が false でスキップした件数
       duplicateNames: collected.duplicateNames || [], // 同じ英語名(alt)が複数あったカード（最大10件）
-      replacedCount: replacedCount
+      replacedCount: replacedCount,
+      divineInsertedCount: divineResult.insertedCount // 神ヒラメキ等の追加行を日本語化した件数
     };
   }
 
-  function run(entries, effects) {
+  function run(entries, effects, extraLines) {
     var charName = currentCharacter();
     log('character context:', charName);
     var ctx = buildContext(entries, charName);
     var effectsIdx = buildEffectsIndex(effects);
 
-    var result = processPage(ctx, effectsIdx, charName);
+    var result = processPage(ctx, effectsIdx, charName, extraLines);
     result.ctx = ctx;
     // effects-ja.json が読めているかの診断用。0件なら未配置か読み込み失敗
     // （拡張の web_accessible_resources 未設定などでブロックされている場合も
@@ -1331,7 +1467,7 @@
       '件(有効' + result.effectsIndexedCount + '件) / 名前特定スキップ' +
       result.skippedCount + '件 / content検出' + result.contentFoundCount +
       '件 / 再適用' + result.reappliedCount + '件 / 切り離しスキップ' +
-      result.staleCount + '件'];
+      result.staleCount + '件 / 追加行' + result.divineInsertedCount + '件'];
 
     if (result.skippedCount > 0) {
       // 名前を特定できず処理対象外にしたカード（無理に近い候補を採用せず
@@ -1418,10 +1554,11 @@
   getEnabled().then(function (enabled) {
     if (!enabled) { log('disabled via popup toggle'); return; }
 
-    Promise.all([fetchGlossary(), fetchEffects()]).then(function (results) {
+    Promise.all([fetchGlossary(), fetchEffects(), fetchExtraLines()]).then(function (results) {
       var entries = results[0];
       var effects = results[1];
-      var result = run(entries, effects);
+      var extraLines = results[2];
+      var result = run(entries, effects, extraLines);
       var ctx = result.ctx;
 
       showStatusToast(formatToastMessage(result));
@@ -1436,7 +1573,7 @@
         setTimeout(function () {
           pending = false;
           var freshEffectsIdx = buildEffectsIndex(effects);
-          processPage(ctx, freshEffectsIdx, currentCharacter());
+          processPage(ctx, freshEffectsIdx, currentCharacter(), extraLines);
         }, 500);
       });
       observer.observe(document.body, { childList: true, subtree: true });

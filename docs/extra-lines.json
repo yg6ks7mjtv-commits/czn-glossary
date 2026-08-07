@@ -1,0 +1,59 @@
+{
+  "_readme": "Prydwenのカード表示で、基本効果の下に追加表示される「神ヒラメキ」ボーナス行の英日対訳表。抽出対象はDOM上でclassに\"divine\"を含む要素のテキストのみ（class=\"rules\"のクラス制限表記や、class=\"epi\"の別系統テキストは対象外）。{N}は数値の変数プレースホルダで、英語側と日本語側で出現順に対応する。マッチング時は空白の連続を1つに正規化し、句読点直前の空白を削除してから比較すること（DOM抽出時の要素境界に起因する空白の揺れを吸収するため）。",
+  "entries": [
+    {
+      "en": "Reduce the cost of this card by {N}.",
+      "ja": "このカードのコストを{N}減らす",
+      "confidence": "confirmed",
+      "note": "既存の用語のみで構成される定型文（コスト・減らす）。数値の意味に曖昧さが無い。"
+    },
+    {
+      "en": "Draw {N}",
+      "ja": "{N}枚ドロー",
+      "confidence": "confirmed",
+      "note": "Drawはglossary.jsonには個別登録が無いが、effects-ja.json全体で「ドロー」の訳が一貫して使われており曖昧さが無い基本語のため確定扱いとした。"
+    },
+    {
+      "en": "{N} AP",
+      "ja": "AP{N}",
+      "confidence": "confirmed",
+      "note": "APはglossary.jsonには個別登録が無いが、effects-ja.json（aosns由来）で一貫して英語表記のまま\"AP\"として使われている（例: 「コスト0でHP回復とAP1獲得できる」）。"
+    },
+    {
+      "en": "Apply Initiation to this card",
+      "ja": "このカードに開戦を付与",
+      "confidence": "confirmed",
+      "note": "Initiation=開戦はglossary.json確定語。"
+    },
+    {
+      "en": "Treated as a Common Card\nDraw {N} Common Card(s)",
+      "ja": "コモンカード扱いになる\nコモンカードを{N}枚ドロー",
+      "confidence": "guess",
+      "note": "Common Cardはglossary.jsonに登録が無く、対応する日本語表記の確証が無い。カードのレアリティ（コモン/レア等）に関する表記と推測し「コモンカード」と音写したが未確認。"
+    },
+    {
+      "en": "{N} Vulnerable to the target",
+      "ja": "対象に脆弱{N}",
+      "confidence": "confirmed",
+      "note": "Vulnerable=脆弱はglossary.json確定語。「対象に脆弱N」という語順はeffects-ja.json内の既存表現と一致。"
+    },
+    {
+      "en": "Always Attack Weakness",
+      "ja": "常に弱点攻撃",
+      "confidence": "confirmed",
+      "note": "Weakness Attack=弱点攻撃はglossary.json確定語。「常に弱点攻撃」はeffects-ja.json（aosns由来）に同一の表現が存在する。"
+    },
+    {
+      "en": "At the start of each turn, when this card is the first card used, Draw {N}",
+      "ja": "ターン開始時、このカードが最初に使用されたカードの場合、{N}枚ドロー",
+      "confidence": "confirmed",
+      "note": "既存の確定語・基本語のみで構成され、曖昧さが無い。"
+    },
+    {
+      "en": "{N} Morale , {N} Resolve",
+      "ja": "士気{N}、決意{N}",
+      "confidence": "confirmed",
+      "note": "Morale=士気・Resolve=決意はいずれもglossary.json確定語。"
+    }
+  ]
+}

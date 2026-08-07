@@ -3,6 +3,7 @@
 // GitHub Pages を docs/ から配信すると docs/ がサイトのルートになるので、
 // 公開URLのパスに docs/ は入らない。
 var SRC = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json';
+var EXTRA_LINES_SRC = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/extra-lines.json';
 var CLS = 'czn-replaced';
 var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|INPUT|SELECT|OPTION)$/;
 // 一般名詞としても使われる語。日本語だけに置き換えると、その置換が正しいのか
@@ -385,7 +386,88 @@ function processContentAreas(cardInfos, re, map) {
   return count;
 }
 
-function run(data, showToast) {
+// ---- 神ヒラメキ等の追加行の日本語化（用語置換・カード名書き換えとは別処理） ----
+// .chaos-content 直下には、基本効果（最初の子要素。processContentAreas が
+// 用語単位で扱う）とは別に、classに"divine"を含む要素として神ヒラメキ
+// ボーナス行が存在することがある。これらはキャラ固有ではなく共通の定型文が
+// 少数（docs/extra-lines.json）だけなので、全文をそのまま対訳表と照合して
+// 置き換える（用語の部分置換ではなく全文一致）。
+function normalizeExtraLineText(text) {
+  return text.split('\n').map(function (line) {
+    return line.replace(/\s+/g, ' ').replace(/\s+([.,;:!?])/g, '$1').trim();
+  }).join('\n').trim();
+}
+function buildExtraLineMatcher(enTemplate) {
+  var escaped = rxEscape(normalizeExtraLineText(enTemplate));
+  var pattern = escaped.replace(/\\\{N\\\}/g, '(\\d+(?:\\.\\d+)?%?)');
+  return new RegExp('^' + pattern + '$');
+}
+// <br>を改行として扱う（textContentは<br>を無視して連結してしまうため）。
+function extractDivineText(el) {
+  var parts = [];
+  Array.prototype.forEach.call(el.childNodes, function (node) {
+    if (node.nodeType === 3) {
+      parts.push(node.nodeValue);
+    } else if (node.nodeName === 'BR') {
+      parts.push('\n');
+    } else {
+      parts.push(node.textContent || '');
+    }
+  });
+  return parts.join('');
+}
+function matchExtraLineTemplate(rawText, extraLines) {
+  var normalized = normalizeExtraLineText(rawText);
+  for (var i = 0; i < extraLines.length; i++) {
+    var entry = extraLines[i];
+    var m = entry.re.exec(normalized);
+    if (m) {
+      var ja = entry.ja;
+      for (var j = 1; j < m.length; j++) {
+        ja = ja.replace('{N}', m[j]);
+      }
+      return ja;
+    }
+  }
+  return null;
+}
+// confirmed のみを対象にする（用語置換のconfirmedのみ基準と同じ）
+function buildExtraLineList(data) {
+  return (data.entries || [])
+    .filter(function (e) { return e.confidence === 'confirmed' && e.en && e.ja; })
+    .map(function (e) { return { en: e.en, ja: e.ja, re: buildExtraLineMatcher(e.en) }; });
+}
+function insertDivineLines(cardInfos, extraLines) {
+  var inserted = 0;
+  if (!extraLines || extraLines.length === 0) { return 0; }
+  cardInfos.forEach(function (info) {
+    var contentEl = info.contentEl;
+    if (!contentEl || !contentEl.querySelectorAll) { return; }
+    var divineEls = contentEl.querySelectorAll('[class*="divine"]');
+    for (var i = 0; i < divineEls.length; i++) {
+      var el = divineEls[i];
+      if (!document.body.contains(el)) { continue; }
+      if (el.getAttribute('data-czn-divine-done') === '1') {
+        var storedJa = el.getAttribute('data-czn-divine-ja') || '';
+        if (storedJa && (el.textContent || '').indexOf(storedJa) !== -1) { continue; }
+      }
+      var origText = el.getAttribute('data-czn-divine-orig');
+      if (origText === null) {
+        origText = extractDivineText(el);
+        el.setAttribute('data-czn-divine-orig', origText);
+      }
+      var jaText = matchExtraLineTemplate(origText, extraLines);
+      if (jaText === null) { continue; }
+      el.textContent = jaText;
+      el.setAttribute('data-czn-divine-done', '1');
+      el.setAttribute('data-czn-divine-ja', jaText);
+      inserted++;
+    }
+  });
+  return inserted;
+}
+
+function run(data, showToast, extraLines) {
   // confirmed だけを使う。guess と unmatched は無視する
   var pairs = (data.entries || []).filter(function (e) {
     return e.confidence === 'confirmed' && e.en && e.ja;
@@ -418,6 +500,7 @@ function run(data, showToast) {
   var charName = currentCharacter();
   var resolved = buildResolved(pairs, charName);
   var cardResult = collectAndRewriteCardNames(resolved, charName);
+  var divineCount = insertDivineLines(cardResult.cardInfos, extraLines || []);
   var contentCount = processContentAreas(cardResult.cardInfos, re, map);
 
   var state = { count: 0 };
@@ -429,16 +512,27 @@ function run(data, showToast) {
   // 再スキャンは画面のちらつき防止のため無言で行う。
   if (showToast) {
     var total = state.count + contentCount;
-    toast(total + ' 件を置換しました（カード名' + cardResult.rewrittenCount + '件）');
+    toast(total + ' 件を置換しました（カード名' + cardResult.rewrittenCount + '件 / 追加行' + divineCount + '件）');
   }
 }
 
 if (!document.body) { return; }
-fetch(SRC, { cache: 'no-store' }).then(function (r) {
+var fetchGlossaryData = fetch(SRC, { cache: 'no-store' }).then(function (r) {
   if (!r.ok) { throw new Error('HTTP ' + r.status); }
   return r.json();
-}).then(function (data) {
-  run(data, true);
+});
+// extra-lines.json の取得失敗は致命的にせず、空リストにフォールバックする
+// （神ヒラメキ行の日本語化だけが無効になり、用語置換・カード名は通常通り動く）。
+var fetchExtraLinesData = fetch(EXTRA_LINES_SRC, { cache: 'no-store' }).then(function (r) {
+  if (!r.ok) { throw new Error('HTTP ' + r.status); }
+  return r.json();
+}).catch(function () {
+  return { entries: [] };
+});
+Promise.all([fetchGlossaryData, fetchExtraLinesData]).then(function (results) {
+  var data = results[0];
+  var extraLines = buildExtraLineList(results[1]);
+  run(data, true, extraLines);
   // SPA側の再描画でDOMが差し替わっても追従できるよう、以後も監視する
   // （拡張機能と同じ設計。連続発火を間引きつつ再実行する）。
   var pending = false;
@@ -447,7 +541,7 @@ fetch(SRC, { cache: 'no-store' }).then(function (r) {
     pending = true;
     setTimeout(function () {
       pending = false;
-      run(data, false);
+      run(data, false, extraLines);
     }, 500);
   });
   observer.observe(document.body, { childList: true, subtree: true });
