@@ -437,6 +437,26 @@ function buildExtraLineList(data) {
     .filter(function (e) { return e.confidence === 'confirmed' && e.en && e.ja; })
     .map(function (e) { return { en: e.en, ja: e.ja, re: buildExtraLineMatcher(e.en) }; });
 }
+// 基本効果側の watchContentTarget と同じ考え方。ページ側の再描画で
+// divine要素の中身だけ英語に戻ることがあるため、要素ごとに個別の
+// MutationObserver を設置し、jaTextが消えていたら書き直す。自分自身の
+// 書き込みで再発火しないよう、書き直す前に監視を止め、書き直した後に
+// 再度監視する。同一要素への書き直しは最大 WATCH_MAX_RETRIES 回まで。
+function watchDivineElement(el, jaText) {
+  var retries = 0;
+  var mo = new MutationObserver(function () {
+    var currentText = el.textContent || '';
+    if (currentText.indexOf(jaText) !== -1) { return; }
+    retries++;
+    if (retries > WATCH_MAX_RETRIES) { mo.disconnect(); return; }
+    mo.disconnect();
+    el.textContent = jaText;
+    el.setAttribute('data-czn-divine-done', '1');
+    el.setAttribute('data-czn-divine-ja', jaText);
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+  });
+  mo.observe(el, { childList: true, subtree: true, characterData: true });
+}
 function insertDivineLines(cardInfos, extraLines) {
   var inserted = 0;
   if (!extraLines || extraLines.length === 0) { return 0; }
@@ -462,6 +482,10 @@ function insertDivineLines(cardInfos, extraLines) {
       el.setAttribute('data-czn-divine-done', '1');
       el.setAttribute('data-czn-divine-ja', jaText);
       inserted++;
+      if (!el.hasAttribute('data-czn-divine-watched')) {
+        el.setAttribute('data-czn-divine-watched', '1');
+        watchDivineElement(el, jaText);
+      }
     }
   });
   return inserted;

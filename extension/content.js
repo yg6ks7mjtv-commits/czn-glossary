@@ -1253,6 +1253,36 @@
     return null;
   }
 
+  // 基本効果側の watchEffectScope と同じ考え方。ページ側の再描画で
+  // divine要素の中身だけ英語に戻ることがあるため、要素ごとに個別の
+  // MutationObserver を設置し、jaTextが消えていたら書き直す。自分自身の
+  // 書き込みで再発火しないよう、書き直す前に監視を止め、書き直した後に
+  // 再度監視する。同一要素への書き直しは最大 DIVINE_WATCH_MAX_RETRIES 回
+  // までとし、超えたら監視を解除する（無限ループ防止）。
+  var DIVINE_WATCH_MAX_RETRIES = 10;
+  function watchDivineElement(el, jaText) {
+    var retries = 0;
+    var mo = new MutationObserver(function () {
+      var currentText = el.textContent || '';
+      if (currentText.indexOf(jaText) !== -1) { return; } // まだ正しい
+
+      retries++;
+      if (retries > DIVINE_WATCH_MAX_RETRIES) {
+        mo.disconnect();
+        return;
+      }
+
+      mo.disconnect(); // 自分の書き込みで再発火しないよう一時停止
+      el.textContent = jaText;
+      el.setAttribute('data-czn-divine-done', '1');
+      el.setAttribute('data-czn-divine-ja', jaText);
+      mo.observe(el, { childList: true, subtree: true, characterData: true });
+
+      log('overwrite detected, auto-rewrote divine line');
+    });
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+  }
+
   // candidates（glossaryでカード名が解決できたもの）ごとに、
   // effectScope（.chaos-content全体）内の"divine"要素を探して日本語化する。
   // effects-ja.jsonの有無・内容とは無関係に、candidateさえあれば実行する
@@ -1291,6 +1321,13 @@
         el.setAttribute('data-czn-divine-done', '1');
         el.setAttribute('data-czn-divine-ja', jaText);
         inserted++;
+
+        // まだ監視を付けていなければ設置する（reapply等で同じ要素へ複数回
+        // 来ても二重に設置しないための目印）。
+        if (!el.hasAttribute('data-czn-divine-watched')) {
+          el.setAttribute('data-czn-divine-watched', '1');
+          watchDivineElement(el, jaText);
+        }
       }
     });
 

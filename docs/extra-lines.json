@@ -27,9 +27,9 @@
     },
     {
       "en": "Treated as a Common Card\nDraw {N} Common Card(s)",
-      "ja": "コモンカード扱いになる\nコモンカードを{N}枚ドロー",
-      "confidence": "guess",
-      "note": "Common Cardはglossary.jsonに登録が無く、対応する日本語表記の確証が無い。カードのレアリティ（コモン/レア等）に関する表記と推測し「コモンカード」と音写したが未確認。"
+      "ja": "共用カード扱いになる\n共用カードを{N}枚ドロー",
+      "confidence": "confirmed",
+      "note": "当初はCommon Cardの訳語が未確認のためguess（「コモンカード」と音写）だったが、aosns（ハイデマリ）の神ヒラメキ表内、極光展開・万人の英雄の行にある「共用カードとして扱う　共用カードを1枚ドロー」がこのテンプレートと数値（1）・構造（2文）ともに完全一致することを確認し、confirmedへ昇格。Common Card = 共用カードはglossary.jsonにも新規confirmed登録した（根拠は同エントリのnote参照）。"
     },
     {
       "en": "{N} Vulnerable to the target",
