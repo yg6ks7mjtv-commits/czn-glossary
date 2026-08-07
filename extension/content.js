@@ -321,12 +321,13 @@
   // source は "ingame"（実機で確認した文言）「aosns"（nightmare.aosns.com
   // から取得した文言）「gamerch"（gamerchから自動収集した文言）のいずれか。
   //
-  // 以前、gamerch由来のエントリについて無関係な別カードの効果文を誤って
-  // 表示してしまう事故があったが、原因はデータそのものではなく確定セレクタ
-  // 方式（img[alt]からのカード名照合）導入前のカード名照合バグだったため、
-  // 索引への計上を再開する。優先順位は ingame > aosns > gamerch とし、
-  // 同じキーに複数のsourceが存在する場合は優先順位の高い方を残す
-  // （setEffectIfAllowed）。
+  // gamerch由来のデータは内容を確認した結果、カードの効果文そのものではなく
+  // 「基本形からの変化点の要約」であることが判明した（例: 剣の雨I の実際の
+  // 効果文は「[連結/安息] ダメージ80%×2 感応：極光剣を2枚生成」だが、
+  // gamerch由来のデータは「安息追加、生成数1枚増加」）。そのため
+  // buildEffectsIndex で source:"gamerch" のエントリを一切索引に載せない
+  // （＝常に「効果文なし」扱いとなり英語のまま残る）。データ自体は
+  // effects-ja.json から削除していない。
   var SOURCE_PRIORITY = { ingame: 3, aosns: 2, gamerch: 1 };
 
   function effectSource(e) {
@@ -346,6 +347,7 @@
     effects.forEach(function (e) {
       if (!e || !e.ja_card || !e.effect) { return; }
       var source = effectSource(e);
+      if (source === 'gamerch') { return; } // 基本形からの変化点要約であり効果文そのものではないため除外
       var level = normLevel(e.level);
       // incomplete: 自動収集時に「評価コメントとの境界が曖昧で、安全側
       // （先頭の一文だけ）に切り出した」ことを示すフラグ。末尾の効果節を
