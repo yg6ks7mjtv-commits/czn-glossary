@@ -109,6 +109,7 @@
 
   var GLOSSARY_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/glossary.json';
   var EXTRA_LINES_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/extra-lines.json';
+  var SITE_LABELS_URL = 'https://yg6ks7mjtv-commits.github.io/czn-glossary/site-labels.json';
   var STORAGE_KEY = 'czn_enabled';
   var TRANSLATE_STORAGE_KEY = 'czn_translate_enabled'; // AI翻訳（実験的機能）のON/OFF。既定OFF
   var CZN_DEBUG = false; // true にすると console にマッチ状況を出す
@@ -296,6 +297,27 @@
       .catch(function (err) {
         log('extra-lines.json を読めなかった:', err.message);
         return [];
+      });
+  }
+
+  // Prydwen独自の見出し・UIラベル（ゲーム用語ではない）の対訳表。
+  // glossary.jsonには混ぜない方針のため別ファイルから取得する。
+  function fetchSiteLabels() {
+    return fetch(SITE_LABELS_URL, { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('site-labels.json HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        var map = Object.create(null);
+        (data.entries || []).forEach(function (e) {
+          if (e.en && e.ja) { map[e.en] = e.ja; }
+        });
+        return map;
+      })
+      .catch(function (err) {
+        log('site-labels.json を読めなかった:', err.message);
+        return Object.create(null);
       });
   }
 
@@ -956,6 +978,20 @@
   var watchInstalledCount = 0;
   var watchAutoRewriteCount = 0;
 
+  // 挿入した日本語効果文の可読性対策（案1）。カードごとに背景画像が異なり、
+  // 種別ごとの文字色（.skill-with-coloring <Element> のCSSで青系等になる）が
+  // 背景と衝突して読みづらくなることがあるため、文字色を白に固定した上で、
+  // 半透明の暗い下地・角丸・軽いパディング・影を敷いて、どの背景画像の上でも
+  // 一定のコントラストを確保する。インラインstyleで最優先度にして確実に
+  // 上書きする。要素ごとに一度だけ適用すればよいため、書き換え・再書き換え
+  // （watchEffectScopeでの自動修復時）の両方で呼ぶが、2回目以降は同じ値を
+  // 上書きするだけで害はない。
+  function applyReadableEffectStyle(el) {
+    el.style.cssText += ';color:#fff !important;background:rgba(0,0,0,0.55);' +
+      'border-radius:4px;padding:2px 5px;box-shadow:0 1px 3px rgba(0,0,0,0.6);' +
+      'text-shadow:0 1px 2px rgba(0,0,0,0.8);';
+  }
+
   function watchEffectScope(scope, c, jaText, excludeCostDigits) {
     var retries = 0;
     var mo = new MutationObserver(function () {
@@ -976,6 +1012,7 @@
       for (var ti = 1; ti < freshNodes.length; ti++) {
         freshNodes[ti].nodeValue = '';
       }
+      applyReadableEffectStyle(scope);
       scope.setAttribute('data-czn-done', '1');
       mo.observe(scope, { childList: true, subtree: true, characterData: true });
 
@@ -1006,7 +1043,33 @@
     return null;
   }
 
-  function insertEffects(candidates, effectsIdx, charName, allTypeLabels) {
+  // p.tags（.chaos-content内、[Lead]等の角括弧タグ一覧）が、挿入した日本語
+  // 効果文（jaText）に完全に含まれている場合のみ、重複表示を避けるため
+  // p.tags を非表示にする。1つでも対応する日本語表記が jaText に含まれて
+  // いないタグがあれば、情報を失わないよう何もしない（英語のまま残す）。
+  // effectScope が無い（旧方式フォールバック時）、p.tags が無い、
+  // resolved が無い場合は何もしない。
+  function hideRedundantTagsLine(effectScope, jaText, resolved) {
+    if (!effectScope || !effectScope.querySelector || !resolved) { return; }
+    var tagsEl = effectScope.querySelector('p.tags');
+    if (!tagsEl || tagsEl.style.display === 'none') { return; }
+    var tagSpans = tagsEl.querySelectorAll('span.inline-name');
+    if (tagSpans.length === 0) { return; }
+
+    for (var i = 0; i < tagSpans.length; i++) {
+      var raw = (tagSpans[i].textContent || '').trim().replace(/^\[+|\]+$/g, '').trim();
+      if (!raw) { continue; }
+      var entry = resolved[raw];
+      if (!entry || !entry.ja || jaText.indexOf(entry.ja) === -1) {
+        return; // 対応する日本語表記が確認できない、または効果文に含まれていない
+      }
+    }
+
+    tagsEl.style.display = 'none';
+    tagsEl.setAttribute('data-czn-tags-hidden', '1');
+  }
+
+  function insertEffects(candidates, effectsIdx, charName, allTypeLabels, resolved) {
     var inserted = 0;
     var diagnostics = [];
     var rewriteDetails = []; // 書き換えた要素の内訳（診断用）
@@ -1068,6 +1131,17 @@
       var jaText = effect.effect +
         (effect.source === 'gamerch' ? '※' : '') +
         (effect.incomplete ? '(一部)' : '');
+
+      // p.tags（[Lead]等の角括弧タグ一覧）が存在し、かつそのタグ全てが
+      // 挿入する日本語効果文（jaText）内にも含まれている場合に限り、
+      // 重複表示を避けるためタグ行を隠す。1つでも含まれていないタグが
+      // あれば何もしない（情報を失わないため）。書き換えが必要かの判定
+      // （後述のreapplied確認）より前に毎回呼ぶことで、ページ側の再描画で
+      // タグ行だけ再表示されるようなケースでも次のスキャンで復旧できる
+      // ようにする（この判定自体は用語置換 replaceTermsOnPage より前に
+      // 行われるため、初回はタグのテキストが原文（英語）のまま読める。
+      // 2回目以降の呼び出しでは既に非表示化済みなら何もしない）。
+      hideRedundantTagsLine(c.effectScope, jaText, resolved);
 
       // c.effectScope が確定していれば（確定セレクタ方式）そこに固定する。
       // 無ければ（旧方式へのフォールバック時）名前照合用の（狭い）カード枠
@@ -1175,7 +1249,9 @@
       }
 
       // 元の英文（集めたテキストノードの連結）を退避する。要素の削除・
-      // 非表示・スタイル変更は行わず、テキストの中身だけを変える。
+      // 非表示は行わず、テキストの中身だけを変える（可読性対策の背景色・
+      // 文字色だけは例外として明示的に適用する。下記 applyReadableEffectStyle
+      // 参照）。
       var originalConcat = textNodes.map(function (n) { return n.nodeValue; }).join('');
       writeTarget.setAttribute('data-czn-orig', originalConcat);
 
@@ -1183,6 +1259,10 @@
       for (var ti = 1; ti < textNodes.length; ti++) {
         textNodes[ti].nodeValue = '';
       }
+
+      // カードの背景画像・種別ごとの文字色（青系等）と衝突して読みづらく
+      // なる対策（案1）。文字色を白に固定し、半透明の暗い下地と影を敷く。
+      applyReadableEffectStyle(writeTarget);
 
       writeTarget.setAttribute('data-czn-done', '1');
 
@@ -1462,6 +1542,54 @@
     return count;
   }
 
+  // Prydwen独自の見出し・UIラベル（docs/site-labels.json、ゲーム用語では
+  // ないためglossary.jsonとは別データ）をページに適用する。replaceTermsOnPage
+  // と同じ考え方（collectTextNodesでテキストノード単位、単語境界判定、
+  // 最長一致優先）だが、キャラ・ローマ数字段階・英語併記の概念が無いぶん
+  // 単純にしている。見出し（例: "Introduction"）は
+  // <div><svg/>見出しテキスト</div> のように、SVGアイコンと同じdiv内に
+  // 裸のテキストノードとして置かれているが、collectTextNodesは
+  // TreeWalker(SHOW_TEXT)でテキストノードを直接走査するため要素の入れ子
+  // 構造に依存せず、この構造でも問題なく置換できる（AI翻訳のブロック
+  // 収集で問題になったisInlineOnlyForTranslateのような要素単位の判定は
+  // ここでは行わないため、SVGの有無に影響されない）。
+  function replaceSiteLabelsOnPage(siteLabels) {
+    var keys = Object.keys(siteLabels);
+    if (keys.length === 0) { return 0; }
+    var alts = keys.sort(function (a, b) { return b.length - a.length; }).map(rxEscape);
+    var re = new RegExp(alts.join('|'), 'g');
+
+    var count = 0;
+    collectTextNodes().forEach(function (node) {
+      var text = node.nodeValue;
+      var frag = null;
+      var last = 0;
+      var m;
+      re.lastIndex = 0;
+      while ((m = re.exec(text)) !== null) {
+        var s = m.index;
+        var e = s + m[0].length;
+        if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; }
+
+        if (frag === null) { frag = document.createDocumentFragment(); }
+        if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); }
+        var span = document.createElement('span');
+        span.className = REPLACED_CLS;
+        span.textContent = siteLabels[m[0]];
+        span.title = m[0];
+        frag.appendChild(span);
+        last = e;
+        count++;
+      }
+      if (frag !== null) {
+        if (last < text.length) { frag.appendChild(document.createTextNode(text.slice(last))); }
+        if (node.parentNode) { node.parentNode.replaceChild(frag, node); }
+      }
+    });
+    log('replaced', count, 'site labels');
+    return count;
+  }
+
   // ---- 起動 ----
   //
   // 順序が重要: 1) カード名を原文のまま収集 → 2) 効果文を挿入 →
@@ -1483,7 +1611,7 @@
   function processPage(ctx, effectsIdx, charName, extraLines) {
     var collected = collectCardCandidates(ctx, charName);   // 1. カード名（原文）
     var candidates = collected.candidates;
-    var insertResult = insertEffects(candidates, effectsIdx, charName, collected.typeLabels); // 2. 効果文挿入
+    var insertResult = insertEffects(candidates, effectsIdx, charName, collected.typeLabels, ctx.resolved); // 2. 効果文挿入
     var divineResult = insertDivineLines(candidates, extraLines || []); // 2b. 神ヒラメキ等の追加行（別処理）
     var replacedCount = replaceTermsOnPage(ctx);             // 3. 用語置換
 
@@ -1683,24 +1811,39 @@
     return /[A-Za-z]/.test(s);
   }
 
-  // 単語数がこれ未満のブロックはTranslator APIに渡さない（文脈の無い単独の
-  // 単語・略語・表の見出しを誤訳させないため）。Magnaのページの実データ
+  // 単語数がこれ未満のブロックは、原則Translator APIに渡さない（文脈の無い
+  // 単独の単語・略語・表の見出しを誤訳させないため）。Magnaのページの実データ
   // （翻訳単位846件の単語数分布）で判断: 1〜5語が574件（68%）を占め、その
   // 中身は "DEF"/"ATK"/"HP"（STATS欄の見出し）、"Potential 1"、"基本カード
   // Proficiency"（Potential名。基本カードは既存確定語）、"CRIT Rate > CRIT
   // DMG"（比較式）、ナビゲーションメニュー項目、装備・カード名の一覧など、
   // 単語・略語・見出しの類がほとんどだった。6語以上になると急激に件数が
   // 減り（6〜7語は846件中8件のみ）、8語以上から一貫して文章（主語・動詞・
-  // 句読点を伴う説明文）になる。この境目から6語未満を「短い」とした。
-  // 既知のトレードオフ: "Increase Health by 1.6/8%."（Potentialの説明文、
-  // 4語）のように、閾値未満でも実際には完結した文になっているブロックも
-  // 少数存在し、これも除外対象になる（英語のまま残る）。単語数だけでは
-  // 文か見出しかを完全には判定できないため、個別の例外を作らずこの
-  // トレードオフを許容する。
+  // 句読点を伴う説明文）になる。この境目から6語未満を基本の「短い」基準とした。
   var TRANSLATE_MIN_WORDS = 6;
 
+  // 語数だけでは「Increase Health by 1.6/8%.」（4語だが完結した文）のような
+  // 短い文を、ラベル・見出しと区別できない。実データを確認したところ、
+  // これらの短い文は例外なく英語の文末記号（.!?）で終わっており、一方で
+  // ラベル・見出し・数値表記（"Last profile update*"、"15/Mar/2026"、
+  // "Potential 5-2"、"Prydwen.gg"、"1.6/8%"の小数点等）は文末記号で終わって
+  // いなかった。そのため、語数がTRANSLATE_MIN_WORDS未満でも、文末が
+  // ".!?"（数値の小数点と紛らわしい「数字直後の.」を除く）であれば文と
+  // みなしTranslator APIに渡す。実機でMagnaのページに適用し、新たに
+  // 対象になったのは「Increase Health by 1.6/8%.」「Base performance of
+  // the character.」「Removed in most Magna decks.」「Loading content...」の
+  // 4種のみで、STATS欄のDEF/ATK/HP等は引き続き対象外のままであることを確認済み。
   function isTooShortForTranslate(text) {
-    return text.split(/\s+/).filter(Boolean).length < TRANSLATE_MIN_WORDS;
+    var words = text.split(/\s+/).filter(Boolean).length;
+    if (words >= TRANSLATE_MIN_WORDS) { return false; }
+    var trimmed = text.replace(/\s+$/, '');
+    var lastChar = trimmed.charAt(trimmed.length - 1);
+    if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+      var beforeLast = trimmed.charAt(trimmed.length - 2);
+      if (lastChar === '.' && /[0-9]/.test(beforeLast)) { return true; } // 小数点等、文末ではない
+      return false; // 文末記号がある短い文 → 翻訳対象にする
+    }
+    return true;
   }
 
   // document.body（.chaos-card-inside配下とSCRIPT/STYLE等を除く）から、
@@ -1929,11 +2072,23 @@
   getEnabled().then(function (enabled) {
     if (!enabled) { log('disabled via popup toggle'); return; }
 
-    Promise.all([fetchGlossary(), fetchEffects(), fetchExtraLines()]).then(function (results) {
+    Promise.all([fetchGlossary(), fetchEffects(), fetchExtraLines(), fetchSiteLabels()]).then(function (results) {
       var entries = results[0];
       var effects = results[1];
       var extraLines = results[2];
+      var siteLabels = results[3];
       var charName = currentCharacter();
+
+      // サイト独自のUIラベル（docs/site-labels.json）はゲーム用語の翻訳・
+      // 用語置換とは無関係の別レイヤーなので、AI翻訳フェーズより前に適用
+      // する。これにより、"Loading content..."のようにサイトラベル側に
+      // 訳語がある短い文はここで既に日本語化され、後段の翻訳対象ブロック
+      // 収集では（アルファベットが残っていないため）自動的に対象外になる
+      // （hasLatinLetterの既存判定がそのまま効くため、優先順位のための
+      // 特別な分岐は追加していない）。範囲は引き続きMagnaのページのみ。
+      if (charName === 'Magna') {
+        replaceSiteLabelsOnPage(siteLabels);
+      }
 
       // AI翻訳（実験的機能）は run() より前に完了させる。run() 自体が
       // カード検出・効果文挿入・監視設置（watchEffectScope /
