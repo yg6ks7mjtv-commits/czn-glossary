@@ -209,3 +209,19 @@
   - node --check・制御文字スキャン・sync.py すべて通過。glossary.json/effects-ja.json/docs/bookmarklet.jsは無変更
 - 未解決: 見出しのSVG子要素による収集漏れ自体は未修正（今回の見た目には影響しないため見送り）。洗い出した166件+見出し19件のglossary未登録語は、ユーザー側でゲーム画面を確認の上、正しい日本語を追加登録する予定
 - コミット: 63f7e4b（A）、836a045（B）
+
+## 2026-08-08 15:00
+- 依頼: 5件を順に対応。【A】効果文の上に出るタグ行（[Lead(主導)]等）の重複を、原因特定の上で情報を失わない形で解消。【B】効果文の可読性向上（一案を実装して報告、判断は保留）。【C】6語未満除外により短い「文」まで英語のまま残る問題を、語数だけでなく文かラベルかを区別できる条件で修正しつつSTATS欄が再翻訳されないことを確認。【D】aosnsからステータス・潜在力・凸・装備種別・サブステ優先度・役割の日本語をconfirmedでglossary.jsonに追加、装備名は件数のみ報告。【E】Prydwen独自のUIラベル対応表（ユーザー提供）をdocs/site-labels.json（新規）に格納しglossary.jsonとは分離、SVGアイコン構造の見出しでも置換が効くことを確認
+- 実施:
+  - 作業用ブランチ fix/tag-dup-contrast-glossary-labels を作成
+  - 【A】p.tagsが表示される原因を特定: p.tagsはページ全体の用語置換（replaceTermsOnPage、既存・無改変）が独立して処理する要素で、insertEffectsが書き込むwriteTargetとは別物。氷の破片等、自前で登録した効果文（ingame/aosns由来）は角括弧タグを常に効果文の先頭に埋め込む慣習になっており、Magnaの該当9件（カード×レベル）全てで内容が一致することを実機で確認。hideRedundantTagsLine()を追加し、p.tagsの各タグに対応する日本語がjaTextに含まれている場合のみp.tagsを非表示化。1件（氷河の鉄拳V、タグ表記"Exhaust 2"）は単純な辞書引きでは一致せず非表示にならないことを確認・報告（情報は失われない、安全側の挙動）
+  - 【B】案1として、白文字＋半透明の暗い下地＋角丸＋影のスタイルをapplyReadableEffectStyle()として実装し、初回書き込み・監視による再書き換えの両方に適用。実機で氷結の拳・霜の盾・氷の破片の3枚に適用したスクリーンショットで、いずれの背景画像に対しても可読性が改善することを確認（判断待ち）
+  - 【C】語数閾値（6語未満）に加え、文末が「.」「!」「?」で終わるものは語数によらず翻訳対象にする条件を追加（小数点由来の「.」は直前が数字なら除外）。Magnaの実データで、この条件により新たに翻訳対象になったのは4種類の短い文のみで、STATS欄のDEF/ATK/HP等は引き続き除外されたままであることを実機で確認
+  - 【D】aosns（マグナ）のページを取得し、要求された用語を調査。ステータス表（Lv1/10/30/50/60）でATK=攻撃力・DEF=防御力を確認。凸性能5凸の説明でUpgrade=強化を再確認（Common/Unique Card登録時と同じ根拠）。潜在力表（メモリーの欠片装備枠）でProficiency=熟練を確認。装備一覧テーブルでWeapon=武器・Armor=防具・Trinket=装飾を確認。メモリーの欠片2piece効果表（否定/理想/渇望/想像の4行）で、各行の対象ステータスがPrydwenのIdeal/Desire/Imaginationの割り当てと完全一致することを確認しIdeal=理想・Desire=渇望・Imagination=想像とした。地の文でHealer=ヒーラー・Support=サポートを確認（UIラベルとしての厳密な用例ではなく地の文での言及である旨をnoteに明記）。HP・DPSは英語表記のままで対応する日本語が無いことを確認（登録せず）。Adaptation・Base・E0〜E6・凸段階の6種の記憶名（Sleeping/Awakening/Vivid/Inner/Complete/Liberated Memory）はいずれも該当箇所が見つからず未登録。装備名は32件（武器4・防具14・装飾14）がaosnsに掲載されていることを件数のみ確認し、名前の突合・登録は行っていない
+  - 【E】ユーザー提供の対応表をそのままdocs/site-labels.json（新規、45件）に格納。glossary.jsonには混ぜていない。既存のreplaceTermsOnPageと同じ仕組み（collectTextNodesによるテキストノード単位の走査）を再利用したreplaceSiteLabelsOnPage()を追加。前回報告した「見出しが<div><svg/>テキスト</div>という構造で判定を妨げる」問題は、AI翻訳のブロック収集（要素単位の判定）固有の問題であり、テキストノード単位で走査するこの仕組みには影響しないことを実機で確認（"Introduction"→"はじめに"、"Stats (level 60)"→"ステータス (level 60)"が問題なく置換された）。適用範囲はMagnaのページのみ、AI翻訳フェーズより前に一度だけ実行し、完全に日本語化されたブロックは既存のhasLatinLetter判定で自然に翻訳対象から外れる設計とした
+- 結果:
+  - node --check・制御文字スキャン・sync.pyすべて通過。effects-ja.json・docs/bookmarklet.jsは無変更
+  - glossary.jsonのcoverage: confirmed 347→361 / total 455→469（14件追加）
+  - docs/site-labels.json新規作成（45件、confidence/noteフィールドなし、ユーザー提供のまま）
+- 未解決: 【A】氷河の鉄拳Vの"Exhaust 2"タグは非表示にならないまま。【B】可読性スタイルの採用可否はユーザー判断待ち。【D】装備名32件の日本語対応は未着手（量を見て判断とのことで保留）
+- コミット: e4b0704（A/B/C/E）、97980ca（D）
