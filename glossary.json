@@ -26,12 +26,12 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 469,
-      "confirmed": 361,
+      "total": 475,
+      "confirmed": 368,
       "guess": 9,
-      "unmatched": 99,
+      "unmatched": 98,
       "unmatched_ja_only": 94,
-      "unmatched_en_only": 5
+      "unmatched_en_only": 4
     },
     "known_gaps": [
       "日本語一覧は2026/04/14時点のもので、シーズン4以降の用語は網羅していない（点火のみ guess で暫定登録）。",
@@ -420,10 +420,10 @@
     },
     {
       "en": "Potential",
-      "ja": "",
-      "confidence": "unmatched",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/",
-      "note": "Prydwen 側の英語表記のみ判明。対応する日本語表記が未特定。"
+      "ja": "潜在力",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "aosns（マグナ）の潜在力表・凸性能表で一貫して「潜在力」が使われていることを確認（例:「潜在力の【基本カード強化】…」）。ユーザーがaosnsの画面表示（「マグナの潜在力」）で確認済み。"
     },
     {
       "en": "Attunement",
@@ -2179,99 +2179,141 @@
       "en": "ATK",
       "ja": "攻撃力",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）のLv1/10/30/50/60ステータス表で「攻撃力」の行がPrydwenのSTATS欄のATKと同じ数値配列（Lv1:135等）に対応することを確認。"
     },
     {
       "en": "DEF",
       "ja": "防御力",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "ATKと同じaosnsステータス表。「防御力」の行がPrydwenのSTATS欄のDEFと同じ数値配列（Lv1:55等）に対応することを確認。"
     },
     {
       "en": "CRIT Rate",
       "ja": "会心率",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）のサブステータス欄「会心率・会心ダメージ・防御力%・防御力(実数)」より。既存confirmed語のCritical Chance=会心率と同じ日本語（enの表記違いのみ）。"
     },
     {
       "en": "CRIT DMG",
       "ja": "会心ダメージ",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "CRIT Rateと同じaosnsサブステータス欄より。既存confirmed語のCritical Damage=会心ダメージと同じ日本語（enの表記違いのみ）。"
     },
     {
       "en": "Upgrade",
       "ja": "強化",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の凸性能（エゴ発現）5凸「潜在力の【基本カード強化】、【固有カード強化】、【共用カード強化】のレベルが3増加します」が、Prydwenの「[Basic Card Upgrade], [Unique Card Upgrade], and [Common Card Upgrade] in Potentials by 3」と語順・数値（3）で一致（Unique Card=固有カードの根拠と同じ）。"
     },
     {
       "en": "Proficiency",
       "ja": "熟練",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の潜在力表（メモリーの欠片装備枠）の「基本カード熟練」「会心率熟練」「HP熟練」より。PrydwenのPotential一覧にある「Basic Card Proficiency」「Health Proficiency」と同じ命名パターン（[対象] Proficiency = [対象]熟練）で対応することを確認。"
     },
     {
       "en": "Weapon",
       "ja": "武器",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の装備一覧テーブルで、装備種別の列に「武器」が使われていることを確認（例: M85軍用手榴弾＝武器）。"
     },
     {
       "en": "Armor",
       "ja": "防具",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の装備一覧テーブルで、装備種別の列に「防具」が使われていることを確認（例: 生い茂った海草の鎧＝防具）。"
     },
     {
       "en": "Trinket",
       "ja": "装飾",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の装備一覧テーブルで、装備種別の列に「装飾」が使われていることを確認（例: 多面平衡宇宙連結体＝装飾。Prydwenの Multifaceted Parallel Universe Nexus と対応）。"
     },
     {
       "en": "Ideal",
       "ja": "理想",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）のメモリーの欠片2piece効果セット名の表（否定/理想/渇望/想像の4行）で、各行に紐づく対象ステータスがPrydwenのMain and sub-stats欄のIdeal/Desire/Imaginationの並びと一致することを確認（理想→会心率、Prydwen側Ideal→CRIT Rate > CRIT DMG）。"
     },
     {
       "en": "Desire",
       "ja": "渇望",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "Idealと同じaosns表より。渇望→正義属性ダメージ量、Prydwen側Desire→正義 DMG%で対応することを確認。"
     },
     {
       "en": "Imagination",
       "ja": "想像",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "Idealと同じaosns表より。想像→防御力%、Prydwen側Imagination→DEF%で対応することを確認。"
     },
     {
       "en": "Healer",
       "ja": "ヒーラー",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の地の文「タンク、アタッカー、ヒーラーで組む場合には」より。UIラベルとしての厳密な用例ではなく地の文での言及だが、英語ロールのカタカナ音写として曖昧さが無いため確定扱いとした。"
     },
     {
       "en": "Support",
       "ja": "サポート",
       "confidence": "confirmed",
-      "source": "https://www.prydwen.gg/chaos-zero-nightmare/characters/magna",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "aosns（マグナ）の地の文「サポート能力が伸びるため」より。Healerと同様、UIラベルとしての厳密な用例ではなく地の文での言及だが、カタカナ音写として曖昧さが無いため確定扱いとした。"
+    },
+    {
+      "en": "Adaptation",
+      "ja": "適応",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "aosns（マグナ）の潜在力表で「神ヒラメキ適応」の表記をユーザーが画面で確認済み（Prydwen側のPotential 5-2「Divine Epiphany Adaptation」に対応）。"
+    },
+    {
+      "en": "Bonus",
+      "ja": "ボーナス",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "aosns（マグナ）の潜在力表で「ヒラメキボーナス」の表記をユーザーが画面で確認済み（Prydwen側のPotential 1「Epiphany Bonus」に対応）。"
+    },
+    {
+      "en": "Divine",
+      "ja": "神",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "aosns（マグナ）の潜在力表で「神ヒラメキ適応」の表記をユーザーが画面で確認済み（Prydwen側のDivineに対応）。"
+    },
+    {
+      "en": "Divine Epiphany",
+      "ja": "神ヒラメキ",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "Divine=神・Epiphany=ヒラメキ（既存confirmed語）をそのまま繋げると「神 ヒラメキ」とスペースが残ってしまうため、aosns表記「神ヒラメキ」（スペース無し）に合わせて複合語として登録した。用語置換・AI翻訳のプレースホルダ復元のどちらでも、この複合語が優先的にマッチする（最長一致優先のため）。"
+    },
+    {
+      "en": "Epiphany Bonus",
+      "ja": "ヒラメキボーナス",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "PrydwenのPotential 1のラベル。Epiphany=ヒラメキ・Bonus=ボーナスを単純に繋げると「ヒラメキ ボーナス」とスペースが残るため、aosns表記「ヒラメキボーナス」（スペース無し）に合わせて複合語として登録した。"
+    },
+    {
+      "en": "Divine Epiphany Adaptation",
+      "ja": "神ヒラメキ適応",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "PrydwenのPotential 5-2のラベル。aosns表記「神ヒラメキ適応」（スペース無し）に合わせて複合語として登録した。"
     },
     {
       "en": "Drawing Slash",

@@ -76,9 +76,19 @@ def validate(data):
         if conf == "guess" and not e.get("note"):
             errors.append(f"{tag}: guess には根拠を note に書くこと")
 
-        # 判定基準: confirmed の根拠は Prydwen のページに限る
-        if conf == "confirmed" and "prydwen.gg" not in e.get("source", ""):
-            errors.append(f"{tag}: confirmed の source が Prydwen ではない "
+        # 判定基準: confirmed の条件は「英語表記がPrydwenのページで実際に
+        # 使われていること」。この確認自体はnoteに記載する（例: aosnsの
+        # 数値・表構造とPrydwenの数値・並び順を突き合わせた根拠）。source
+        # フィールドは「日本語表記の実際の出所」を指す欄として、Prydwen
+        # またはaosnsのURLを許可する（2026-08-08変更。以前はsourceに
+        # 必ずPrydwenのURLを入れる運用だったが、aosns由来の日本語訳の
+        # 場合はsourceがPrydwenのURLのままだと、あとから見たときに出所を
+        # 誤解する。既存のPrydwen直接引用のエントリはそのまま、aosnsの
+        # 数値・表構造から日本語訳を特定したエントリはaosnsのURLを
+        # sourceに入れる）。
+        if conf == "confirmed" and not any(
+                domain in e.get("source", "") for domain in ("prydwen.gg", "aosns.com")):
+            errors.append(f"{tag}: confirmed の source が Prydwen/aosns のいずれでもない "
                           f"({e.get('source')!r})")
 
     counted = {lv: sum(1 for e in entries if e.get("confidence") == lv) for lv in LEVELS}
