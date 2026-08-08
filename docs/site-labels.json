@@ -52,6 +52,24 @@
     {"en": "Selected", "ja": "選択中"},
     {"en": "Level", "ja": "レベル"},
     {"en": "Debuffer", "ja": "デバッファー"},
-    {"en": "Counterattacker", "ja": "反撃役"}
+    {"en": "Counterattacker", "ja": "反撃役"},
+    {"en": "Kit", "ja": "スキル構成"},
+    {"en": "Review", "ja": "解説"},
+    {"en": "Gear", "ja": "装備"},
+    {"en": "Deck & Teams", "ja": "デッキと編成"},
+    {"en": "Chaos Mode", "ja": "カオスモード"},
+    {"en": "Chaos Teams", "ja": "カオス編成"},
+    {"en": "Generic - Chaos", "ja": "汎用（カオス）"},
+    {"en": "Counter-Attack", "ja": "反撃"},
+    {"en": "Fragments", "ja": "記憶の欠片"},
+    {"en": "ST Damage", "ja": "単体ダメージ"},
+    {"en": "AoE Damage", "ja": "全体ダメージ"},
+    {"en": "AP Efficiency", "ja": "AP効率"},
+    {"en": "Utility", "ja": "汎用性"},
+    {"en": "Removal Priority", "ja": "抜くカードの優先度"},
+    {"en": "Conditional Card Removal", "ja": "条件付きで抜くカード"},
+    {"en": "Copying Priority", "ja": "コピーの優先度"},
+    {"en": "Base", "ja": "基本"},
+    {"en": "Ego", "ja": "エゴ"}
   ]
 }

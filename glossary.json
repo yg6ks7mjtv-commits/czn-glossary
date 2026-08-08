@@ -26,8 +26,8 @@
       "character_cards": "全キャラのカード名・固有バフ追加作業（2026-08-06開始）。この作業のセッションでは gamerch.com は直接フェッチ可能だったが www.prydwen.gg は引き続き403で直接フェッチ不可だったため、WebSearch の site:prydwen.gg 検索結果に含まれる本文引用スニペットで用語の実在と効果説明を確認した。直接ページを読んだ確認ではない点に注意。1キャラごとに Prydwen 該当キャラページと gamerch 該当キャラページを突き合わせ、効果説明が一致する語のみ confirmed とした。"
     },
     "coverage": {
-      "total": 475,
-      "confirmed": 368,
+      "total": 499,
+      "confirmed": 392,
       "guess": 9,
       "unmatched": 98,
       "unmatched_ja_only": 94,
@@ -2239,6 +2239,153 @@
       "note": "aosns（マグナ）の装備一覧テーブルで、装備種別の列に「装飾」が使われていることを確認（例: 多面平衡宇宙連結体＝装飾。Prydwenの Multifaceted Parallel Universe Nexus と対応）。"
     },
     {
+      "en": "Tentacles of Chaos",
+      "ja": "混沌した時代の触手",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（武器）「混沌した時代の触手」の効果「味方の攻撃力+8％。撃破時、ストレスが高い戦闘員のストレス2減少」が、Prydwen equipmentページのTentacles of Chaos「+8% ally Attack Upon enemy Defeat, -2 Stress to the unit with the highest Stress」と数値・条件とも完全一致することを確認。"
+    },
+    {
+      "en": "Dagger That Tricked the Shadow",
+      "ja": "影を騙した短剣",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（武器）「影を騙した短剣」の効果「会心ダメージ+12％」が、PrydwenのDagger That Tricked the Shadow「+12% Crit DMG」と一致。名称も直訳で一致（影=Shadow、騙した=Tricked、短剣=Dagger）。"
+    },
+    {
+      "en": "Shell Bug Horn",
+      "ja": "甲殻虫の角",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（武器）「甲殻虫の角」（甲殻虫=Shell Bug、角=Horn）の効果「会心ダメージ+12％」が、PrydwenのShell Bug Horn「+12% Crit DMG」と一致。"
+    },
+    {
+      "en": "Obsidian Sword",
+      "ja": "黒曜石の剣",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（武器）「黒曜石の剣」（黒曜石=Obsidian、剣=Sword）の効果「ダメージ量12％増加」が、PrydwenのObsidian Sword「Increase damage amount by 12%」と一致。"
+    },
+    {
+      "en": "Harpoon Case of Broken Resolve",
+      "ja": "折れた意思の銛筒",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（武器）「折れた意思の銛筒」（折れた=Broken、意思=Resolve、銛筒=Harpoon Case）の効果「奇数ターンごとに貫き1枚生成」が、PrydwenのHarpoon Case of Broken Resolve「Create 1 Pierce each odd turn」と一致。Prydwenページ上では既存confirmed語Resolve=決意が先に適用され「Harpoon Case of Broken 決意」と表示されるため、確認は表示前の英語名（Resolve）で行った。"
+    },
+    {
+      "en": "Fairy King's Crown",
+      "ja": "妖精王の冠",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「妖精王の冠」（妖精王=Fairy King、冠=Crown）の効果「会心率+6%」が、PrydwenのFairy King's Crownの効果と数値・名称とも一致。"
+    },
+    {
+      "en": "Mask of Flames",
+      "ja": "炎の仮面",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「炎の仮面」（炎=Flames、仮面=Mask）の効果「脆弱対象へのダメージ量35%増加」が、PrydwenのMask of Flamesの効果と一致。"
+    },
+    {
+      "en": "Victor's Laurel",
+      "ja": "勝者の月桂冠",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「勝者の月桂冠」（勝者=Victor's、月桂冠=Laurel）の効果「反撃ダメージ40%増加」が、PrydwenのVictor's Laurelの効果と一致。"
+    },
+    {
+      "en": "Phytotype Synthetic",
+      "ja": "植物型義体",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「植物型義体」（植物型=Phytotype、義体=Synthetic）の効果「シールド獲得時、1ターンの間、次に発動する攻撃カード1枚のダメージ量20%増加」が、PrydwenのPhytotype Syntheticの効果と一致。"
+    },
+    {
+      "en": "Consecrated Halo",
+      "ja": "聖別された光輪",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「聖別された光輪」（聖別された=Consecrated、光輪=Halo）の効果「シールド獲得量25％増加」が、PrydwenのConsecrated Haloの効果と一致。"
+    },
+    {
+      "en": "Announcement of Catastrophe",
+      "ja": "災厄の聖骸布",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「災厄の聖骸布」の効果「防御力+12％。全戦闘員崩壊の回復に必要なカード数1枚減少」が、PrydwenのAnnouncement of Catastrophe「+12% Defense. Decrease the number of Break Recovery cards required by all Combatants by 1」と完全一致（名称は直訳ではないが効果内容で確認）。"
+    },
+    {
+      "en": "Shell of Aberration",
+      "ja": "奇妙な殻",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「奇妙な殻」の効果「防御力+12％。ストレス増加時、50％の確率で1減少して受ける」が、PrydwenのShell of Aberration「+12% Defense. When Stress increases, 50% chance to increase Stress by 1 less」と完全一致（名称は直訳ではないが効果内容で確認）。"
+    },
+    {
+      "en": "Fragment of the Empty",
+      "ja": "虚ろな空虚の破片",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「虚ろな空虚の破片」の効果「戦闘開始時、3枚まで破棄、その枚数に応じてドロー」が、PrydwenのFragment of the Empty「At the start of battle, Discard up to 3 cards, Draw equal to the number」と一致。"
+    },
+    {
+      "en": "Rocket-Adorned Cape",
+      "ja": "ロケットの飾り付きマント",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「ロケットの飾り付きマント」（ロケットの飾り付き=Rocket-Adorned、マント=Cape）の効果「戦闘開始時、ダメージ減少1、ドロー1」が、PrydwenのRocket-Adorned Cape「At the start of the battle, 1 damage reduction and Draw 1」と一致。"
+    },
+    {
+      "en": "Lush Seaweed Armor",
+      "ja": "生い茂った海草の鎧",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（防具）「生い茂った海草の鎧」（生い茂った=Lush、海草=Seaweed、鎧=Armor）の効果「シールド獲得時、固定シールド30％」が、PrydwenのLush Seaweed Armor「When gaining Shield, gain 30% Fixed Shield」と一致。"
+    },
+    {
+      "en": "Verdant Day",
+      "ja": "深緑の昼",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「深緑の昼」（深緑=Verdant、昼=Day）の効果「奇数ターンに攻撃力+8％、防御力+12％」が、PrydwenのVerdant Day「On odd turns, +8% Attack, 12% Defense」と一致。"
+    },
+    {
+      "en": "Verdant Night",
+      "ja": "深緑の夜",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「深緑の夜」（深緑=Verdant、夜=Night）の効果「偶数ターンに攻撃力+12％、防御力+8％」が、PrydwenのVerdant Night「On even turns, +12% Attack, 8% Defense」と一致。"
+    },
+    {
+      "en": "Corrupted Core",
+      "ja": "堕落コア",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「堕落コア」（堕落=Corrupted、コア=Core）の効果「防御力+15%、シールド20％保存」が、PrydwenのCorrupted Core「+15% Defense, Retained +20% Shield」と一致。"
+    },
+    {
+      "en": "Hyperimmunity Hormone",
+      "ja": "過剰免疫ホルモン",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「過剰免疫ホルモン」（過剰免疫=Hyperimmunity、ホルモン=Hormone）の効果「能力でドロー時、1ターンの間、シールド獲得量+25％（各ターン2回）」が、PrydwenのHyperimmunity Hormone「When you Draw by an ability, +25% Shield gain for 1 turn (Max 2 times per turn)」と一致。"
+    },
+    {
+      "en": "Superconductive Protein",
+      "ja": "超伝導タンパク質",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「超伝導タンパク質」（超伝導=Superconductive、タンパク質=Protein）の効果「戦闘開始時、手札のカード1枚が1ターンの間、コスト0に変更」が、PrydwenのSuperconductive Protein「At the start of the battle, change the cost of 1 card in your hand to 0 for 1 turn」と一致。"
+    },
+    {
+      "en": "Multifaceted Parallel Universe Nexus",
+      "ja": "多面平衡宇宙連結体",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/装備一覧",
+      "note": "aosns装備一覧（装飾）「多面平衡宇宙連結体」がPrydwenのMultifaceted Parallel Universe Nexusに対応することは、既存のTrinket=装飾語の根拠note内で以前から言及していたが、この語自体は未登録だったため今回改めて単独のconfirmed語として登録した。"
+    },
+    {
       "en": "Ideal",
       "ja": "理想",
       "confidence": "confirmed",
@@ -2314,6 +2461,27 @@
       "confidence": "confirmed",
       "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
       "note": "PrydwenのPotential 5-2のラベル。aosns表記「神ヒラメキ適応」（スペース無し）に合わせて複合語として登録した。"
+    },
+    {
+      "en": "Divine Epiphanies",
+      "ja": "神ヒラメキ",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "PrydwenのCards欄見出し「Divine Epiphanies:」（複数形）。Divine Epiphany（単数、既存confirmed語）と同じ対象を指しており、aosns側も単数・複数を区別しないため同じ訳語「神ヒラメキ」を割り当てた。単数形のみ登録していたため複数形は完全一致せず分離表示（「神 Epiphanies:」）される不具合があり、その対応として複数形も個別に登録した。"
+    },
+    {
+      "en": "Health Proficiency",
+      "ja": "HP熟練",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "PrydwenのPotential 6のラベル。Health単体は未登録のため、HealthとProficiency（既存confirmed語「熟練」）を単純に繋げると意味が伝わりにくい「Health熟練」になってしまう。aosns（マグナ）の潜在力表にある「HP熟練」表記に合わせて複合語として登録した。"
+    },
+    {
+      "en": "Unique Stat Upgrade",
+      "ja": "固有能力値強化",
+      "confidence": "confirmed",
+      "source": "https://nightmare.aosns.com/キャラ一覧/マグナ",
+      "note": "PrydwenのPotential 7のラベル。Stat単体は未登録のため、Unique（既存confirmed語「唯一」）・Upgrade（既存confirmed語「強化」）とは別に複合語として登録が必要だった。aosns（マグナ）の潜在力表にある「固有能力値強化」表記に対応することをユーザーが画面で確認済み。"
     },
     {
       "en": "Drawing Slash",

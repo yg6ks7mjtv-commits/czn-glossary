@@ -2043,6 +2043,37 @@
     return result;
   }
 
+  // docs/site-labels.json の英語ラベル（en）をプレースホルダに置き換える。
+  // glossary.json用のsubstituteTermPlaceholdersと役割は同じだが、こちらは
+  // replaceSiteLabelsOnPageと同じくcase-insensitiveでマッチする。地の文中の
+  // 一般語（例: "character"）はPrydwenのUIラベルとしての原表記
+  // （"Character"）と大文字小文字が一致しないことが多いため（実機で
+  // "5✦ character"という小文字表記を確認済み）。
+  function substituteSiteLabelPlaceholders(text, siteLabels, placeholders) {
+    var keys = Object.keys(siteLabels);
+    if (keys.length === 0) { return text; }
+    var lowerLookup = Object.create(null);
+    keys.forEach(function (k) { lowerLookup[k.toLowerCase()] = siteLabels[k]; });
+    var alts = keys.sort(function (a, b) { return b.length - a.length; }).map(rxEscape);
+    var re = new RegExp(alts.join('|'), 'gi');
+    var result = '';
+    var last = 0;
+    var m;
+    re.lastIndex = 0;
+    while ((m = re.exec(text)) !== null) {
+      var s = m.index;
+      var e = s + m[0].length;
+      if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { re.lastIndex = e; continue; }
+      var token = '[[' + (placeholders.length + 1) + ']]';
+      placeholders.push({ token: token, kind: 'term', ja: lowerLookup[m[0].toLowerCase()] });
+      result += text.slice(last, s) + token;
+      last = e;
+      re.lastIndex = e;
+    }
+    result += text.slice(last);
+    return result;
+  }
+
   // 翻訳後の文字列に残ったプレースホルダ（[[N]]）を、リンク要素または
   // 公式用語のテキストに復元してDocumentFragmentを組み立てる。
   function restorePlaceholders(translatedText, placeholders) {
@@ -2080,13 +2111,19 @@
 
   // 1ブロックを翻訳して書き換える。個別に失敗しても他のブロックへの
   // 処理は続ける（1箇所の失敗で全体を止めないため）。
-  function translateOneBlock(el, translator, resolved) {
+  function translateOneBlock(el, translator, resolved, siteLabels) {
     var placeholders = [];
     var rawText = extractBlockTextWithPlaceholders(el, placeholders);
-    // 既に日本語になっている部分（用語置換の先行適用等）を先に保護してから、
-    // glossary用語を保護する（両者は文字種が別なので処理順自体は影響しない）。
+    // 既に日本語になっている部分（用語置換の先行適用等）→サイトラベル→
+    // glossary用語の順に保護する。site-labels.jsonとglossary.jsonは登録
+    // 対象が重ならない設計のため、この2つの処理順自体は結果に影響しない
+    // （ページ全体を扱う既存のreplaceSiteLabelsOnPage→replaceTermsOnPageの
+    // 順序に合わせているだけ）。
     var withJapaneseProtected = substituteJapaneseRunPlaceholders(rawText, placeholders);
-    var withPlaceholders = substituteTermPlaceholders(withJapaneseProtected, resolved, placeholders);
+    var withSiteLabelsProtected = siteLabels
+      ? substituteSiteLabelPlaceholders(withJapaneseProtected, siteLabels, placeholders)
+      : withJapaneseProtected;
+    var withPlaceholders = substituteTermPlaceholders(withSiteLabelsProtected, resolved, placeholders);
     if (!withPlaceholders.trim()) { return Promise.resolve(false); }
 
     return translator.translate(withPlaceholders).then(function (translated) {
@@ -2104,13 +2141,13 @@
   // ブロックを1件ずつ順番に処理する（Translator APIの処理は元々
   // 逐次実行のため、並列化しても速くならない）。診断用にトーストへ出す
   // ため、成功件数も数えて返す。
-  function translateBlocksSequentially(blocks, translator, resolved) {
+  function translateBlocksSequentially(blocks, translator, resolved, siteLabels) {
     var i = 0;
     var succeeded = 0;
     function next() {
       if (i >= blocks.length) { return Promise.resolve({ attempted: blocks.length, succeeded: succeeded }); }
       var el = blocks[i++];
-      return translateOneBlock(el, translator, resolved).then(function (ok) {
+      return translateOneBlock(el, translator, resolved, siteLabels).then(function (ok) {
         if (ok) { succeeded++; }
         return next();
       });
@@ -2118,11 +2155,42 @@
     return next();
   }
 
-  function translatePage(translator, resolved) {
+  // 今アクティブな（ユーザーが見ている）タブパネルに属するブロックを、
+  // それ以外（非アクティブなタブパネル、および後述の理由でページ内に
+  // 存在する複製DOM）より先に翻訳対象にする。逐次処理のAPIをドキュメント
+  // の出現順そのままで処理すると、ページ下部のセクション（例:
+  // デッキ解説）は先に何十件ものブロックを処理し終えるまで手が付かず、
+  // 実機で最大15秒前後、日本語化されないまま英語で見えてしまうことを
+  // 確認した（.tab-insideは5つのタブパネル全てが常にDOM上に存在し、
+  // activeクラスの有無だけで表示/非表示を切り替えている既知の構造）。
+  // .tab-insideに属さない要素（共通部分）とactiveなタブパネル内の要素を
+  // 優先度0、それ以外を優先度1とし、安定ソートで同一優先度内の元の順序
+  // は保つ。非アクティブなタブパネルも従来通りこの並べ替えの範囲内で
+  // 翻訳され続けるため、タブを切り替えたときのために先読みしておくという
+  // 既存の狙いは変えていない。
+  function isInsideInactiveTab(el) {
+    var tab = el.closest ? el.closest('.tab-inside') : null;
+    return !!tab && !tab.classList.contains('active');
+  }
+
+  function prioritizeVisibleTabBlocks(blocks) {
+    return blocks
+      .map(function (el, i) { return { el: el, i: i }; })
+      .sort(function (a, b) {
+        var pa = isInsideInactiveTab(a.el) ? 1 : 0;
+        var pb = isInsideInactiveTab(b.el) ? 1 : 0;
+        if (pa !== pb) { return pa - pb; }
+        return a.i - b.i;
+      })
+      .map(function (x) { return x.el; });
+  }
+
+  function translatePage(translator, resolved, siteLabels) {
     var blocks = [];
     collectTranslationBlocks(document.body, blocks);
+    blocks = prioritizeVisibleTabBlocks(blocks);
     log('translation blocks found:', blocks.length);
-    return translateBlocksSequentially(blocks, translator, resolved);
+    return translateBlocksSequentially(blocks, translator, resolved, siteLabels);
   }
 
   // AI翻訳のプレースホルダ保護に使うresolvedを組み立てる。既存の
@@ -2254,7 +2322,7 @@
       // 置換のみで進む。
       setupTranslation(charName).then(function (setup) {
         var translationPromise = setup.translator
-          ? translatePage(setup.translator, buildTranslationResolved(entries, charName))
+          ? translatePage(setup.translator, buildTranslationResolved(entries, charName), siteLabels)
           : Promise.resolve(null);
 
         translationPromise.catch(function (err) {
@@ -2301,7 +2369,7 @@
           // より前に適用する既存の順序を保ったまま、こちらも同じ再スキャンに
           // 組み込む。
           var pending = false;
-          var observer = new MutationObserver(function () {
+          function scheduleRescan() {
             if (pending) { return; }
             pending = true;
             setTimeout(function () {
@@ -2310,7 +2378,7 @@
               }
               var freshEffectsIdx = buildEffectsIndex(effects);
               var rescanTranslation = setup.translator
-                ? translatePage(setup.translator, buildTranslationResolved(entries, charName))
+                ? translatePage(setup.translator, buildTranslationResolved(entries, charName), siteLabels)
                 : Promise.resolve(null);
               rescanTranslation.catch(function (err) {
                 log('rescan translation failed (falling back to replacement-only):', err.message);
@@ -2320,8 +2388,24 @@
                 pending = false;
               });
             }, 500);
-          });
+          }
+          var observer = new MutationObserver(scheduleRescan);
           observer.observe(document.body, { childList: true, subtree: true });
+
+          // MutationObserverはchildList/subtreeのみを監視しているため、
+          // タブ切り替え（activeクラスの付け替えだけで子要素の追加削除を
+          // 伴わない）では発火しない。タブをクリックした直後に
+          // translatePage側の優先順位付け（prioritizeVisibleTabBlocks）を
+          // 効かせるため、同じ再スキャンをタブクリックでも起動する。
+          // Prydwen側の既存クリックハンドラ自体は変更せず、素通しの
+          // バブリングリスナーを追加するだけ。
+          if (charName === 'Magna') {
+            document.body.addEventListener('click', function (ev) {
+              if (ev.target.closest && ev.target.closest('.single-tab')) {
+                scheduleRescan();
+              }
+            });
+          }
         });
       });
     }).catch(function (err) {
