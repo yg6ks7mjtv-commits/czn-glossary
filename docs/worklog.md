@@ -225,3 +225,21 @@
   - docs/site-labels.json新規作成（45件、confidence/noteフィールドなし、ユーザー提供のまま）
 - 未解決: 【A】氷河の鉄拳Vの"Exhaust 2"タグは非表示にならないまま。【B】可読性スタイルの採用可否はユーザー判断待ち。【D】装備名32件の日本語対応は未着手（量を見て判断とのことで保留）
 - コミット: e4b0704（A/B/C/E）、97980ca（D）
+
+## 2026-08-08 16:00
+- 依頼: 5件。【A】(最優先)POTENTIAL欄が英語のまま残る原因調査（併せてsite-labelsが効いているかも確認）。【B】確認済みの用語（Potential/Adaptation/Bonus/Divine）を登録し、「Potential N」ラベルも日本語化。【C】効果文の色が2色に分かれる原因を報告のみで特定。【D】aosns由来語のsourceをaosnsのURLに直し、sync.py側も対応。【E】氷河の鉄拳Vのタグ非表示が効かない原因調査・修正
+- 実施:
+  - 作業用ブランチ fix/potential-section-and-source-attribution を作成
+  - ブラウザ拡張（claude-in-chrome）が本セッション中ずっと接続不能だったため、【A】の実機確認と【C】の色分岐の実機確認は静的HTML・コードレビューのみで対応し、断定を避けて報告した
+  - 【A】collectTranslationBlocks・isInlineOnlyForTranslateのコードとPOTENTIAL欄の生HTML（.skill-with-coloring内はテキスト+<b>タグのみ、単語数も閾値超）を突き合わせたが、ブロック収集ロジック自体に不具合は見つからなかった。一方でsetupTranslationは元々成否に関わらず何も表示しない設計（CZN_DEBUG時のみログ）だったため、トグルOFF・API未対応・利用不可・失敗のどれで止まっているか外から見分けられなかった。診断用にsetupTranslationの戻り値を{translator, status}に変更し、translatePageの対象件数・成功件数と合わせてトーストに表示するようにした。site-labelsが効いているかどうかも、このトーストとは別に実機での目視確認が必要なままで、断定はしていない
+  - 【B】Potential（既存のunmatchedエントリをconfirmedへ更新）、Adaptation、Bonus、Divineをconfirmedで追加。「Divine ヒラメキ」のように単純に繋げるとスペースが残る問題に対処するため、Divine Epiphany=神ヒラメキ、Epiphany Bonus=ヒラメキボーナス、Divine Epiphany Adaptation=神ヒラメキ適応の複合語も登録（aosns表記に合わせてスペース無し）。「Potential N」「Potential N-M」形式のラベルについては、replaceTermsOnPageの既存のローマ数字サフィックス処理を拡張し、数字サフィックスも検出してja側にスペース無しで連結する処理を追加（en側の表示・title属性はスペース付きのまま維持）
+  - 【C】氷の破片III（複数行、<br>区切りで<b>/<u>タグが混在する構造）の生HTMLを確認し、テキストノード単位で書き換える現在の仕組みでは、最初のテキストノード（<b>タグ内）にjaTextが入り、他のテキストノード（<u>タグ内含む）は空文字になることを確認した。可読性スタイル（【B】前回分）は外側の.skill-with-coloring divに適用しており、CSS継承の性質上、Prydwen側が<u>タグ等に独自の色指定をしている場合は子要素側の指定が優先されうる（要検証）という仮説を報告する。実機で見えている「上段が青・下段が白」の具体的な対応要素は、拡張機能を読み込んだ状態でのDOM確認ができておらず断定できていない
+  - 【D】scripts/sync.pyのvalidate()を修正し、confirmed の source が prydwen.gg または aosns.com のいずれかを含めばよいことにした（英語表記がPrydwenで実際に使われていることの確認はnoteに記載する運用は変更なし）。今回・前回に追加したaosns由来21件のsourceをaosnsのマグナページURLに変更。それ以前（Fatal Strike・Common Card等）の既存アosns由来エントリは今回の指示範囲外のため変更していない
+  - 【E】氷河の鉄拳Vのタグ表記「Exhaust 2」が、単純な完全一致では登録語「Exhaust」と一致しないために非表示にならなかったことを特定。「基本語+末尾の数字」形式を検出し、基本語の訳語の直後（スペース有り・無し両方）に数字が現れるかで判定するisTagCoveredInJaText()を追加。他のタグ付きカード8件は数字付きタグが無いことを前回のデータで確認済み
+- 結果:
+  - node --check・制御文字スキャン・sync.pyすべて通過。effects-ja.json・docs/bookmarklet.jsは無変更
+  - glossary.jsonのcoverage: confirmed 361→368 / total 469→475 / unmatched 99→98（Potentialがunmatched解消）
+  - 【A】原因は特定できず、診断用トーストの追加に留まった。次回実機確認が必要
+  - 【C】報告のみ。統一するかはユーザー判断待ち
+- 未解決: 【A】POTENTIAL欄が翻訳されない根本原因は未特定（ブラウザ接続不能のため）。site-labelsが実際に効いているかの実機確認も未実施。【C】色分岐の具体的な原因要素も未特定（同じ理由）
+- コミット: 9d1a00c（content.js: A診断・B語尾処理・E修正）、7c71b0d（glossary.json/sync.py: B用語・D source修正）
