@@ -120,6 +120,14 @@
     }
   }
 
+  // AI翻訳フェーズの診断専用。CZN_DEBUGの設定に関わらず必ずconsoleに出す
+  // （トーストは他の描画に巻き込まれて消えることがあるため、こちらを
+  // 主な確認手段にする）。既存のlog()やCZN_DEBUGの既定値・挙動は変更
+  // しない。
+  function logAlways() {
+    console.log.apply(console, ['[czn-ext]'].concat(Array.prototype.slice.call(arguments)));
+  }
+
   // ブックマークレット (docs/bookmarklet.js) と同じ判定基準。
   // KEEP_EN を編集したら、docs/bookmarklet.js 側の KEEP_EN も合わせて更新すること。
   var KEEP_EN_STATIC = [
@@ -2156,13 +2164,13 @@
           var result = run(entries, effects, extraLines);
           var ctx = result.ctx;
 
-          // AI翻訳フェーズの結果（status・処理件数）をトーストに含める。
-          // 元々は成否に関わらず何も表示せず進んでいたため、OFF・API無し・
-          // 利用不可・失敗のどれで止まっているかをDevToolsを開かずに確認
-          // できなかった。この1行を追加しただけで、既存のトースト本文
-          // （formatToastMessage）自体は変更していない。
+          // AI翻訳フェーズの結果（status・処理件数）を診断用に出す。トースト
+          // は他の描画に巻き込まれて消えることがあるため、consoleへの出力
+          // （logAlways、CZN_DEBUGの設定に関わらず必ず出る）を主な確認手段
+          // とし、トーストは補助として残す。
           var translateLine = 'CZN: AI翻訳 status=' + setup.status +
             (translateResult ? (' / 対象' + translateResult.attempted + '件 / 成功' + translateResult.succeeded + '件') : '');
+          logAlways(translateLine);
           showStatusToast(translateLine + '\n' + formatToastMessage(result));
 
           // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
