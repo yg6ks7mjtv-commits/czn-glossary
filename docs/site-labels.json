@@ -45,6 +45,13 @@
     {"en": "Tools", "ja": "ツール"},
     {"en": "Advertisement", "ja": "広告"},
     {"en": "Privacy Policy", "ja": "プライバシーポリシー"},
-    {"en": "Loading content...", "ja": "読み込み中..."}
+    {"en": "Loading content...", "ja": "読み込み中..."},
+    {"en": "Builds", "ja": "ビルド"},
+    {"en": "Build", "ja": "ビルド"},
+    {"en": "Character", "ja": "キャラクター"},
+    {"en": "Selected", "ja": "選択中"},
+    {"en": "Level", "ja": "レベル"},
+    {"en": "Debuffer", "ja": "デバッファー"},
+    {"en": "Counterattacker", "ja": "反撃役"}
   ]
 }

@@ -998,6 +998,14 @@
     el.style.cssText += ';color:#fff !important;background:rgba(0,0,0,0.55);' +
       'border-radius:4px;padding:2px 5px;box-shadow:0 1px 3px rgba(0,0,0,0.6);' +
       'text-shadow:0 1px 2px rgba(0,0,0,0.8);';
+    // Prydwen側が<b>/<u>タグに個別の色指定をしていることが実機で判明した
+    // （例: rgb(24,122,176)という青系のハイライト色）。CSSの継承は子要素に
+    // 直接かかるルールが無い場合のみ働くため、親のcolor（!important込み）
+    // だけでは子には及ばない。子孫要素全てにも同じ白を直接指定して揃える。
+    var descendants = el.querySelectorAll('*');
+    for (var i = 0; i < descendants.length; i++) {
+      descendants[i].style.setProperty('color', '#fff', 'important');
+    }
   }
 
   function watchEffectScope(scope, c, jaText, excludeCostDigits) {
@@ -1600,8 +1608,15 @@
   function replaceSiteLabelsOnPage(siteLabels) {
     var keys = Object.keys(siteLabels);
     if (keys.length === 0) { return 0; }
+    // 大文字小文字を区別しない（CSSのtext-transform:uppercase等で見た目の
+    // 表記がDOM上のテキストと異なることがあるため。実例: 見た目は
+    // "[6 SELECTED]"でもDOM上は"[6 selected]"）。マッチしたキーをそのまま
+    // siteLabels のキーとして引けなくなるため、小文字化したキーで引ける
+    // ルックアップを別途用意する。
+    var lowerLookup = Object.create(null);
+    keys.forEach(function (k) { lowerLookup[k.toLowerCase()] = siteLabels[k]; });
     var alts = keys.sort(function (a, b) { return b.length - a.length; }).map(rxEscape);
-    var re = new RegExp(alts.join('|'), 'g');
+    var re = new RegExp(alts.join('|'), 'gi');
 
     var count = 0;
     collectTextNodes().forEach(function (node) {
@@ -1615,11 +1630,38 @@
         var e = s + m[0].length;
         if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; }
 
+        // "STATS (LEVEL 60)"のような数字サフィックスは、glossary側の
+        // "Potential N"と同じ考え方でja側にスペース無しで連結する
+        // （en側は元テキストをそのまま残すため特別な処理は不要）。
+        var jaSuffix = '';
+        var numMatch = /^ (\d+(?:-\d+)?)(?![A-Za-z0-9])/.exec(text.slice(e));
+        if (numMatch) {
+          jaSuffix = numMatch[1];
+          e += numMatch[0].length;
+        }
+
+        // 直前が「半角スペース+(」なら全角「（」に、直後（数字サフィックス
+        // 消費後）が「)」なら全角「）」に、それぞれ置き換える（日本語の
+        // 文脈では全角括弧を使う慣習に合わせる。例:
+        // "Stats (level 60)" -> "ステータス（レベル60）"）。
+        var replaceStart = s;
+        var openParen = '';
+        if (text.slice(Math.max(0, s - 2), s) === ' (') {
+          replaceStart = s - 2;
+          openParen = '（';
+        }
+        var closeParen = '';
+        if (text.charAt(e) === ')') {
+          closeParen = '）';
+          e += 1;
+        }
+        re.lastIndex = e; // 数字サフィックス・閉じ括弧の分だけ余分に消費した位置から次の検索を始める
+
         if (frag === null) { frag = document.createDocumentFragment(); }
-        if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); }
+        if (replaceStart > last) { frag.appendChild(document.createTextNode(text.slice(last, replaceStart))); }
         var span = document.createElement('span');
         span.className = REPLACED_CLS;
-        span.textContent = siteLabels[m[0]];
+        span.textContent = openParen + lowerLookup[m[0].toLowerCase()] + jaSuffix + closeParen;
         span.title = m[0];
         frag.appendChild(span);
         last = e;
@@ -1838,6 +1880,13 @@
   var TRANSLATE_TARGET_LANG = 'ja';
   var TRANSLATE_INLINE_TAGS = { B: 1, I: 1, U: 1, STRONG: 1, EM: 1, SPAN: 1, BR: 1, SUP: 1, SUB: 1, SMALL: 1, MARK: 1, A: 1 };
 
+  // キャラクター名（固有名詞）はTranslator APIに渡すと誤訳されうる（実例:
+  // "Magna"→"マグナレ"）ため、glossary用語と同じプレースホルダ機構で保護
+  // する。キャラクター名はglossary.json（Prydwenのゲーム用語）にもdocs/
+  // site-labels.json（サイトのUIラベル）にも属さない固有名詞のため、ここに
+  // 直接持つ。範囲は引き続きMagnaのページのみのため1件のみ登録している。
+  var CHARACTER_JA_NAMES = { Magna: 'マグナ' };
+
   // 要素の中身が「インラインタグ（A含む）とテキストだけ」かどうか。
   // これがtrueの要素を1つの翻訳単位（ブロック）として扱う。falseなら
   // まだ内側にP/DIV/LI等の入れ子構造が残っているとみなし、さらに内側へ
@@ -1935,7 +1984,38 @@
         parts.push(extractBlockTextWithPlaceholders(node, placeholders));
       }
     });
-    return parts.join('');
+    // タグの境界をまたいで単語が連結してしまうケース（例: Prydwen側の
+    // 生HTML "<strong>Use the tabs</strong>to quickly switch..." のように、
+    // 閉じタグ直後に空白なく後続テキストが続く記述ミスがあり、"tabsto"と
+    // いう1語に見えてしまうことがある。実際に"Tabs"が翻訳されずに残る
+    // 原因として実機で確認済み）を防ぐため、隣接パーツの境界が英数字同士に
+    // なっている場合はスペースを1つ補う。DOM自体は書き換えないため、英語
+    // 表示には影響しない（翻訳に渡すテキストだけの補正）。
+    var joined = parts.length > 0 ? parts[0] : '';
+    for (var i = 1; i < parts.length; i++) {
+      var prev = joined;
+      var next = parts[i];
+      if (prev && next && isWordChar(prev.charAt(prev.length - 1)) && isWordChar(next.charAt(0))) {
+        joined += ' ';
+      }
+      joined += next;
+    }
+    return joined;
+  }
+
+  // 既にAI翻訳より前の段階（用語置換の一部先行適用や、ページ側の再描画で
+  // 混入した日本語等）で日本語になっている部分を、Translator APIにそのまま
+  // 渡すとさらに誤訳されうる（実例: "ヴァンガード"→"ビュンジェード"のような
+  // 再翻訳による崩れ）。ひらがな・カタカナ・漢字の連続をプレースホルダに
+  // 置き換えて素通しし、翻訳後にそのまま復元する。
+  var JAPANESE_RUN_RE = /[぀-ヿ㐀-鿿＀-￯]+/g;
+
+  function substituteJapaneseRunPlaceholders(text, placeholders) {
+    return text.replace(JAPANESE_RUN_RE, function (match) {
+      var token = '[[' + (placeholders.length + 1) + ']]';
+      placeholders.push({ token: token, kind: 'japanese', text: match });
+      return token;
+    });
   }
 
   // glossary.json の確定語（en）をプレースホルダに置き換える。翻訳後に
@@ -1985,6 +2065,8 @@
         frag.appendChild(a);
       } else if (p && p.kind === 'term') {
         frag.appendChild(document.createTextNode(p.ja));
+      } else if (p && p.kind === 'japanese') {
+        frag.appendChild(document.createTextNode(p.text));
       } else {
         frag.appendChild(document.createTextNode(m[0])); // 対応が見つからない場合はそのまま残す
       }
@@ -2001,7 +2083,10 @@
   function translateOneBlock(el, translator, resolved) {
     var placeholders = [];
     var rawText = extractBlockTextWithPlaceholders(el, placeholders);
-    var withPlaceholders = substituteTermPlaceholders(rawText, resolved, placeholders);
+    // 既に日本語になっている部分（用語置換の先行適用等）を先に保護してから、
+    // glossary用語を保護する（両者は文字種が別なので処理順自体は影響しない）。
+    var withJapaneseProtected = substituteJapaneseRunPlaceholders(rawText, placeholders);
+    var withPlaceholders = substituteTermPlaceholders(withJapaneseProtected, resolved, placeholders);
     if (!withPlaceholders.trim()) { return Promise.resolve(false); }
 
     return translator.translate(withPlaceholders).then(function (translated) {
@@ -2038,6 +2123,21 @@
     collectTranslationBlocks(document.body, blocks);
     log('translation blocks found:', blocks.length);
     return translateBlocksSequentially(blocks, translator, resolved);
+  }
+
+  // AI翻訳のプレースホルダ保護に使うresolvedを組み立てる。既存の
+  // buildContext(entries, charName).resolved（glossary.json由来）に、
+  // キャラクター名（CHARACTER_JA_NAMES、固有名詞のため別扱い）を追加する。
+  // buildContext自体は改変しない（既存の用語置換processPage側の呼び出しは
+  // 元のbuildContextの戻り値をそのまま使い続ける）。
+  function buildTranslationResolved(entries, charName) {
+    var resolved = buildContext(entries, charName).resolved;
+    var characterJa = CHARACTER_JA_NAMES[charName];
+    if (characterJa && !resolved[charName]) {
+      resolved = Object.assign(Object.create(null), resolved);
+      resolved[charName] = { ja: characterJa, character: charName, ambiguous: false };
+    }
+    return resolved;
   }
 
   // モデル未ダウンロード時にページ内に出すボタン。実際のクリック（＝
@@ -2154,7 +2254,7 @@
       // 置換のみで進む。
       setupTranslation(charName).then(function (setup) {
         var translationPromise = setup.translator
-          ? translatePage(setup.translator, buildContext(entries, charName).resolved)
+          ? translatePage(setup.translator, buildTranslationResolved(entries, charName))
           : Promise.resolve(null);
 
         translationPromise.catch(function (err) {
@@ -2176,14 +2276,49 @@
           // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
           // 収集→挿入→置換の3段階をまとめて再実行する（用語置換だけ除外すると、
           // 再描画で消えた置換結果が復活しないため）。
+          //
+          // AI翻訳（実験的機能）も同じ再スキャンに組み込む。POTENTIAL欄等、
+          // document_idle時点でまだDOMに存在しないコンテンツ（Reactの
+          // ハイドレーション遅延によるものと見られるが、hydrationエラー
+          // #418との因果関係自体は未確認）が後から現れても、次の再スキャン
+          // で拾えるようにするため。
+          //   - 二重翻訳の防止: translatePage内のcollectTranslationBlocksは
+          //     data-czn-translated属性を持つ要素を除外するため、毎回の
+          //     再スキャンは「まだ翻訳していない新規ブロックだけ」を対象に
+          //     する。同じブロックが繰り返し翻訳APIに渡ることはない
+          //   - 「先に翻訳、あとから用語置換」の順序: 初回と全く同じ構造
+          //     （毎回のrescanTranslationのthen内でprocessPage、つまり
+          //     replaceTermsOnPageを呼ぶ）にすることで、再スキャンの
+          //     どの回でもこの順序が保たれることを保証する
+          //   - 多重実行の防止: pendingの解除をprocessPage完了後（翻訳が
+          //     終わった後）に移し、翻訳中に次のタイマーが動き出さない
+          //     ようにする
+          //
+          // 調査の過程で、docs/site-labels.jsonの適用（replaceSiteLabelsOnPage）
+          // も同じ問題を抱えていることが分かった（初回のみの実行のため、
+          // "Introduction"見出し等も後から現れた場合に取り残される。実機で
+          // czn-replacedスパンが一切付いていないことを確認済み）。用語置換
+          // より前に適用する既存の順序を保ったまま、こちらも同じ再スキャンに
+          // 組み込む。
           var pending = false;
           var observer = new MutationObserver(function () {
             if (pending) { return; }
             pending = true;
             setTimeout(function () {
-              pending = false;
+              if (charName === 'Magna') {
+                replaceSiteLabelsOnPage(siteLabels);
+              }
               var freshEffectsIdx = buildEffectsIndex(effects);
-              processPage(ctx, freshEffectsIdx, currentCharacter(), extraLines);
+              var rescanTranslation = setup.translator
+                ? translatePage(setup.translator, buildTranslationResolved(entries, charName))
+                : Promise.resolve(null);
+              rescanTranslation.catch(function (err) {
+                log('rescan translation failed (falling back to replacement-only):', err.message);
+                return null;
+              }).then(function () {
+                processPage(ctx, freshEffectsIdx, currentCharacter(), extraLines);
+                pending = false;
+              });
             }, 500);
           });
           observer.observe(document.body, { childList: true, subtree: true });
