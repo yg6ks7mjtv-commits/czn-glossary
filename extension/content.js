@@ -1049,6 +1049,30 @@
   // いないタグがあれば、情報を失わないよう何もしない（英語のまま残す）。
   // effectScope が無い（旧方式フォールバック時）、p.tags が無い、
   // resolved が無い場合は何もしない。
+  // 1つのタグ（角括弧の中身、例: "Lead"・"Exhaust 2"）が、挿入した日本語
+  // 効果文（jaText）に含まれているかを判定する。まず完全一致でglossaryを
+  // 引き、無ければ「基本語＋末尾の数字（重複・スタック数）」の形式
+  // （例: "Exhaust 2" = Exhaust＋スタック数2。Magnaの氷河の鉄拳Vで実例あり）
+  // とみなし、基本語だけをglossaryで引いた上で、数字をスペース有り・
+  // 無しの両方の並びで探す（自前で登録した効果文には「消滅2」のように
+  // スペース無しで数字を続ける慣習があるため）。
+  function isTagCoveredInJaText(rawTag, jaText, resolved) {
+    var entry = resolved[rawTag];
+    if (entry && entry.ja && jaText.indexOf(entry.ja) !== -1) { return true; }
+
+    var m = /^(.*?)\s+(\d+)$/.exec(rawTag);
+    if (m) {
+      var baseEntry = resolved[m[1]];
+      if (baseEntry && baseEntry.ja) {
+        var num = m[2];
+        if (jaText.indexOf(baseEntry.ja + num) !== -1 || jaText.indexOf(baseEntry.ja + ' ' + num) !== -1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   function hideRedundantTagsLine(effectScope, jaText, resolved) {
     if (!effectScope || !effectScope.querySelector || !resolved) { return; }
     var tagsEl = effectScope.querySelector('p.tags');
@@ -1059,8 +1083,7 @@
     for (var i = 0; i < tagSpans.length; i++) {
       var raw = (tagSpans[i].textContent || '').trim().replace(/^\[+|\]+$/g, '').trim();
       if (!raw) { continue; }
-      var entry = resolved[raw];
-      if (!entry || !entry.ja || jaText.indexOf(entry.ja) === -1) {
+      if (!isTagCoveredInJaText(raw, jaText, resolved)) {
         return; // 対応する日本語表記が確認できない、または効果文に含まれていない
       }
     }
@@ -1512,19 +1535,32 @@
         if (isWordChar(text.charAt(s - 1)) || isWordChar(text.charAt(e))) { continue; }
 
         var en = m[0];
-        var levelSuffix = ''; // " III" のように、先頭スペース込みで保持する
+        var levelSuffix = ''; // " III" のように、先頭スペース込みで保持する（en側表示用）
+        var jaSuffix = ''; // ja側に連結する分（ローマ数字はスペース込み、数字ラベルはスペース無し）
         // 直後にヒラメキ段階のローマ数字が単語境界付きで続いていれば、
         // まとめて1つの用語として扱う（例: "Sword Rain III"）。
         var romanMatch = /^ (I{1,3}|IV|V)(?![A-Za-z0-9])/.exec(text.slice(e));
         if (romanMatch) {
           levelSuffix = romanMatch[0];
+          jaSuffix = romanMatch[0];
           e += romanMatch[0].length;
+        } else {
+          // "Potential 1"/"Potential 3-1"のような数字（ハイフン区切りの
+          // 枝番含む）サフィックスは、ja側では直前のスペースを詰めて
+          // そのまま連結する（"潜在力 1"ではなく"潜在力1"にするため。
+          // en側の表示（title・英語併記）はスペースを保持する）。
+          var numMatch = /^ (\d+(?:-\d+)?)(?![A-Za-z0-9])/.exec(text.slice(e));
+          if (numMatch) {
+            levelSuffix = numMatch[0];
+            jaSuffix = numMatch[1];
+            e += numMatch[0].length;
+          }
         }
         re.lastIndex = e;
 
         if (frag === null) { frag = document.createDocumentFragment(); }
         if (s > last) { frag.appendChild(document.createTextNode(text.slice(last, s))); }
-        var ja = ctx.resolved[en].ja + levelSuffix;
+        var ja = ctx.resolved[en].ja + jaSuffix;
         var span = document.createElement('span');
         span.className = REPLACED_CLS;
         span.textContent = keepEn[en] ? en + levelSuffix + '(' + ja + ')' : ja;
@@ -1958,26 +1994,33 @@
     var placeholders = [];
     var rawText = extractBlockTextWithPlaceholders(el, placeholders);
     var withPlaceholders = substituteTermPlaceholders(rawText, resolved, placeholders);
-    if (!withPlaceholders.trim()) { return Promise.resolve(); }
+    if (!withPlaceholders.trim()) { return Promise.resolve(false); }
 
     return translator.translate(withPlaceholders).then(function (translated) {
       var frag = restorePlaceholders(translated, placeholders);
       while (el.firstChild) { el.removeChild(el.firstChild); }
       el.appendChild(frag);
       el.setAttribute('data-czn-translated', '1');
+      return true;
     }).catch(function (err) {
       log('block translation failed (skipped):', err.message);
+      return false;
     });
   }
 
   // ブロックを1件ずつ順番に処理する（Translator APIの処理は元々
-  // 逐次実行のため、並列化しても速くならない）。
+  // 逐次実行のため、並列化しても速くならない）。診断用にトーストへ出す
+  // ため、成功件数も数えて返す。
   function translateBlocksSequentially(blocks, translator, resolved) {
     var i = 0;
+    var succeeded = 0;
     function next() {
-      if (i >= blocks.length) { return Promise.resolve(); }
+      if (i >= blocks.length) { return Promise.resolve({ attempted: blocks.length, succeeded: succeeded }); }
       var el = blocks[i++];
-      return translateOneBlock(el, translator, resolved).then(next);
+      return translateOneBlock(el, translator, resolved).then(function (ok) {
+        if (ok) { succeeded++; }
+        return next();
+      });
     }
     return next();
   }
@@ -2041,31 +2084,35 @@
     });
   }
 
-  // 翻訳フェーズ全体のエントリポイント。対象外・トグルOFF・API無し・
-  // 利用不可等はすべて null を返し、呼び出し側は「翻訳スキップ→従来通り
-  // 置換のみ」にフォールバックする（拡張機能全体は止めない）。
+  // 翻訳フェーズ全体のエントリポイント。{ translator, status } を返す。
+  // translator が無い場合、呼び出し側は「翻訳スキップ→従来通り置換のみ」に
+  // フォールバックする（拡張機能全体は止めない）。status はトーストで
+  // 見える形にして、OFF・API無し・利用不可・失敗のどれで止まったのかを
+  // DevToolsを開かずに確認できるようにするための診断用（元々サイレントに
+  // nullを返すだけだったため、原因の切り分けができなかった）。
   function setupTranslation(charName) {
-    if (charName !== 'Magna') { return Promise.resolve(null); } // 今回はMagnaのページのみが対象
+    if (charName !== 'Magna') { return Promise.resolve({ translator: null, status: 'not-magna' }); }
     return getTranslateEnabled().then(function (enabled) {
-      if (!enabled) { return null; }
+      if (!enabled) { return { translator: null, status: 'off' }; }
       if (typeof window.Translator === 'undefined') {
         log('Translator API is not available in this context');
-        return null;
+        return { translator: null, status: 'no-api' };
       }
       return window.Translator.availability({ sourceLanguage: TRANSLATE_SOURCE_LANG, targetLanguage: TRANSLATE_TARGET_LANG })
         .then(function (avail) {
           if (avail === 'available') {
-            return window.Translator.create({ sourceLanguage: TRANSLATE_SOURCE_LANG, targetLanguage: TRANSLATE_TARGET_LANG });
+            return window.Translator.create({ sourceLanguage: TRANSLATE_SOURCE_LANG, targetLanguage: TRANSLATE_TARGET_LANG })
+              .then(function (translator) { return { translator: translator, status: 'ready' }; });
           }
           if (avail === 'downloadable' || avail === 'downloading') {
             offerTranslatorDownload(); // 今回のページはブロックせず、ボタンだけ出す
-            return null;
+            return { translator: null, status: 'downloadable' };
           }
-          return null; // 'unavailable' 等
+          return { translator: null, status: 'unavailable:' + avail };
         });
     }).catch(function (err) {
       log('setupTranslation failed:', err.message);
-      return null;
+      return { translator: null, status: 'error:' + err.message };
     });
   }
 
@@ -2097,18 +2144,26 @@
       // せずに「翻訳→監視開始」の順序を満たせる。翻訳が使えない・失敗
       // した場合は setupTranslation が null を返し、そのまま従来通り
       // 置換のみで進む。
-      setupTranslation(charName).then(function (translator) {
-        var translationPromise = translator
-          ? translatePage(translator, buildContext(entries, charName).resolved)
-          : Promise.resolve();
+      setupTranslation(charName).then(function (setup) {
+        var translationPromise = setup.translator
+          ? translatePage(setup.translator, buildContext(entries, charName).resolved)
+          : Promise.resolve(null);
 
         translationPromise.catch(function (err) {
           log('translation phase failed (falling back to replacement-only):', err.message);
-        }).then(function () {
+          return null;
+        }).then(function (translateResult) {
           var result = run(entries, effects, extraLines);
           var ctx = result.ctx;
 
-          showStatusToast(formatToastMessage(result));
+          // AI翻訳フェーズの結果（status・処理件数）をトーストに含める。
+          // 元々は成否に関わらず何も表示せず進んでいたため、OFF・API無し・
+          // 利用不可・失敗のどれで止まっているかをDevToolsを開かずに確認
+          // できなかった。この1行を追加しただけで、既存のトースト本文
+          // （formatToastMessage）自体は変更していない。
+          var translateLine = 'CZN: AI翻訳 status=' + setup.status +
+            (translateResult ? (' / 対象' + translateResult.attempted + '件 / 成功' + translateResult.succeeded + '件') : '');
+          showStatusToast(translateLine + '\n' + formatToastMessage(result));
 
           // SPA的な再描画に対応する簡易 MutationObserver。連続発火を間引きつつ、
           // 収集→挿入→置換の3段階をまとめて再実行する（用語置換だけ除外すると、
